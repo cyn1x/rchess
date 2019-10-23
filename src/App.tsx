@@ -1,8 +1,7 @@
 import React from "react";
-import { IGameState } from "./components/types";
 import ChessEngine from "./components";
 
-const initialState = {
+const initialGameState = {
     currentPlayer: "Demo",
     fenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
     playerTurn: "Demo",
@@ -10,14 +9,14 @@ const initialState = {
     movePieceTo: ""
 }
 
-const App: any = (props: IGameState) => {
+const App = () => {
     return (
         <ChessEngine
-            currentPlayer={initialState.currentPlayer}
-            nextFenString={initialState.fenString}
-            nextPlayerTurn={initialState.playerTurn}
-            movePieceFrom={initialState.movePieceFrom}
-            movePieceTo={initialState.movePieceTo}
+            currentPlayer={initialGameState.currentPlayer}
+            nextFenString={initialGameState.fenString}
+            nextPlayerTurn={initialGameState.playerTurn}
+            movePieceFrom={initialGameState.movePieceFrom}
+            movePieceTo={initialGameState.movePieceTo}
         />
     );
 }

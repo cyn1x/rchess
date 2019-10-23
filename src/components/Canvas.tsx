@@ -41,7 +41,7 @@ class Canvas extends React.Component<ICanvas, IState> {
     componentWillUnmount() {}
 
     componentDidUpdate() {
-        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() && this.game.getFenString() !== this.props.game.nextFenString) {
+        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
             
             const updatedSquare = this.game.updateGameState(this.props.game);
             if (updatedSquare) {
@@ -141,7 +141,7 @@ class Canvas extends React.Component<ICanvas, IState> {
     }
 
     interceptClick(event: any) {
-        if (this.game.getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
             this.handleClick(event);
         }
     }
@@ -175,7 +175,8 @@ class Canvas extends React.Component<ICanvas, IState> {
                     return;
                 }
                 if (squaresArray[i].squareContainsPiece()) {
-                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
+                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
+                        || this.game.getCurrentPlayer().getColour() === "Demo") {
                         this.activateSquare(squaresArray[i])
                     }
                 }
@@ -216,10 +217,10 @@ class Canvas extends React.Component<ICanvas, IState> {
         const activePiece = prevActiveSquare.getPiece();
         const img = this.constructImage(activePiece);
 
+        this.game.handleOverwriteSquare(activeSquare, activePiece);
         this.selectCell(prevActiveSquare);
         this.manageValidSquares();
         this.selectCell(activeSquare);
-        this.game.handleOverwriteSquare(activeSquare, activePiece);
 
         this.drawImg(img, ranks.indexOf(Number(activeSquare.getPosition()[1])), files.indexOf(activeSquare.getPosition()[0]));
     }
@@ -293,8 +294,12 @@ class Canvas extends React.Component<ICanvas, IState> {
     setNextState(prevPos: string, nextPos: string) {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
-
-        this.game.setCurrentTurn(nextPlayerMove);
+        
+        if (this.game.getCurrentPlayer().getColour() !== "Demo") {
+            this.game.getGameState().setCurrentTurn(nextPlayerMove)
+        }
+        this.game.getGameState().setFenString(newFenSequence);
+        this.game.getGameState().setMoveState(prevPos, nextPos);
     }
 
     render() {

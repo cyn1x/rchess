@@ -1,33 +1,36 @@
 import { IPiece } from './pieces/types';
 
+import GameState from './GameState';
 import PiecesFactory from './PiecesFactory';
 import Board from './Board';
 import Square from './Square';
 import Player from './Player';
 
 class Game {
+    private gameState: GameState;
     private chessBoard: Board;
-    private fenString!: string;
     private isSquareClicked: boolean;
     private validMoves!: Array<Square>;
     private currentPlayer!: Player;
-    private currentTurn: string;
-    private previousActivePiecePos!: string;
-    private nextActivePiecePos!: string;
 
     constructor(player: string, fen: string, turn: string) {
+        this.gameState = new GameState();
         this.chessBoard = new Board();
-        this.fenString = fen;
         this.isSquareClicked = false;
         this.validMoves = [];
         
-        if (player === "Player 1") {
-            this.currentPlayer = new Player('White');
-        } else {
-            this.currentPlayer = new Player('Black');
+        if (player === "Demo") {
+            this.currentPlayer = new Player("Demo");
+        }
+        else if (player === "Player 1") {
+            this.currentPlayer = new Player("White");
+        }
+        else {
+            this.currentPlayer = new Player("Black");
         }
 
-        this.currentTurn = turn;
+        this.gameState.setFenString(fen);
+        this.gameState.setCurrentTurn(turn);
     }
     
     initialise(cw: number, ch: number) {
@@ -45,8 +48,8 @@ class Game {
 
     updateGameState(gameProps: any) {
         const squaresArray = this.chessBoard.getSquaresArray();
-
-        if (gameProps.nextPlayerTurn !== this.getCurrentTurn()) {
+        
+        if (gameProps.nextPlayerTurn !== this.gameState.getCurrentTurn()) {
             for (let i = 0; i < squaresArray.length; i++) {
                 if (squaresArray[i].getPosition() === gameProps.movePieceFrom) {
                     this.chessBoard.setActiveSquare(squaresArray[i]);
@@ -54,8 +57,8 @@ class Game {
             }
             for (let i = 0; i < squaresArray.length; i++) {
                 if (squaresArray[i].getPosition() === gameProps.movePieceTo) {
-                    this.setCurrentTurn(gameProps.nextPlayerTurn);
-                    this.setFenString(gameProps.nextFenString);
+                    this.gameState.setCurrentTurn(gameProps.nextPlayerTurn);
+                    this.gameState.setFenString(gameProps.nextFenString);
                     return squaresArray[i];
                 }
             }
@@ -79,7 +82,7 @@ class Game {
 
     setPiecePositions() {
         const piecesFactory = new PiecesFactory();
-        const startingFen = this.getFenString();
+        const startingFen = this.gameState.getFenString();
         const squaresArray = this.chessBoard.getSquaresArray();
         const piecesArray = this.fenParser(startingFen);
         let currentRank = 0;
@@ -261,43 +264,25 @@ class Game {
         return false;
     }
 
-    getMoveState() {
-        const prevMove = this.previousActivePiecePos;
-        const nextMove = this.nextActivePiecePos;
-
-        return {prevMove, nextMove};
-    }
-
-    setMoveState(prev: string, next: string) {
-        this.previousActivePiecePos = prev;
-        this.nextActivePiecePos = next;
-    }
-
     incrementMoveCount(piece: IPiece) { piece.incrementMoveNumber(1); }
 
-    getNextMove() { return (this.getCurrentTurn() === "White" ? ("Black") : ("White")); }
+    getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? ("Black") : ("White")); }
 
     getChessboard() { return this.chessBoard; }
 
     getSquareActive() { return this.isSquareClicked; }
  
-    getFenString() { return this.fenString; }
- 
     getValidMoves() { return this.validMoves; }
 
-    getCurrentPlayer() { return this.currentPlayer; }
+    getGameState() { return this.gameState; }
 
-    getCurrentTurn() { return this.currentTurn; }
+    getCurrentPlayer() { return this.currentPlayer; }
 
     setChessboard(board: Board) { this.chessBoard = board; }
 
     setSquareActive(active: boolean) { this.isSquareClicked = active; }
 
-    setFenString(fen: string) { this.fenString = fen; }
-
     setValidMoves(valid: Array<Square>) { this.validMoves = valid; }
-
-    setCurrentTurn(player: string) { this.currentTurn = player; }
 
 }
 
