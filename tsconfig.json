@@ -2,8 +2,9 @@
   "compilerOptions": {
     "target": "esnext",
     "outDir": "./dist/",
-    "allowJs": true,
-    "skipLibCheck": true,
+    "allowJs": false,
+    "sourceMap": true,
+    "declaration": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
     "strict": true,
