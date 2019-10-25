@@ -1,3 +1,3 @@
-import Canvas from './components';
-import { ICanvas, IGameState } from './components/types';
+import { IGameState, ICanvas } from './components/types';
+import Canvas from "./components/Canvas";
 export { Canvas, IGameState, ICanvas };

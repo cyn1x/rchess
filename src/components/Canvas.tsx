@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-    ICanvas, IState
+    ICanvas, IState, IGameState
 } from './types';
 
 import { IPiece } from './pieces/types';
@@ -28,7 +28,10 @@ class Canvas extends React.Component<ICanvas, IState> {
                 ratio: this.ratio
             }
         };
-        this.game = new Game(this.props.game.currentPlayer, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
+        if (this.props.controller) {
+            this.props.controller.bind(this.props.game);
+        }
+        this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
         this.initialise();
     }
 
@@ -300,6 +303,16 @@ class Canvas extends React.Component<ICanvas, IState> {
         }
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
+
+        if (this.props.controller) {
+            const newState: IGameState = {
+                nextFenString: newFenSequence,
+                nextPlayerTurn: nextPlayerMove,
+                movePieceFrom: prevPos,
+                movePieceTo: nextPos
+            }
+            this.props.controller(newState);
+        }
     }
 
     render() {

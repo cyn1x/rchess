@@ -1,10 +1,13 @@
 import React from 'react';
-import { IGameState } from './types';
+import { ICanvas } from './types';
 import Canvas from './Canvas';
 
-const ChessEngine = (props: IGameState) => {
+const ChessEngine = (props: ICanvas) => {
     return (
-        <Canvas game={props} />
+        <Canvas 
+            player={props.player}
+            game={props.game}
+        />
     )
 }
 

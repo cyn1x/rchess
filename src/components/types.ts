@@ -17,10 +17,11 @@ export interface ICanvas {
         height: number;
         ratio: number;
     }
+    player: string;
+    controller?: (props: any) => any;
 }
 
 export interface IGameState {
-    currentPlayer: string;
     nextFenString: string;
     nextPlayerTurn: string;
     movePieceFrom: string;

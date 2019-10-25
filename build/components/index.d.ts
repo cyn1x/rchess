@@ -1,4 +1,4 @@
 /// <reference types="react" />
-import { IGameState } from './types';
-declare const ChessEngine: (props: IGameState) => JSX.Element;
+import { ICanvas } from './types';
+declare const ChessEngine: (props: ICanvas) => JSX.Element;
 export default ChessEngine;

@@ -2,8 +2,8 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import App from './App';
 
-import Canvas from './components';
-import { ICanvas, IGameState } from './components/types';
+import { IGameState, ICanvas } from './components/types';
+import Canvas from "./components/Canvas";
 
 ReactDOM.render(<App />, document.getElementById("root"));
 

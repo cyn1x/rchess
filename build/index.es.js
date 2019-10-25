@@ -1,6 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 
+const App = () => {
+    return (React.createElement("div", null,
+        React.createElement("p", null, "UniChess Chess Engine")));
+};
+
 class GameState {
     getMoveState() {
         const prevMove = this.previousActivePiecePos;
@@ -691,7 +696,10 @@ class Canvas extends React.Component {
                 ratio: this.ratio
             }
         };
-        this.game = new Game(this.props.game.currentPlayer, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
+        if (this.props.controller) {
+            this.props.controller.bind(this.props.game);
+        }
+        this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
         this.initialise();
     }
     componentDidMount() {
@@ -918,6 +926,15 @@ class Canvas extends React.Component {
         }
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
+        if (this.props.controller) {
+            const newState = {
+                nextFenString: newFenSequence,
+                nextPlayerTurn: nextPlayerMove,
+                movePieceFrom: prevPos,
+                movePieceTo: nextPos
+            };
+            this.props.controller(newState);
+        }
     }
     render() {
         return (React.createElement("canvas", { ref: this.state.canvas, width: this.state.screen.width * this.state.screen.ratio, height: this.state.screen.height * this.state.screen.ratio }));
@@ -929,22 +946,7 @@ class Canvas extends React.Component {
     }
 }
 
-const ChessEngine = (props) => {
-    return (React.createElement(Canvas, { game: props }));
-};
-
-const initialGameState = {
-    currentPlayer: "Demo",
-    fenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
-    playerTurn: "Demo",
-    movePieceFrom: "",
-    movePieceTo: ""
-};
-const App = () => {
-    return (React.createElement(ChessEngine, { currentPlayer: initialGameState.currentPlayer, nextFenString: initialGameState.fenString, nextPlayerTurn: initialGameState.playerTurn, movePieceFrom: initialGameState.movePieceFrom, movePieceTo: initialGameState.movePieceTo }));
-};
-
 ReactDOM.render(React.createElement(App, null), document.getElementById("root"));
 
-export { ChessEngine as Canvas };
+export { Canvas };
 //# sourceMappingURL=index.es.js.map
