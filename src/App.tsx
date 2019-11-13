@@ -3,15 +3,21 @@ import { GameProvider } from './components/GameContext'
 import GameSettings from "./components/GameSettings";
 import GameCanvas from "./components/index";
 
+import './styles.css'
+
 const App = () => {
     return (
-        <div>
-            <p>UniChess Chess Engine</p>
-            <GameProvider>
-                <GameSettings />
-                <GameCanvas />
-            </GameProvider>
-        </div>
+        <React.Fragment>
+            <div id="unichess-heading">
+                <h1>UniChess Chess Engine</h1>
+            </div>
+            <div id="unichess-app">
+                <GameProvider>
+                    <GameCanvas />
+                    <GameSettings />
+                </GameProvider>
+            </div>
+        </React.Fragment>
     );
 }
 
