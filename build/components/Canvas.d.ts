@@ -1,15 +1,15 @@
 /// <reference types="node" />
 import React from 'react';
-import { ICanvas, IState } from './types';
+import { IGameCanvas, IState } from './types';
 import { IPiece } from './pieces/types';
 import Square from './Square';
-declare class Canvas extends React.Component<ICanvas, IState> {
+declare class Canvas extends React.Component<IGameCanvas, IState> {
     private game;
     private canvas;
     private width;
     private height;
     private ratio;
-    constructor(props: ICanvas);
+    constructor(props: IGameCanvas);
     componentDidMount(): void;
     componentWillUnmount(): void;
     componentDidUpdate(): void;
@@ -31,6 +31,7 @@ declare class Canvas extends React.Component<ICanvas, IState> {
     drawPiece(validMoves: IPiece): HTMLImageElement;
     selectCell(square: Square): void;
     setNextState(prevPos: string, nextPos: string): void;
+    isDemonstrationMode(): boolean;
     render(): JSX.Element;
     getCellDimensions(): {
         cw: number;

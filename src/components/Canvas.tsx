@@ -1,7 +1,7 @@
 import React from 'react';
 
 import {
-    ICanvas, IState, IGameState
+    IGameCanvas, IState, IGameState
 } from './types';
 
 import { IPiece } from './pieces/types';
@@ -10,14 +10,14 @@ import Square from './Square';
 
 const boardSize = () => { return ( (window.innerWidth > window.innerHeight) ); }
 
-class Canvas extends React.Component<ICanvas, IState> {
+class Canvas extends React.Component<IGameCanvas, IState> {
     private game: Game;
     private canvas = React.createRef<HTMLCanvasElement>();
     private width = (boardSize() ? window.innerWidth: window.innerHeight) / 2.5;
     private height = this.width;
     private ratio = this.width / this.height
     
-    constructor(props: ICanvas) {
+    constructor(props: IGameCanvas) {
         super(props);
         this.update = this.update.bind(this)
         this.state = {
@@ -144,7 +144,8 @@ class Canvas extends React.Component<ICanvas, IState> {
     }
 
     interceptClick(event: any) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()
+            || this.isDemonstrationMode()) {
             this.handleClick(event);
         }
     }
@@ -179,7 +180,7 @@ class Canvas extends React.Component<ICanvas, IState> {
                 }
                 if (squaresArray[i].squareContainsPiece()) {
                     if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
-                        || this.game.getCurrentPlayer().getColour() === "Demo") {
+                        || this.isDemonstrationMode()) {
                         this.activateSquare(squaresArray[i])
                     }
                 }
@@ -298,7 +299,7 @@ class Canvas extends React.Component<ICanvas, IState> {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
         
-        if (this.game.getCurrentPlayer().getColour() !== "Demo") {
+        if (!this.isDemonstrationMode()) {
             this.game.getGameState().setCurrentTurn(nextPlayerMove)
         }
         this.game.getGameState().setFenString(newFenSequence);
@@ -314,6 +315,8 @@ class Canvas extends React.Component<ICanvas, IState> {
             this.props.controller(newState);
         }
     }
+
+    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
 
     render() {
         return (

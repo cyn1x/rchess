@@ -1,4 +1,12 @@
-import { RefObject } from 'react';
+import { ReactNode } from 'react';
+export interface IGameContext {
+    getGameState: IGameCanvas;
+    setGameState: React.Dispatch<React.SetStateAction<IGameCanvas>>;
+}
+export interface IGameProviderProps {
+    defaults?: Partial<IGameContext>;
+    children?: ReactNode;
+}
 export interface IState {
     canvas: any;
     screen: {
@@ -7,16 +15,10 @@ export interface IState {
         ratio: number;
     };
 }
-export interface ICanvas {
+export interface IGameCanvas {
     game: IGameState;
-    canvas?: RefObject<HTMLCanvasElement>;
-    screen?: {
-        width: number;
-        height: number;
-        ratio: number;
-    };
     player: string;
-    controller?: (props: any) => any;
+    controller?: (props: IGameState) => void;
 }
 export interface IGameState {
     nextFenString: string;

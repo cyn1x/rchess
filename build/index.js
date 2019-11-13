@@ -4,12 +4,39 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var React = _interopDefault(require('react'));
+var React = require('react');
+var React__default = _interopDefault(React);
 var ReactDOM = _interopDefault(require('react-dom'));
 
-const App = () => {
-    return (React.createElement("div", null,
-        React.createElement("p", null, "UniChess Chess Engine")));
+const initialGameState = {
+    player: "Demo",
+    game: {
+        nextFenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        nextPlayerTurn: "White",
+        movePieceFrom: "",
+        movePieceTo: ""
+    }
+};
+const defaultGameState = {
+    getGameState: initialGameState,
+    setGameState: () => { }
+};
+const GameContext = React.createContext(defaultGameState);
+const GameProvider = (props) => {
+    const [getGameState, setGameState] = React.useState({
+        ...initialGameState,
+        ...props.defaults,
+    });
+    return (React__default.createElement(GameContext.Provider, { value: { getGameState, setGameState } }, props.children));
+};
+
+const GameSettings = () => {
+    const gameSettings = React.useContext(GameContext);
+    return (React__default.createElement("form", null,
+        React__default.createElement("input", { name: "fen", type: "text" }),
+        React__default.createElement("button", { onClick: (event) => {
+                event.preventDefault();
+            } }, "Set")));
 };
 
 class GameState {
@@ -685,10 +712,10 @@ class Game {
 }
 
 const boardSize = () => { return ((window.innerWidth > window.innerHeight)); };
-class Canvas extends React.Component {
+class Canvas extends React__default.Component {
     constructor(props) {
         super(props);
-        this.canvas = React.createRef();
+        this.canvas = React__default.createRef();
         this.width = (boardSize() ? window.innerWidth : window.innerHeight) / 2.5;
         this.height = this.width;
         this.ratio = this.width / this.height;
@@ -801,7 +828,8 @@ class Canvas extends React.Component {
         }
     }
     interceptClick(event) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()
+            || this.isDemonstrationMode()) {
             this.handleClick(event);
         }
     }
@@ -833,7 +861,7 @@ class Canvas extends React.Component {
                 }
                 if (squaresArray[i].squareContainsPiece()) {
                     if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
-                        || this.game.getCurrentPlayer().getColour() === "Demo") {
+                        || this.isDemonstrationMode()) {
                         this.activateSquare(squaresArray[i]);
                     }
                 }
@@ -927,7 +955,7 @@ class Canvas extends React.Component {
     setNextState(prevPos, nextPos) {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
-        if (this.game.getCurrentPlayer().getColour() !== "Demo") {
+        if (!this.isDemonstrationMode()) {
             this.game.getGameState().setCurrentTurn(nextPlayerMove);
         }
         this.game.getGameState().setFenString(newFenSequence);
@@ -942,8 +970,9 @@ class Canvas extends React.Component {
             this.props.controller(newState);
         }
     }
+    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
     render() {
-        return (React.createElement("canvas", { ref: this.state.canvas, width: this.state.screen.width * this.state.screen.ratio, height: this.state.screen.height * this.state.screen.ratio }));
+        return (React__default.createElement("canvas", { ref: this.state.canvas, width: this.state.screen.width * this.state.screen.ratio, height: this.state.screen.height * this.state.screen.ratio }));
     }
     getCellDimensions() {
         const cw = (this.state.screen.width * this.state.screen.ratio) / 8;
@@ -952,7 +981,20 @@ class Canvas extends React.Component {
     }
 }
 
-ReactDOM.render(React.createElement(App, null), document.getElementById("root"));
+const GameCanvas = () => {
+    const gameSettings = React.useContext(GameContext);
+    return (React__default.createElement(Canvas, { player: gameSettings.getGameState.player, game: gameSettings.getGameState.game }));
+};
+
+const App = () => {
+    return (React__default.createElement("div", null,
+        React__default.createElement("p", null, "UniChess Chess Engine"),
+        React__default.createElement(GameProvider, null,
+            React__default.createElement(GameSettings, null),
+            React__default.createElement(GameCanvas, null))));
+};
+
+ReactDOM.render(React__default.createElement(App, null), document.getElementById("root"));
 
 exports.Canvas = Canvas;
 //# sourceMappingURL=index.js.map

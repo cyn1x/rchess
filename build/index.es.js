@@ -1,9 +1,35 @@
-import React from 'react';
+import React, { createContext, useState, useContext } from 'react';
 import ReactDOM from 'react-dom';
 
-const App = () => {
-    return (React.createElement("div", null,
-        React.createElement("p", null, "UniChess Chess Engine")));
+const initialGameState = {
+    player: "Demo",
+    game: {
+        nextFenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        nextPlayerTurn: "White",
+        movePieceFrom: "",
+        movePieceTo: ""
+    }
+};
+const defaultGameState = {
+    getGameState: initialGameState,
+    setGameState: () => { }
+};
+const GameContext = createContext(defaultGameState);
+const GameProvider = (props) => {
+    const [getGameState, setGameState] = useState({
+        ...initialGameState,
+        ...props.defaults,
+    });
+    return (React.createElement(GameContext.Provider, { value: { getGameState, setGameState } }, props.children));
+};
+
+const GameSettings = () => {
+    const gameSettings = useContext(GameContext);
+    return (React.createElement("form", null,
+        React.createElement("input", { name: "fen", type: "text" }),
+        React.createElement("button", { onClick: (event) => {
+                event.preventDefault();
+            } }, "Set")));
 };
 
 class GameState {
@@ -795,7 +821,8 @@ class Canvas extends React.Component {
         }
     }
     interceptClick(event) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()
+            || this.isDemonstrationMode()) {
             this.handleClick(event);
         }
     }
@@ -827,7 +854,7 @@ class Canvas extends React.Component {
                 }
                 if (squaresArray[i].squareContainsPiece()) {
                     if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
-                        || this.game.getCurrentPlayer().getColour() === "Demo") {
+                        || this.isDemonstrationMode()) {
                         this.activateSquare(squaresArray[i]);
                     }
                 }
@@ -921,7 +948,7 @@ class Canvas extends React.Component {
     setNextState(prevPos, nextPos) {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
-        if (this.game.getCurrentPlayer().getColour() !== "Demo") {
+        if (!this.isDemonstrationMode()) {
             this.game.getGameState().setCurrentTurn(nextPlayerMove);
         }
         this.game.getGameState().setFenString(newFenSequence);
@@ -936,6 +963,7 @@ class Canvas extends React.Component {
             this.props.controller(newState);
         }
     }
+    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
     render() {
         return (React.createElement("canvas", { ref: this.state.canvas, width: this.state.screen.width * this.state.screen.ratio, height: this.state.screen.height * this.state.screen.ratio }));
     }
@@ -945,6 +973,19 @@ class Canvas extends React.Component {
         return { cw, ch };
     }
 }
+
+const GameCanvas = () => {
+    const gameSettings = useContext(GameContext);
+    return (React.createElement(Canvas, { player: gameSettings.getGameState.player, game: gameSettings.getGameState.game }));
+};
+
+const App = () => {
+    return (React.createElement("div", null,
+        React.createElement("p", null, "UniChess Chess Engine"),
+        React.createElement(GameProvider, null,
+            React.createElement(GameSettings, null),
+            React.createElement(GameCanvas, null))));
+};
 
 ReactDOM.render(React.createElement(App, null), document.getElementById("root"));
 
