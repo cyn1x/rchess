@@ -15,7 +15,7 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     private canvas = React.createRef<HTMLCanvasElement>();
     private width = (boardSize() ? window.innerWidth: window.innerHeight) / 2.5;
     private height = this.width;
-    private ratio = this.width / this.height
+    private ratio = this.width / this.height;
     
     constructor(props: IGameCanvas) {
         super(props);
@@ -35,6 +35,15 @@ class Canvas extends React.Component<IGameCanvas, IState> {
         this.initialise();
     }
 
+    initialise() {
+        const {cw, ch} = this.getCellDimensions();
+        this.game.initialise(cw, ch);
+    }
+
+    resizeCallback = () => setTimeout(this.update, 500);
+
+    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
+
     componentDidMount() {
         this.update();
         window.addEventListener('resize', this.resizeCallback, false);
@@ -44,20 +53,25 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     componentWillUnmount() {}
 
     componentDidUpdate() {
-        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
-            
-            const updatedSquare = this.game.updateGameState(this.props.game);
-            if (updatedSquare) {
-                this.overwriteSquare(updatedSquare);
-            }
+        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() 
+            && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
+                this.updateOppositePlayerMove();
         }
+        if (this.props.resetGame) { this.resetGame(); }
     }
 
-    resizeCallback = () => setTimeout(this.update, 500);
+    resetGame() {
+        this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
+        this.initialise();
+        this.drawBoard();
+        this.drawPieces();
+    }
 
-    initialise() {
-        const {cw, ch} = this.getCellDimensions();
-        this.game.initialise(cw, ch);
+    updateOppositePlayerMove() {
+        const updatedSquare = this.game.updateGameState(this.props.game);
+        if (updatedSquare) {
+            this.overwriteSquare(updatedSquare);
+        }
     }
 
     update() {
@@ -146,7 +160,7 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     interceptClick(event: any) {
         if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()
             || this.isDemonstrationMode()) {
-            this.handleClick(event);
+                this.handleClick(event);
         }
     }
 
@@ -299,9 +313,8 @@ class Canvas extends React.Component<IGameCanvas, IState> {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
         
-        if (!this.isDemonstrationMode()) {
-            this.game.getGameState().setCurrentTurn(nextPlayerMove)
-        }
+        
+        this.game.getGameState().setCurrentTurn(nextPlayerMove);
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
 
@@ -316,11 +329,9 @@ class Canvas extends React.Component<IGameCanvas, IState> {
         }
     }
 
-    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
-
     render() {
         return (
-                <canvas ref={ this.state.canvas }
+                <canvas id="canvas" ref={ this.state.canvas }
                     width={ this.state.screen.width * this.state.screen.ratio }
                     height={ this.state.screen.height * this.state.screen.ratio }
                 />

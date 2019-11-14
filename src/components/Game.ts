@@ -19,15 +19,8 @@ class Game {
         this.isSquareClicked = false;
         this.validMoves = [];
         
-        if (player === "Demo") {
-            this.currentPlayer = new Player("Demo");
-        }
-        else if (player === "Player 1") {
-            this.currentPlayer = new Player("White");
-        }
-        else {
-            this.currentPlayer = new Player("Black");
-        }
+        if (player === "Demo") { this.currentPlayer = new Player("Demo"); }
+        else { this.currentPlayer = new Player(this.determinePlayerColour(player)); }
 
         this.gameState.setFenString(fen);
         this.gameState.setCurrentTurn(turn);
@@ -44,6 +37,10 @@ class Game {
         }
         this.chessBoard.setSquaresArray(squaresArray);
         this.setPiecePositions();
+    }
+
+    determinePlayerColour(player: string) {
+        return player === "Player 1" ? "White" : "Black";
     }
 
     updateGameState(gameProps: any) {

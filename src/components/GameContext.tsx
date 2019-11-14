@@ -9,7 +9,8 @@ const initialGameState: IGameCanvas = {
         nextPlayerTurn: "White",
         movePieceFrom: "",
         movePieceTo: ""
-    }
+    },
+    resetGame: false
 };
 
 const defaultGameState: IGameContext = {

@@ -23,6 +23,7 @@ export interface IGameCanvas {
     game: IGameState;
     player: string;
     controller?: (props: IGameState) => void;
+    resetGame?: boolean;
 }
 
 export interface IGameState {

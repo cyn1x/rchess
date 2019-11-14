@@ -1,4 +1,5 @@
 
+const initialState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 class GameState {
     private fenString!: string;
@@ -22,7 +23,13 @@ class GameState {
 
     getCurrentTurn() { return this.currentTurn; }
 
-    setFenString(fen: string) { this.fenString = fen; }
+    setFenString(fen: string) {
+        if (fen === "") {
+            this.fenString = initialState;
+            return;
+        }
+        this.fenString = fen;
+    }
 
     setCurrentTurn(player: string) { this.currentTurn = player; }
 
