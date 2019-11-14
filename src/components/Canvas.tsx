@@ -53,11 +53,12 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     componentWillUnmount() {}
 
     componentDidUpdate() {
-        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() 
-            && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
-                this.updateOppositePlayerMove();
-        }
         if (this.props.resetGame) { this.resetGame(); }
+        
+        else if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() 
+            && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
+                this.updateOpponentMove();
+        }
     }
 
     resetGame() {
@@ -65,9 +66,10 @@ class Canvas extends React.Component<IGameCanvas, IState> {
         this.initialise();
         this.drawBoard();
         this.drawPieces();
+        console.log('here')
     }
 
-    updateOppositePlayerMove() {
+    updateOpponentMove() {
         const updatedSquare = this.game.updateGameState(this.props.game);
         if (updatedSquare) {
             this.overwriteSquare(updatedSquare);
