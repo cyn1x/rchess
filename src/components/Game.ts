@@ -123,6 +123,13 @@ class Game {
     }
 
     fenCreator() {
+        const fenPositions = this.createFenPositions();
+        const newFenString = this.appendFenState(fenPositions);
+
+        return newFenString;
+    }
+
+    createFenPositions() {
         const board = this.getChessboard().getSquaresArray();
         let newFenString = "";
         let emptySquares = 0;
@@ -138,7 +145,7 @@ class Game {
                 emptySquares = 0;
             } else {
                 emptySquares++;
-                if ((i + 1) < 63) {
+                if ((i + 1) < board.length) {
                     if ((i + 1) % 8 === 0) {
                         newFenString += emptySquares;
                     }
@@ -148,6 +155,13 @@ class Game {
                 }
             }
         }
+        return newFenString;
+    }
+
+    appendFenState(newFenString: string) {
+        const currentTurn = this.gameState.getCurrentTurn();
+        currentTurn[0] === 'W' ? newFenString += " w " : newFenString += " b ";
+
         return newFenString;
     }
 
@@ -171,46 +185,64 @@ class Game {
     }
 
     checkValidMoves(pos: string, piece: IPiece) {
+        const isKnight = (piece.getType() === 'N' || piece.getType() === 'n');
+
+        if (isKnight) {
+            this.knightSpecialCases(pos, piece);
+            return;
+        }
+
+        this.generalMoveCases(pos, piece);
+    }
+
+    knightSpecialCases(pos: string, piece: IPiece) {
         const files = this.chessBoard.getFiles();
         const pieceMoves = piece.getMoveDirections();
 
         const file = files.indexOf(pos[0])
         const rank = Number(pos[1])
 
+        const knightMoveDirections: any = {
+            'NNE': () => (this.checkBounds(file + 1, rank + 2, piece)),
+            'ENE': () => (this.checkBounds(file + 2, rank + 1, piece)),
+            'ESE': () => (this.checkBounds(file + 2, rank - 1, piece)),
+            'SSE': () => (this.checkBounds(file + 1, rank - 2, piece)),
+            'SSW': () => (this.checkBounds(file - 1, rank - 2, piece)),
+            'WSW': () => (this.checkBounds(file - 2, rank - 1, piece)),
+            'WNW': () => (this.checkBounds(file - 2, rank + 1, piece)),
+            'NWN': () => (this.checkBounds(file - 1, rank + 2, piece))
+        }
+
+        pieceMoves.forEach( (step: number, cardinal: string) => {
+            if (knightMoveDirections[cardinal]()) {
+                return;
+            }
+        })
+    }
+
+    generalMoveCases(pos: string, piece: IPiece) {
+        const files = this.chessBoard.getFiles();
+        const pieceMoves = piece.getMoveDirections();
+
+        const file = files.indexOf(pos[0])
+        const rank = Number(pos[1])
+
+        const generalMoveDirections: any = {
+            'N': () => (this.checkBounds(file, rank + currentMove, piece)),
+            'S': () => (this.checkBounds(file, rank - currentMove, piece)),
+            'E': () => (this.checkBounds(file + currentMove, rank, piece)),
+            'W': () => (this.checkBounds(file - currentMove, rank, piece)),
+            'NE': () => (this.checkBounds(file + currentMove, rank + currentMove, piece)),
+            'SE': () => (this.checkBounds(file + currentMove, rank - currentMove, piece)),
+            'NW': () => (this.checkBounds(file - currentMove, rank + currentMove, piece)),
+            'SW': () => (this.checkBounds(file - currentMove, rank - currentMove, piece))
+        }
+
         let currentMove = 0;
         if (pieceMoves) {
             pieceMoves.forEach( (step: number, cardinal: string) => {
 
-                const generalMoveDirections: any = {
-                    'N': () => (this.checkBounds(file, rank + currentMove, piece)),
-                    'S': () => (this.checkBounds(file, rank - currentMove, piece)),
-                    'E': () => (this.checkBounds(file + currentMove, rank, piece)),
-                    'W': () => (this.checkBounds(file - currentMove, rank, piece)),
-                    'NE': () => (this.checkBounds(file + currentMove, rank + currentMove, piece)),
-                    'SE': () => (this.checkBounds(file + currentMove, rank - currentMove, piece)),
-                    'NW': () => (this.checkBounds(file - currentMove, rank + currentMove, piece)),
-                    'SW': () => (this.checkBounds(file - currentMove, rank - currentMove, piece))
-                }
-
-                const knightMoveDirections: any = {
-                    'NNE': () => (this.checkBounds(file + 1, rank + 2, piece)),
-                    'ENE': () => (this.checkBounds(file + 2, rank + 1, piece)),
-                    'ESE': () => (this.checkBounds(file + 2, rank - 1, piece)),
-                    'SSE': () => (this.checkBounds(file + 1, rank - 2, piece)),
-                    'SSW': () => (this.checkBounds(file - 1, rank - 2, piece)),
-                    'WSW': () => (this.checkBounds(file - 2, rank - 1, piece)),
-                    'WNW': () => (this.checkBounds(file - 2, rank + 1, piece)),
-                    'NWN': () => (this.checkBounds(file - 1, rank + 2, piece))
-                }
-
-                const isKnight = (piece.getType() === 'n' || piece.getType() === 'N')
                 currentMove = 1;
-
-                if (isKnight) { 
-                    if (knightMoveDirections[cardinal]()) { return; }
-                    return;
-                }
-                
                 while (currentMove <= step) {
                     if (generalMoveDirections[cardinal]()) { return; }
                     currentMove++;

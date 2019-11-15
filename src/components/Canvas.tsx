@@ -66,7 +66,6 @@ class Canvas extends React.Component<IGameCanvas, IState> {
         this.initialise();
         this.drawBoard();
         this.drawPieces();
-        console.log('here')
     }
 
     updateOpponentMove() {

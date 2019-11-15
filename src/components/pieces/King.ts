@@ -9,6 +9,7 @@ class King implements IPiece {
     moves!: number;
     moveDirections!: Map<string, number>;
     private inCheck!: boolean;
+    private canCastle!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -21,12 +22,16 @@ class King implements IPiece {
     initialise() {
         this.moves = 0;
         this.inCheck = false;
+        this.canCastle = true;
         const pieces = new Pieces();
 
         this.setMoveDirections(pieces.kingMoves());
     }
 
-    incrementMoveNumber(move: number) { this.moves += move; }
+    incrementMoveNumber(move: number) {
+        this.moves += move;
+        this.setCastledStatus(false);
+    }
 
     getType() { return this.type; }
 
@@ -40,13 +45,19 @@ class King implements IPiece {
 
     getMoveNumber() { return this.moves; }
 
+    getCheckStatus() { return this.inCheck; }
+
+    getCastleStatus() { return this.canCastle; }
+
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
 
-    setCheck(check: boolean) { this.inCheck = check; }
+    setCheckStatus(check: boolean) { this.inCheck = check; }
+
+    setCastledStatus(castled: boolean) { this.canCastle = castled; }
 
 }
 
