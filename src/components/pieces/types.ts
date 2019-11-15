@@ -9,6 +9,8 @@ export interface IPiece {
     setMoveDirections(arg0: Map<string, number>): void;
     setPosition(arg0: string): void;
     incrementMoveNumber(arg0: number): void;
+    getCastleStatus?(): boolean;
+    getCheckStatus?(): boolean;
 
     type: string;
     colour: string;
