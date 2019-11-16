@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom';
 import App from './App';
 
 import { IGameState, IGameCanvas } from './components/types';
-import Canvas from "./components/Canvas";
+import Canvas from "./components/GameCanvas";
 
 ReactDOM.render(<App />, document.getElementById("root"));
 

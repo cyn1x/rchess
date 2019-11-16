@@ -10,7 +10,7 @@ import Square from './Square';
 
 const boardSize = () => { return ( (window.innerWidth > window.innerHeight) ); }
 
-class Canvas extends React.Component<IGameCanvas, IState> {
+class GameCanvas extends React.Component<IGameCanvas, IState> {
     private game: Game;
     private canvas = React.createRef<HTMLCanvasElement>();
     private width = (boardSize() ? window.innerWidth: window.innerHeight) / 2.5;
@@ -32,12 +32,14 @@ class Canvas extends React.Component<IGameCanvas, IState> {
             this.props.controller.bind(this.props.game);
         }
         this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
-        this.initialise();
     }
 
     initialise() {
         const {cw, ch} = this.getCellDimensions();
         this.game.initialise(cw, ch);
+        
+        this.drawBoard();
+        this.drawPieces();
     }
 
     resizeCallback = () => setTimeout(this.update, 500);
@@ -45,7 +47,8 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
 
     componentDidMount() {
-        this.update();
+        this.initialise();
+
         window.addEventListener('resize', this.resizeCallback, false);
         this.state.canvas.current.addEventListener("click", (event: EventTarget) => { this.interceptClick(event) }, false);
     }
@@ -53,12 +56,14 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     componentWillUnmount() {}
 
     componentDidUpdate() {
-        if (this.props.resetGame) { this.resetGame(); }
-        
-        else if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour() 
-            && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
-                this.updateOpponentMove();
+        if (this.props.resetGame) {
+            this.resetGame();
+            return;
         }
+        else if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour()) {
+            this.updateOpponentMove();
+        }
+        this.game.postMoveCalculations();
     }
 
     resetGame() {
@@ -246,30 +251,30 @@ class Canvas extends React.Component<IGameCanvas, IState> {
 
     manageValidSquares() {
         if (this.game.getSquareActive()) {
-            const activeSquare = this.game.getChessboard().getActiveSquare().getPosition();
+            const activeSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
             const activePiece = this.game.getChessboard().getActiveSquare().getPiece();
 
-            this.game.checkValidMoves(activeSquare, activePiece)
+            this.game.checkValidMoves(activeSquarePos, activePiece);
             this.drawValidSquares();
 
             return;
         }
         this.drawValidSquares();
-        this.game.setValidMoves([]);
+        this.game.setAttackedSquares([]);
     }
 
     drawValidSquares() {
         const files = this.game.getChessboard().getFiles();
         const ranks = this.game.getChessboard().getRanks();
 
-        if (this.game.getValidMoves().length > 0) {
-            const validMoves = this.game.getValidMoves()
+        if (this.game.getAttackedSquares().length > 0) {
+            const validMoves = this.game.getAttackedSquares();
             for (let i = 0; i < validMoves.length; i++) {
 
                 this.selectCell(validMoves[i]);
 
                 if (validMoves[i].squareContainsPiece()) {
-                    const img = this.drawPiece(validMoves[i].getPiece())
+                    const img = this.drawPiece(validMoves[i].getPiece());
                     this.drawImg(img, ranks.indexOf(Number(validMoves[i].getPosition()[1])), files.indexOf(validMoves[i].getPosition()[0]));
                 }
             }
@@ -346,4 +351,4 @@ class Canvas extends React.Component<IGameCanvas, IState> {
     }
 }
 
-export default Canvas;
+export default GameCanvas;

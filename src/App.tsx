@@ -1,7 +1,7 @@
 import React from "react";
 import { GameProvider } from './components/GameContext'
 import GameSettings from './components/GameSettings';
-import GameCanvas from './components/index';
+import GameEntryPoint from './components/index';
 import GameInfo from './components/GameInfo';
 
 import './styles.css'
@@ -14,7 +14,7 @@ const App = () => {
             </div>
             <div id="unichess-app">
                 <GameProvider>
-                    <GameCanvas />
+                    <GameEntryPoint />
                     <div id="unichess-info">
                         <GameInfo />
                         <GameSettings />

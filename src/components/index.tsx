@@ -1,9 +1,9 @@
 import React, { useContext } from 'react';
 import { GameContext } from './GameContext';
-import Canvas from './Canvas';
+import GameCanvas from './GameCanvas';
 import { IGameState } from './types';
 
-const GameCanvas = () => {
+const GameEntryPoint = () => {
     const gameSettings = useContext(GameContext);
 
     const mediator = (props: IGameState) => {
@@ -20,7 +20,7 @@ const GameCanvas = () => {
     }
 
     return (
-        <Canvas 
+        <GameCanvas 
             player={gameSettings.getGameState.player}
             game={gameSettings.getGameState.game}
             controller={mediator}
@@ -29,4 +29,4 @@ const GameCanvas = () => {
     )
 }
 
-export default GameCanvas;
+export default GameEntryPoint;
