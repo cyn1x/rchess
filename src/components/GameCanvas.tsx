@@ -319,7 +319,6 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
         
-        
         this.game.getGameState().setCurrentTurn(nextPlayerMove);
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);

@@ -184,6 +184,7 @@ class Game {
     postMoveCalculations() {
         this.gameLogic.postMoveCalculations();
         this.gameLogic.setOpponentAttackedSquares(this.gameLogic.getAttackedSquares());
+        this.gameLogic.copyAttackedSquares();
         this.gameLogic.setAttackedSquares([]);
     }
 
