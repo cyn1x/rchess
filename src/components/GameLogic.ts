@@ -25,31 +25,15 @@ class GameLogic {
         }
 
         this.generalMoveCases(pos, piece);
-    }
 
-    knightSpecialCases(pos: string, piece: IPiece) {
-        const files = this.chessboard.getFiles();
-        const pieceMoves = piece.getMoveDirections();
-
-        const file = files.indexOf(pos[0])
-        const rank = Number(pos[1])
-
-        const knightMoveDirections: any = {
-            'NNE': () => (this.checkAttackableSquares(file + 1, rank + 2, piece)),
-            'ENE': () => (this.checkAttackableSquares(file + 2, rank + 1, piece)),
-            'ESE': () => (this.checkAttackableSquares(file + 2, rank - 1, piece)),
-            'SSE': () => (this.checkAttackableSquares(file + 1, rank - 2, piece)),
-            'SSW': () => (this.checkAttackableSquares(file - 1, rank - 2, piece)),
-            'WSW': () => (this.checkAttackableSquares(file - 2, rank - 1, piece)),
-            'WNW': () => (this.checkAttackableSquares(file - 2, rank + 1, piece)),
-            'NWN': () => (this.checkAttackableSquares(file - 1, rank + 2, piece))
-        }
-
-        pieceMoves.forEach( (step: number, cardinal: string) => {
-            if (knightMoveDirections[cardinal]()) {
-                return;
+        if (this.bIsKing(piece) || this.bIsRook(piece)) {
+            if (this.bCanCastle(piece)) {
+                
             }
-        })
+        }
+        else if (this.bIsPawn(piece)) {
+
+        }
     }
 
     generalMoveCases(pos: string, piece: IPiece) {
@@ -83,19 +67,45 @@ class GameLogic {
         }
     }
 
+    knightSpecialCases(pos: string, piece: IPiece) {
+        const files = this.chessboard.getFiles();
+        const pieceMoves = piece.getMoveDirections();
+
+        const file = files.indexOf(pos[0])
+        const rank = Number(pos[1])
+
+        const knightMoveDirections: any = {
+            'NNE': () => (this.checkAttackableSquares(file + 1, rank + 2, piece)),
+            'ENE': () => (this.checkAttackableSquares(file + 2, rank + 1, piece)),
+            'ESE': () => (this.checkAttackableSquares(file + 2, rank - 1, piece)),
+            'SSE': () => (this.checkAttackableSquares(file + 1, rank - 2, piece)),
+            'SSW': () => (this.checkAttackableSquares(file - 1, rank - 2, piece)),
+            'WSW': () => (this.checkAttackableSquares(file - 2, rank - 1, piece)),
+            'WNW': () => (this.checkAttackableSquares(file - 2, rank + 1, piece)),
+            'NWN': () => (this.checkAttackableSquares(file - 1, rank + 2, piece))
+        }
+
+        pieceMoves.forEach( (step: number, cardinal: string) => {
+            if (knightMoveDirections[cardinal]()) {
+                return;
+            }
+        })
+    }
+
     checkAttackableSquares(file: number, rank: number, piece: IPiece) {
         const squaresArray = this.chessboard.getSquaresArray();
         const files = this.chessboard.getFiles();
-        const singleFiles = this.chessboard.getSquaresArray().length / 8;
-        const attackedSquare = (singleFiles - rank) * singleFiles + file;
-
-        if (attackedSquare < 0 || attackedSquare > singleFiles ** 2 - 1) { return; }
+        const boardLength = this.chessboard.getSquaresArray().length / 8;
+        const attackedSquare = (boardLength - rank) * boardLength + file;
+        
+        
+        if (attackedSquare < 0 || attackedSquare > squaresArray.length - 1) { return; }
 
         if (squaresArray[attackedSquare].getPosition() === (files[file] + rank)) {
 
             if (!squaresArray[attackedSquare].squareContainsPiece()) {
                 if (this.bIsPawn(piece)) {
-                    if (this.bPawnCanMoveForward(squaresArray[attackedSquare], piece)) {
+                    if (this.bPawnCanAttack(squaresArray[attackedSquare], piece)) {
                         return;
                     }
                 }
@@ -106,13 +116,14 @@ class GameLogic {
                 return true;
             }
             if (this.bIsPawn(piece)) {
-                if (this.bPawnCanAttackDiagonally(squaresArray[attackedSquare], piece)) {
+                if (this.bPawnPathBlocked(squaresArray[attackedSquare], piece)) {
                     return true;
                 };
             }
             this.attackedSquares.push(squaresArray[attackedSquare]);
             return true;
         }
+
     }
 
     checkRequestedMove(squares: Square) {
@@ -124,14 +135,14 @@ class GameLogic {
         return false;
     }
 
-    bPawnCanMoveForward(square: Square, piece: IPiece) {
+    bPawnCanAttack(square: Square, piece: IPiece) {
         if (square.getPosition()[0] === piece.getPosition()[0]) {
             this.attackedSquares.push(square);
         }
         return true;
     }
 
-    bPawnCanAttackDiagonally(square: Square, piece: IPiece) {
+    bPawnPathBlocked(square: Square, piece: IPiece) {
         if (piece.getColour() === square.getPiece().getColour()) {
             return true;
         }
@@ -140,10 +151,15 @@ class GameLogic {
         }
     }
 
-    castlingDeterminant(file: number, rank: number, piece: IPiece) {
+    bCanCastle(piece: IPiece) {
         if (piece.getMoveNumber() === 0) {
             return true;
         }
+        return false;
+    }
+
+    bEnPassanteOpen() {
+
         return false;
     }
 
