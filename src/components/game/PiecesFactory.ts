@@ -1,5 +1,5 @@
 import { IPiece } from './pieces/types';
-import Pieces from './Pieces';
+import Pieces from './pieces/Pieces';
 import Pawn from './pieces/Pawn';
 import Knight from './pieces/Knight';
 import Bishop from './pieces/Bishop';

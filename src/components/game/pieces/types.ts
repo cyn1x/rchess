@@ -19,3 +19,8 @@ export interface IPiece {
     moves: number;
     moveDirections: Map<string, number>;
 }
+
+export interface IPieceKing {
+    getCastleStatus(): boolean;
+    getCheckStatus(): boolean;
+}

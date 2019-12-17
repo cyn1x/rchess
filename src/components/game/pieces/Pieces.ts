@@ -1,16 +1,16 @@
-import whitePawn from '../assets/img/pieces/w_pawn_png_128px.png';
-import whiteKnight from '../assets/img/pieces/w_knight_png_128px.png';
-import whiteBishop from '../assets/img/pieces/w_bishop_png_128px.png';
-import whiteRook from '../assets/img/pieces/w_rook_png_128px.png';
-import whiteQueen from '../assets/img/pieces/w_queen_png_128px.png';
-import whiteKing from '../assets/img/pieces/w_king_png_128px.png';
+import whitePawn from '../../../assets/img/pieces/w_pawn_png_128px.png';
+import whiteKnight from '../../../assets/img/pieces/w_knight_png_128px.png';
+import whiteBishop from '../../../assets/img/pieces/w_bishop_png_128px.png';
+import whiteRook from '../../../assets/img/pieces/w_rook_png_128px.png';
+import whiteQueen from '../../../assets/img/pieces/w_queen_png_128px.png';
+import whiteKing from '../../../assets/img/pieces/w_king_png_128px.png';
 
-import blackPawn from '../assets/img/pieces/b_pawn_png_128px.png';
-import blackKnight from '../assets/img/pieces/b_knight_png_128px.png';
-import blackBishop from '../assets/img/pieces/b_bishop_png_128px.png';
-import blackRook from '../assets/img/pieces/b_rook_png_128px.png';
-import blackQueen from '../assets/img/pieces/b_queen_png_128px.png';
-import blackKing from '../assets/img/pieces/b_king_png_128px.png';
+import blackPawn from '../../../assets/img/pieces/b_pawn_png_128px.png';
+import blackKnight from '../../../assets/img/pieces/b_knight_png_128px.png';
+import blackBishop from '../../../assets/img/pieces/b_bishop_png_128px.png';
+import blackRook from '../../../assets/img/pieces/b_rook_png_128px.png';
+import blackQueen from '../../../assets/img/pieces/b_queen_png_128px.png';
+import blackKing from '../../../assets/img/pieces/b_king_png_128px.png';
 
 export const wP = whitePawn;
 export const wN = whiteKnight;

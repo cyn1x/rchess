@@ -184,7 +184,6 @@ class Game {
     postMoveCalculations() {
         this.gameLogic.postMoveCalculations();
         this.gameLogic.setOpponentAttackedSquares(this.gameLogic.getAttackedSquares());
-        this.gameLogic.copyAttackedSquares();
         this.gameLogic.setAttackedSquares([]);
     }
 
@@ -212,7 +211,7 @@ class Game {
 
     setSquareActive(active: boolean) { this.isSquareClicked = active; }
 
-    setAttackedSquares(valid: Array<Square>) { this.gameLogic.setAttackedSquares(valid); }
+    setAttackedSquares(emptyArray: Array<Square>) { this.gameLogic.setAttackedSquares(emptyArray); }
 
 }
 

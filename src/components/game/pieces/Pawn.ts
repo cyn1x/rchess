@@ -1,13 +1,15 @@
 import { IPiece } from './types';
-import Pieces from '../Pieces';
+import Pieces from './Pieces';
 
-class Bishop implements IPiece {
+class Pawn implements IPiece {
     type: string;
     colour: string;
     image: string;
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
+    private firstMove!: boolean;
+    private hasUpgraded!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -16,15 +18,31 @@ class Bishop implements IPiece {
 
         this.initialise();
     }
-
+    
     initialise() {
+        this.hasUpgraded = false;
         this.moves = 0;
         const pieces = new Pieces();
 
-        this.setMoveDirections(pieces.bishopMoves());
+        this.setMoveDirections(pieces.pawnMoves(this.type));
     }
 
-    incrementMoveNumber(move: number) { this.moves += move; }
+    update() {
+        if (!this.firstMove) { 
+            this.firstMove = true;
+            if (this.type === 'P') {
+                this.moveDirections.set('N', 1)
+            }
+            else {
+                this.moveDirections.set('S', 1)
+            }
+        }
+    }
+
+    incrementMoveNumber(move: number) {
+        this.moves += move;
+        this.update();
+    }
 
     getType() { return this.type; }
 
@@ -38,12 +56,16 @@ class Bishop implements IPiece {
 
     getMoveNumber() { return this.moves; }
 
+    getHasUpgraded() { return this.hasUpgraded; }
+
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
 
+    setHasUpgraded(upgraded: boolean) { this.hasUpgraded = upgraded; }
+
 }
 
-export default Bishop;
+export default Pawn;

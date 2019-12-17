@@ -1,15 +1,13 @@
 import { IPiece } from './types';
-import Pieces from '../Pieces';
+import Pieces from './Pieces';
 
-class King implements IPiece {
+class Bishop implements IPiece {
     type: string;
     colour: string;
     image: string;
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
-    private inCheck!: boolean;
-    private canCastle!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -21,17 +19,12 @@ class King implements IPiece {
 
     initialise() {
         this.moves = 0;
-        this.inCheck = false;
-        this.canCastle = true;
         const pieces = new Pieces();
 
-        this.setMoveDirections(pieces.kingMoves());
+        this.setMoveDirections(pieces.bishopMoves());
     }
 
-    incrementMoveNumber(move: number) {
-        this.moves += move;
-        this.setCastledStatus(false);
-    }
+    incrementMoveNumber(move: number) { this.moves += move; }
 
     getType() { return this.type; }
 
@@ -45,20 +38,12 @@ class King implements IPiece {
 
     getMoveNumber() { return this.moves; }
 
-    getCheckStatus() { return this.inCheck; }
-
-    getCastleStatus() { return this.canCastle; }
-
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
 
-    setCheckStatus(check: boolean) { this.inCheck = check; }
-
-    setCastledStatus(castled: boolean) { this.canCastle = castled; }
-
 }
 
-export default King;
+export default Bishop;

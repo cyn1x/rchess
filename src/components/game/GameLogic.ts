@@ -1,4 +1,4 @@
-import { IPiece } from './pieces/types';
+import { IPiece, IPieceKing } from './pieces/types';
 
 import Board from './Board';
 import Square from './Square';
@@ -17,9 +17,7 @@ class GameLogic {
     }
 
     squareContainsAttack(pos: string, piece: IPiece) {
-        const isKnight = (piece.getType() === 'N' || piece.getType() === 'n');
-
-        if (isKnight) {
+        if (this.bIsKnight(piece)) {
             this.knightSpecialCases(pos, piece);
             return;
         }
@@ -32,18 +30,24 @@ class GameLogic {
             }
         }
         else if (this.bIsPawn(piece)) {
+            if (this.bEnPassanteOpen()) {
 
+            }
         }
+    }
+
+    specialMoveCases(pos: string, piece: IPiece) {
+        
     }
 
     generalMoveCases(pos: string, piece: IPiece) {
         const files = this.chessboard.getFiles();
-        const pieceMoves = piece.getMoveDirections();
+        const pieceMoveDirections = piece.getMoveDirections();
 
         const file = files.indexOf(pos[0])
         const rank = Number(pos[1])
 
-        const generalMoveDirections: any = {
+        const moveDirections: any = {
             'N': () => (this.checkAttackableSquares(file, rank + currentMove, piece)),
             'S': () => (this.checkAttackableSquares(file, rank - currentMove, piece)),
             'E': () => (this.checkAttackableSquares(file + currentMove, rank, piece)),
@@ -55,16 +59,14 @@ class GameLogic {
         }
 
         let currentMove = 0;
-        if (pieceMoves) {
-            pieceMoves.forEach( (step: number, cardinal: string) => {
+        pieceMoveDirections.forEach( (totalMoveCount: number, cardinalDirection: string) => {
 
-                currentMove = 1;
-                while (currentMove <= step) {
-                    if (generalMoveDirections[cardinal]()) { return; }
-                    currentMove++;
-                }
-            })
-        }
+            currentMove = 1;
+            while (currentMove <= totalMoveCount) {
+                if (moveDirections[cardinalDirection]()) { return; }
+                currentMove++;
+            }
+        })
     }
 
     knightSpecialCases(pos: string, piece: IPiece) {
@@ -74,7 +76,7 @@ class GameLogic {
         const file = files.indexOf(pos[0])
         const rank = Number(pos[1])
 
-        const knightMoveDirections: any = {
+        const moveDirections: any = {
             'NNE': () => (this.checkAttackableSquares(file + 1, rank + 2, piece)),
             'ENE': () => (this.checkAttackableSquares(file + 2, rank + 1, piece)),
             'ESE': () => (this.checkAttackableSquares(file + 2, rank - 1, piece)),
@@ -85,10 +87,8 @@ class GameLogic {
             'NWN': () => (this.checkAttackableSquares(file - 1, rank + 2, piece))
         }
 
-        pieceMoves.forEach( (step: number, cardinal: string) => {
-            if (knightMoveDirections[cardinal]()) {
-                return;
-            }
+        pieceMoves.forEach( (totalMoveCount: number, cardinalDirection: string) => {
+            if (moveDirections[cardinalDirection]()) { return; }
         })
     }
 
@@ -97,7 +97,6 @@ class GameLogic {
         const files = this.chessboard.getFiles();
         const boardLength = this.chessboard.getSquaresArray().length / 8;
         const attackedSquare = (boardLength - rank) * boardLength + file;
-        
         
         if (attackedSquare < 0 || attackedSquare > squaresArray.length - 1) { return; }
 
@@ -174,11 +173,11 @@ class GameLogic {
 
     bIsPawn(piece: IPiece) { return piece.getType() === 'P' || piece.getType() === 'p'; }
 
+    bIsKnight(piece: IPiece) { return (piece.getType() === 'N' || piece.getType() === 'n'); }
+
     bIsRook(piece: IPiece) { return piece.getType() === 'R' || piece.getType() === 'r'; }
 
     bIsKing(piece: IPiece) { return piece.getType() === 'K' || piece.getType() === 'k'; }
-
-    copyAttackedSquares() { this.attackedSquaresReference = this.attackedSquares; }
  
     getAttackedSquares() { return this.attackedSquares; }
 

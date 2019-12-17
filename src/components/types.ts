@@ -10,15 +10,6 @@ export interface IGameProviderProps {
     children?: ReactNode;
 }
 
-export interface IState {
-    canvas: any;
-    screen: {
-        width: number;
-        height: number;
-        ratio: number;
-    },
-}
-
 export interface IGameCanvas {
     game: IGameState;
     player: string;

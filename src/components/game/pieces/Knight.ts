@@ -1,5 +1,5 @@
 import { IPiece } from './types';
-import Pieces from '../Pieces';
+import Pieces from './Pieces';
 
 class Knight implements IPiece {
     type: string;

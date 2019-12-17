@@ -1,15 +1,13 @@
 import { IPiece } from './types';
-import Pieces from '../Pieces';
+import Pieces from './Pieces';
 
-class Pawn implements IPiece {
+class Queen implements IPiece {
     type: string;
     colour: string;
     image: string;
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
-    private firstMove!: boolean;
-    private hasUpgraded!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -18,31 +16,15 @@ class Pawn implements IPiece {
 
         this.initialise();
     }
-    
+
     initialise() {
-        this.hasUpgraded = false;
         this.moves = 0;
         const pieces = new Pieces();
 
-        this.setMoveDirections(pieces.pawnMoves(this.type));
+        this.setMoveDirections(pieces.queenMoves());
     }
 
-    update() {
-        if (!this.firstMove) { 
-            this.firstMove = true;
-            if (this.type === 'P') {
-                this.moveDirections.set('N', 1)
-            }
-            else {
-                this.moveDirections.set('S', 1)
-            }
-        }
-    }
-
-    incrementMoveNumber(move: number) {
-        this.moves += move;
-        this.update();
-    }
+    incrementMoveNumber(move: number) { this.moves += move; }
 
     getType() { return this.type; }
 
@@ -52,11 +34,9 @@ class Pawn implements IPiece {
 
     getMoveDirections() { return this.moveDirections; }
 
-    getPosition() { return this.position; }
-
     getMoveNumber() { return this.moves; }
 
-    getHasUpgraded() { return this.hasUpgraded; }
+    getPosition() { return this.position; }
 
     setImage(image: string) { this.image = image; }
 
@@ -64,8 +44,6 @@ class Pawn implements IPiece {
 
     setPosition(pos: string) { this.position = pos; }
 
-    setHasUpgraded(upgraded: boolean) { this.hasUpgraded = upgraded; }
-
 }
 
-export default Pawn;
+export default Queen;

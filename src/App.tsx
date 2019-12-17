@@ -7,21 +7,30 @@ import GameInfo from './components/GameInfo';
 import './styles.css'
 
 const App = () => {
+    const debug = true;
+
+    if (debug) {
+        return (
+            <React.Fragment>
+                <div id="unichess-heading">
+                    <h1>Cyn1x Chess Engine</h1>
+                </div>
+                <div id="unichess-app">
+                    <GameProvider>
+                        <GameEntryPoint />
+                        <div id="unichess-info">
+                            <GameInfo />
+                            <GameSettings />
+                        </div>
+                    </GameProvider>
+                </div>
+            </React.Fragment>
+        );
+    }
     return (
-        <React.Fragment>
-            <div id="unichess-heading">
-                <h1>Cyn1x Chess Engine</h1>
-            </div>
-            <div id="unichess-app">
-                <GameProvider>
-                    <GameEntryPoint />
-                    <div id="unichess-info">
-                        <GameInfo />
-                        <GameSettings />
-                    </div>
-                </GameProvider>
-            </div>
-        </React.Fragment>
+        <div id="unichess-heading">
+            <h1>Cyn1x Chess Engine</h1>
+        </div>
     );
 }
 

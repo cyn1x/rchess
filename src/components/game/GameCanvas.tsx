@@ -1,8 +1,9 @@
 import React from 'react';
 
 import {
-    IGameCanvas, IState, IGameState
-} from './types';
+    IGameCanvas, IGameState
+} from '../types';
+import { IState } from './types';
 
 import { IPiece } from './pieces/types';
 import Game from './Game';
