@@ -199,7 +199,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
                     }
                     return;
                 }
-                if (squaresArray[i].squareContainsPiece()) {
+                if (squaresArray[i].bSquareContainsPiece()) {
                     if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
                         || this.isDemonstrationMode()) {
                         this.activateSquare(squaresArray[i])
@@ -261,7 +261,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             return;
         }
         this.drawValidSquares();
-        this.game.setAttackedSquares([]);
+        this.game.clearAttackedSquares();
     }
 
     drawValidSquares() {
@@ -274,7 +274,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
                 this.selectCell(validMoves[i]);
 
-                if (validMoves[i].squareContainsPiece()) {
+                if (validMoves[i].bSquareContainsPiece()) {
                     const img = this.drawPiece(validMoves[i].getPiece());
                     this.drawImg(img, ranks.indexOf(Number(validMoves[i].getPosition()[1])), files.indexOf(validMoves[i].getPosition()[0]));
                 }

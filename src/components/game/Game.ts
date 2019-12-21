@@ -137,7 +137,7 @@ class Game {
                 emptySquares = 0;
             }
             
-            if (board[i].squareContainsPiece()) {
+            if (board[i].bSquareContainsPiece()) {
                 newFenString += board[i].getPiece().getType();
                 emptySquares = 0;
             } else {
@@ -146,7 +146,7 @@ class Game {
                     if ((i + 1) % 8 === 0) {
                         newFenString += emptySquares;
                     }
-                    else if (board[i + 1].squareContainsPiece()) {
+                    else if (board[i + 1].bSquareContainsPiece()) {
                         newFenString += emptySquares;
                     }
                 }
@@ -182,9 +182,8 @@ class Game {
     }
 
     postMoveCalculations() {
-        this.gameLogic.postMoveCalculations();
-        this.gameLogic.setOpponentAttackedSquares(this.gameLogic.getAttackedSquares());
-        this.gameLogic.setAttackedSquares([]);
+        this.gameLogic.determineAttackedSquares();
+        this.gameLogic.clearAttackedSquares();
     }
 
     determinePlayerColour(player: string) { return player === "Player 1" ? "White" : "Black"; }
@@ -194,6 +193,8 @@ class Game {
     checkValidMoves(pos: string, piece: IPiece) { return this.gameLogic.squareContainsAttack(pos, piece); }
 
     incrementMoveCount(piece: IPiece) { piece.incrementMoveNumber(1); }
+
+    clearAttackedSquares() { this.gameLogic.clearAttackedSquares(); }
 
     getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? "Black" : "White"); }
 
@@ -210,8 +211,6 @@ class Game {
     setChessboard(board: Board) { this.chessboard = board; }
 
     setSquareActive(active: boolean) { this.isSquareClicked = active; }
-
-    setAttackedSquares(emptyArray: Array<Square>) { this.gameLogic.setAttackedSquares(emptyArray); }
 
 }
 

@@ -8,8 +8,10 @@ class Square {
     private h: number;
     private piece!: IPiece;
     private hasPiece!: boolean;
+    private isAttacked!: boolean;
     private colour!: string;
     private enPassant!: string;
+    private attackingPieces!: IPiece[];
 
     constructor(pos: string, x: number, y: number, w: number, h: number) {
         this.pos = pos;
@@ -17,14 +19,23 @@ class Square {
         this.y = y;
         this.w = w;
         this.h = h;
+
+        this.attackingPieces = [];
     }
 
     removePiece() { 
         delete this.piece;
         this.hasPiece = false;
+        this.isAttacked = false;
     }
 
-    squareContainsPiece() { return this.hasPiece; }
+    bSquareContainsPiece() { return this.hasPiece; }
+
+    bSquareIsAttacked() { return this.isAttacked; }
+
+    clearAttackingPieces() { this.attackingPieces = []; }
+
+    getAttackingPiece() { return this.attackingPieces; }
 
     getPiece() { return this.piece; }
 
@@ -55,6 +66,10 @@ class Square {
         this.hasPiece = true;
         piece.setPosition(this.pos);
     }
+
+    setSquareAttacked(attacked: boolean) { this.isAttacked = attacked; }
+
+    setAttackingPiece(piece: IPiece) { this.attackingPieces.push(piece); }
 
     setColour(colour: string) { this.colour = colour; }
 
