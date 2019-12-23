@@ -24,7 +24,7 @@ class Queen implements IPiece {
         this.setMoveDirections(pieces.queenMoves());
     }
 
-    incrementMoveNumber(move: number) { this.moves += move; }
+    incrementMoveCount() { this.moves += 1; }
 
     getType() { return this.type; }
 
@@ -34,7 +34,7 @@ class Queen implements IPiece {
 
     getMoveDirections() { return this.moveDirections; }
 
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
 
     getPosition() { return this.position; }
 

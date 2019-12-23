@@ -39,8 +39,8 @@ class Pawn implements IPiece {
         }
     }
 
-    incrementMoveNumber(move: number) {
-        this.moves += move;
+    incrementMoveCount() {
+        this.moves += 1;
         this.update();
     }
 
@@ -54,7 +54,7 @@ class Pawn implements IPiece {
 
     getPosition() { return this.position; }
 
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
 
     getHasUpgraded() { return this.hasUpgraded; }
 

@@ -28,8 +28,8 @@ class King implements IPiece {
         this.setMoveDirections(pieces.kingMoves());
     }
 
-    incrementMoveNumber(move: number) {
-        this.moves += move;
+    incrementMoveCount() {
+        this.moves += 1;
         this.setCastledStatus(false);
     }
 
@@ -43,7 +43,7 @@ class King implements IPiece {
 
     getPosition() { return this.position; }
 
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
 
     getCheckStatus() { return this.inCheck; }
 

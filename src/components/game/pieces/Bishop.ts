@@ -24,7 +24,7 @@ class Bishop implements IPiece {
         this.setMoveDirections(pieces.bishopMoves());
     }
 
-    incrementMoveNumber(move: number) { this.moves += move; }
+    incrementMoveCount() { this.moves += 1; }
 
     getType() { return this.type; }
 
@@ -36,7 +36,7 @@ class Bishop implements IPiece {
 
     getPosition() { return this.position; }
 
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
 
     setImage(image: string) { this.image = image; }
 

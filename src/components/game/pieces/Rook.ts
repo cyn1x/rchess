@@ -26,8 +26,8 @@ class Rook implements IPiece {
         this.setMoveDirections(pieces.rookMoves());
     }
 
-    incrementMoveNumber(move: number) {
-        this.moves += move;
+    incrementMoveCount() {
+        this.moves += 1;
         this.setCastledStatus(false);
     }
 
@@ -39,7 +39,7 @@ class Rook implements IPiece {
 
     getMoveDirections() { return this.moveDirections; }
 
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
 
     getPosition() { return this.position; }
 

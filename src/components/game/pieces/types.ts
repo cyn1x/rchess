@@ -4,11 +4,11 @@ export interface IPiece {
     getImage(): string;
     getMoveDirections(): Map<string, number>;
     getPosition(): string;
-    getMoveNumber(): number;
+    getMoveCount(): number;
     setImage(arg0: string): void;
     setMoveDirections(arg0: Map<string, number>): void;
     setPosition(arg0: string): void;
-    incrementMoveNumber(arg0: number): void;
+    incrementMoveCount(): void;
     getCastleStatus?(): boolean;
     getCheckStatus?(): boolean;
 
@@ -18,9 +18,4 @@ export interface IPiece {
     position: string;
     moves: number;
     moveDirections: Map<string, number>;
-}
-
-export interface IPieceKing {
-    getCastleStatus(): boolean;
-    getCheckStatus(): boolean;
 }

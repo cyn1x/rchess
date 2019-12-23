@@ -45,7 +45,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
     resizeCallback = () => setTimeout(this.update, 500);
 
-    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
+    bIsDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
 
     componentDidMount() {
         this.initialise();
@@ -165,9 +165,8 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     interceptClick(event: any) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()
-            || this.isDemonstrationMode()) {
-                this.handleClick(event);
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour() || this.bIsDemonstrationMode()) {
+            this.handleClick(event);
         }
     }
 
@@ -200,8 +199,10 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
                     return;
                 }
                 if (squaresArray[i].bSquareContainsPiece()) {
-                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
-                        || this.isDemonstrationMode()) {
+                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
+                        this.activateSquare(squaresArray[i])
+                    }
+                    if (this.bIsDemonstrationMode() && squaresArray[i].getPiece().getColour() === this.game.getGameState().getCurrentTurn()) {
                         this.activateSquare(squaresArray[i])
                     }
                 }

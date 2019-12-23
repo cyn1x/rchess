@@ -19,6 +19,8 @@ class GameState {
         this.nextActivePiecePos = next;
     }
 
+    setPlayerCheck() {  }
+
     getFenString() { return this.fenString; }
 
     getCurrentTurn() { return this.currentTurn; }

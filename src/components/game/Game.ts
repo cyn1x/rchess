@@ -12,19 +12,22 @@ class Game {
     private gameLogic: GameLogic;
     private chessboard: Board;
     private isSquareClicked: boolean;
-    private currentPlayer!: Player;
+    private player!: Player;
 
     constructor(player: string, fen: string, turn: string) {
         this.gameState = new GameState();
         this.chessboard = new Board();
+        this.setPlayer(player);
         this.gameLogic = new GameLogic(this.chessboard);
         this.isSquareClicked = false;
-        
-        if (player === "Demo") { this.currentPlayer = new Player("Demo"); }
-        else { this.currentPlayer = new Player(this.determinePlayerColour(player)); }
 
         this.gameState.setFenString(fen);
         this.gameState.setCurrentTurn(turn);
+    }
+
+    setPlayer(player: string) {
+        if (player === "Demo") { this.player = new Player("Demo"); }
+        else { this.player = new Player(this.determinePlayerColour(player)); }
     }
     
     initialise(cw: number, ch: number) {
@@ -192,7 +195,7 @@ class Game {
 
     checkValidMoves(pos: string, piece: IPiece) { return this.gameLogic.squareContainsAttack(pos, piece); }
 
-    incrementMoveCount(piece: IPiece) { piece.incrementMoveNumber(1); }
+    incrementMoveCount(piece: IPiece) { piece.incrementMoveCount(); }
 
     clearAttackedSquares() { this.gameLogic.clearAttackedSquares(); }
 
@@ -206,7 +209,7 @@ class Game {
 
     getGameState() { return this.gameState; }
 
-    getCurrentPlayer() { return this.currentPlayer; }
+    getCurrentPlayer() { return this.player; }
 
     setChessboard(board: Board) { this.chessboard = board; }
 
