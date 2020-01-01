@@ -18,7 +18,7 @@ class Game {
         this.gameState = new GameState();
         this.chessboard = new Board();
         this.setPlayer(player);
-        this.gameLogic = new GameLogic(this.chessboard);
+        this.gameLogic = new GameLogic(this, this.chessboard, this.player);
         this.isSquareClicked = false;
 
         this.gameState.setFenString(fen);
@@ -188,6 +188,8 @@ class Game {
         this.gameLogic.determineAttackedSquares();
         this.gameLogic.clearAttackedSquares();
     }
+
+    bIsDemonstrationMode() { return this.getCurrentPlayer().getColour() === "Demo"; }
 
     determinePlayerColour(player: string) { return player === "Player 1" ? "White" : "Black"; }
 

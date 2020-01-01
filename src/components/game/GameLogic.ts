@@ -2,13 +2,19 @@ import { IPiece } from './pieces/types';
 
 import Board from './Board';
 import Square from './Square';
+import Player from './Player';
+import Game from './Game';
 
 class GameLogic {
     private chessboard: Board;
+    private player: Player;
     private attackedSquares!: Array<Square>;
+    private game: Game;
 
-    constructor(chessboard: Board) {
+    constructor(game: Game, chessboard: Board, player: Player) {
+        this.game = game;
         this.chessboard = chessboard;
+        this.player = player;
         this.attackedSquares = [];
     }
 
@@ -22,6 +28,10 @@ class GameLogic {
     }
 
     squareContainsAttack(pos: string, piece: IPiece) {
+        if (this.player.isInCheck()) {
+            this.checkDeterminant();
+        }
+
         if (this.bIsKnight(piece)) {
             this.knightSpecialCases(pos, piece);
             return;
@@ -35,10 +45,6 @@ class GameLogic {
         else if (this.bIsPawn(piece)) {
             this.enPassantDeterminant(piece);
         }
-    }
-
-    specialMoveCases(pos: string, piece: IPiece) {
-        
     }
 
     generalMoveCases(pos: string, piece: IPiece) {
@@ -108,7 +114,10 @@ class GameLogic {
             }
             else {
                 if (this.bKingInCheck(piece, attackedSquare)) {
-                     
+                    this.player.setCheckStatus(true);
+                    if (this.game.bIsDemonstrationMode()) {
+                        this.demonstrationModeCheckHandler();
+                    }
                 }
             }
             return this.bAttackOccupiedSquares(piece, attackedSquare);
@@ -154,7 +163,16 @@ class GameLogic {
         const attackedPiece = squaresArray[attackedSquare].getPiece();
 
         if (piece.getColour() !== attackedPiece.getColour()) {
-            return this.bKingIsAttacked(attackedPiece.getType(), attackedSquare);
+            return this.bKingIsAttacked(attackedPiece.getType());
+        }
+    }
+
+    checkDeterminant() {
+        if (this.game.bIsDemonstrationMode()) {
+            
+        }
+        else {
+
         }
     }
 
@@ -163,7 +181,7 @@ class GameLogic {
         
     }
 
-    enPassantDeterminant(piece: IPiece) {console.log(piece.getMoveCount())
+    enPassantDeterminant(piece: IPiece) {
         if (piece.getMoveCount() === 0) { return; }
 
     }
@@ -173,6 +191,12 @@ class GameLogic {
 
         squaresArray[attackedSquare].setSquareAttacked(true);
         squaresArray[attackedSquare].setAttackingPiece(piece);
+    }
+
+    demonstrationModeCheckHandler() {
+        (this.game.getGameState().getCurrentTurn() === "Black" ? 
+            this.player.setCheckColour("Black") :
+                this.player.setCheckColour("White"));
     }
 
     determineAttackedSquares() {
@@ -188,8 +212,6 @@ class GameLogic {
         }
     }
 
-    bKingIsAttacked(piece: string, attackedSquare: number) { return piece === 'K' || piece === 'k'; }
-
     bPawnCanAttack(square: Square, piece: IPiece) { return (square.getPosition()[0] !== piece.getPosition()[0]); }
 
     bPawnPathBlocked(square: Square, piece: IPiece) { return (piece.getPosition()[0] === square.getPosition()[0]); }
@@ -201,6 +223,8 @@ class GameLogic {
     bIsRook(piece: IPiece) { return piece.getType() === 'R' || piece.getType() === 'r'; }
 
     bIsKing(piece: IPiece) { return piece.getType() === 'K' || piece.getType() === 'k'; }
+
+    bKingIsAttacked(piece: string) { return piece === 'K' || piece === 'k'; }
 
     clearAttackedSquares() { this.attackedSquares = []; }
  
