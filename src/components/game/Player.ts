@@ -16,6 +16,8 @@ class Player {
 
     setDemonstrationMode() { this.isDemo = true; }
 
+    setColour(colour: string) { this.colour = colour; }
+
     setCheckStatus(check: boolean) { this.inCheck = check; }
 
 }

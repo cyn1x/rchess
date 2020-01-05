@@ -35,8 +35,10 @@ class Game {
         this.player = new Player(player);
     }
 
-    switchPlayerDemonstrationMode() {
-        this.player.getColour() === "White" ? this.player = new Player("Black") : this.player = new Player("White");
+    switchPlayerForDemonstrationMode() {
+        this.player.getColour() === "White" ? this.player.setColour("Black") : this.player.setColour("White");
+        this.player.setDemonstrationMode();
+        this.player.setCheckStatus(false);
     }
     
     initialise(cw: number, ch: number) {
@@ -194,16 +196,15 @@ class Game {
     }
 
     postMoveCalculations() {
-        const chessboard = this.chessboard.getSquaresArray();
-
-        this.gameLogic.determineAttackedSquares(chessboard);
-        this.gameLogic.clearAttackedSquares();
-
         if (this.player.isDemonstrationMode()) {
-            this.switchPlayerDemonstrationMode();
-            this.player.setDemonstrationMode();
+            this.switchPlayerForDemonstrationMode();
         }
+
+        this.gameLogic.determineAttackedSquares();
+        this.gameLogic.clearAttackedSquares();
     }
+
+    bIsDemonstrationMode() { return this.player.isDemonstrationMode(); }
 
     checkRequestedMove(squares: Square) { return this.gameLogic.checkRequestedMove(squares); }
 

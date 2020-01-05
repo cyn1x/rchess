@@ -28,6 +28,7 @@ class GameLogic {
     }
 
     squareContainsAttack(pos: string, piece: IPiece) {
+        
         if (this.bIsKnight(piece)) {
             this.knightSpecialCases(pos, piece);
             return;
@@ -66,7 +67,7 @@ class GameLogic {
 
             currentMove = 1;
             while (currentMove <= totalMoveCount) {
-                if (moveDirections[cardinalDirection]()) { return; }
+                if (!moveDirections[cardinalDirection]()) { return; }
                 currentMove++;
             }
         })
@@ -91,7 +92,7 @@ class GameLogic {
         }
 
         pieceMoves.forEach( (totalMoveCount: number, cardinalDirection: string) => {
-            if (moveDirections[cardinalDirection]()) { return; }
+            if (!moveDirections[cardinalDirection]()) { return; }
         })
     }
 
@@ -122,9 +123,26 @@ class GameLogic {
     bAttackUnoccupiedSquares(piece: IPiece, attackedSquareIndex: number) {
         const squaresArray = this.chessboard.getSquaresArray();
 
-        if (this.bIsPawn(piece) && this.bPawnCanAttack(squaresArray[attackedSquareIndex], piece)) {
+        if (this.bIsPawn(piece) && !this.bPawnCanAttack(squaresArray[attackedSquareIndex], piece)) {
             this.setSquareAttack(attackedSquareIndex, piece);
-            return true;
+            return false;
+        }
+        else { this.setSquareAttack(attackedSquareIndex, piece); }
+
+        this.attackedSquares.push(squaresArray[attackedSquareIndex]);
+        return true;
+    }
+
+    bAttackOccupiedSquares(piece: IPiece, attackedSquareIndex: number) {
+        const squaresArray = this.chessboard.getSquaresArray();
+
+        if (piece.getColour() === squaresArray[attackedSquareIndex].getPiece().getColour()) {
+            return false;
+        }
+        if (this.bIsPawn(piece)) {
+            if (this.bPawnCanAttack(squaresArray[attackedSquareIndex], piece)) {
+                return true;
+            }
         }
         else { this.setSquareAttack(attackedSquareIndex, piece); }
 
@@ -132,26 +150,8 @@ class GameLogic {
         return false;
     }
 
-    bAttackOccupiedSquares(piece: IPiece, attackedSquareIndex: number) {
-        const squaresArray = this.chessboard.getSquaresArray();
-
-        if (piece.getColour() === squaresArray[attackedSquareIndex].getPiece().getColour()) {
-            return true;
-        }
-        if (this.bIsPawn(piece)) {
-            return this.bPawnPathBlocked(squaresArray[attackedSquareIndex], piece);
-        }
-        else {
-            this.setSquareAttack(attackedSquareIndex, piece);
-        }
-        this.attackedSquares.push(squaresArray[attackedSquareIndex]);
-        return true;
-    }
-
     bKingInCheck(piece: IPiece, attackedPiece: IPiece) {
-        if (this.bIsKing(attackedPiece)) {
-            return (piece.getColour() !== attackedPiece.getColour());
-        }
+        return (piece.getColour() !== attackedPiece.getColour() && this.player.getColour() === attackedPiece.getColour());
     }
 
     setSquareAttack(attackedSquare: number, piece: IPiece) {
@@ -161,28 +161,21 @@ class GameLogic {
         squaresArray[attackedSquare].setAttackingPiece(piece);
     }
 
-    determineAttackedSquares(chessboard: Array<Square>) {
-        for (let i = 0; i < chessboard.length; i++) {
-            chessboard[i].setSquareAttacked(false);
-            chessboard[i].clearAttackingPieces();
+    determineAttackedSquares() {
+        const squaresArray = this.chessboard.getSquaresArray();
+
+        for (let i = 0; i < squaresArray.length; i++) {
+            squaresArray[i].setSquareAttacked(false);
+            squaresArray[i].clearAttackingPieces();
         }
-        for (let i = 0; i < chessboard.length; i++) {
-            if (chessboard[i].getPiece()) {
-                this.squareContainsAttack(chessboard[i].getPosition(), chessboard[i].getPiece());
+        for (let i = 0; i < squaresArray.length; i++) {
+            if (squaresArray[i].getPiece()) {
+                this.squareContainsAttack(squaresArray[i].getPosition(), squaresArray[i].getPiece());
             }
         }
     }
 
     verifyMoveState(attackedSquare: Square) {
-        const files = this.chessboard.getFiles();
-        const file = files.indexOf(attackedSquare.getPosition()[0]);
-        const rank = Number(attackedSquare.getPosition()[1]);
-
-        const squaresArray = this.chessboard.getSquaresArray();
-        const boardLength = squaresArray.length / 8;
-        const attackedSquareIndex = (boardLength - rank) * boardLength + file;
-        const activeSquare = this.chessboard.getActiveSquare()
-
         
     }
 
@@ -213,9 +206,7 @@ class GameLogic {
 
     bIsKing(piece: IPiece) { return piece.getType() === 'K' || piece.getType() === 'k'; }
 
-    bPawnCanAttack(square: Square, piece: IPiece) { return (square.getPosition()[0] !== piece.getPosition()[0]); }
-
-    bPawnPathBlocked(square: Square, piece: IPiece) { return (piece.getPosition()[0] === square.getPosition()[0]); }
+    bPawnCanAttack(square: Square, piece: IPiece) { return (square.getPosition()[0] === piece.getPosition()[0]); }
 
     clearAttackedSquares() { this.attackedSquares = []; }
  
