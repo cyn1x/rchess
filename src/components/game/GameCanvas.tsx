@@ -163,7 +163,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     interceptClick(event: any) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour() || this.game.bIsDemonstrationMode()) {
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
             this.handleClick(event);
         }
     }
@@ -200,7 +200,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
                     if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
                         this.activateSquare(squaresArray[i])
                     }
-                    if (this.game.bIsDemonstrationMode() && squaresArray[i].getPiece().getColour() === this.game.getGameState().getCurrentTurn()) {
+                    if (squaresArray[i].getPiece().getColour() === this.game.getGameState().getCurrentTurn()) {
                         this.activateSquare(squaresArray[i])
                     }
                 }

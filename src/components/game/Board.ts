@@ -36,8 +36,6 @@ class Board {
 
     getActiveSquare() { return this.activeSquare; }
 
-    getActivePiece() { return this.activePiece; }
-
     setSquaresArray(squares: Array<Square>) { this.squares = squares }
 
     setPiecePositionsArray(pieces: Array<string>) { this.piecePositionsArray = pieces; }
@@ -45,8 +43,6 @@ class Board {
     setPieceObjectArray(piece: IPiece) { this.piecesArray.push(piece); }
 
     setActiveSquare(squarePos: Square) { this.activeSquare = squarePos; }
-
-    setActivePiece(piece: IPiece) { this.activePiece = piece; }
 
 }
 

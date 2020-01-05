@@ -1,7 +1,7 @@
 class Player {
     private colour: string;
     private inCheck: boolean;
-    private colourInCheck!: string;
+    private isDemo!: boolean;
 
     constructor(colour: string) {
         this.colour = colour;
@@ -10,13 +10,13 @@ class Player {
 
     isInCheck() { return this.inCheck; }
 
+    isDemonstrationMode() { return this.isDemo; }
+
     getColour() { return this.colour; }
 
-    getCheckColour() { return this.colourInCheck; }
+    setDemonstrationMode() { this.isDemo = true; }
 
     setCheckStatus(check: boolean) { this.inCheck = check; }
-
-    setCheckColour(colour: string) { this.colourInCheck = colour; }
 
 }
 

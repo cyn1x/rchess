@@ -73,7 +73,7 @@ class Square {
 
     setColour(colour: string) { this.colour = colour; }
 
-    setEnPassant(enPassant: string) { this.enPassant = enPassant }
+    setEnPassant(enPassant: string) { this.enPassant = enPassant; }
 
 }
 

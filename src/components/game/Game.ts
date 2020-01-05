@@ -26,8 +26,17 @@ class Game {
     }
 
     setPlayer(player: string) {
-        if (player === "Demo") { this.player = new Player("Demo"); }
-        else { this.player = new Player(this.determinePlayerColour(player)); }
+        if (player === "Demo") {
+            this.player = new Player("White");
+            this.player.setDemonstrationMode();
+            return;
+        }
+        
+        this.player = new Player(player);
+    }
+
+    switchPlayerDemonstrationMode() {
+        this.player.getColour() === "White" ? this.player = new Player("Black") : this.player = new Player("White");
     }
     
     initialise(cw: number, ch: number) {
@@ -185,13 +194,16 @@ class Game {
     }
 
     postMoveCalculations() {
-        this.gameLogic.determineAttackedSquares();
+        const chessboard = this.chessboard.getSquaresArray();
+
+        this.gameLogic.determineAttackedSquares(chessboard);
         this.gameLogic.clearAttackedSquares();
+
+        if (this.player.isDemonstrationMode()) {
+            this.switchPlayerDemonstrationMode();
+            this.player.setDemonstrationMode();
+        }
     }
-
-    bIsDemonstrationMode() { return this.getCurrentPlayer().getColour() === "Demo"; }
-
-    determinePlayerColour(player: string) { return player === "Player 1" ? "White" : "Black"; }
 
     checkRequestedMove(squares: Square) { return this.gameLogic.checkRequestedMove(squares); }
 
