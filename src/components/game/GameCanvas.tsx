@@ -198,10 +198,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
                 }
                 if (squaresArray[i].bSquareContainsPiece()) {
                     if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
-                        this.activateSquare(squaresArray[i])
-                    }
-                    if (squaresArray[i].getPiece().getColour() === this.game.getGameState().getCurrentTurn()) {
-                        this.activateSquare(squaresArray[i])
+                        this.activateSquare(squaresArray[i]);
                     }
                 }
             }
