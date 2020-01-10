@@ -18,7 +18,7 @@ class Game {
         this.gameState = new GameState();
         this.chessboard = new Board();
         this.setPlayer(player);
-        this.gameLogic = new GameLogic(this, this.chessboard, this.player);
+        this.gameLogic = new GameLogic(this.chessboard, this.player);
         this.isSquareClicked = false;
 
         this.gameState.setFenString(fen);
@@ -32,7 +32,7 @@ class Game {
             return;
         }
         
-        this.player = new Player(player);
+        player === "Player 1" ? this.player = new Player("White") : this.player = new Player("Black");
     }
 
     switchPlayerForDemonstrationMode() {
@@ -71,6 +71,7 @@ class Game {
                 }
             }
         }
+
     }
 
     updateSquareSizeProps(cw: number, ch: number) {
@@ -188,27 +189,29 @@ class Game {
         this.setSquareActive(false);
     }
 
-    handleOverwriteSquare(activeSquare: Square, activePiece: IPiece) {
+    handleOverwriteSquare(activeSquare: Square, activePiece: IPiece) {        
         this.chessboard.getActiveSquare().removePiece();
         this.chessboard.setActiveSquare(activeSquare);
         this.incrementMoveCount(activePiece);
         activeSquare.setPiece(activePiece);
     }
-
+    
     postMoveCalculations() {
-        if (this.player.isDemonstrationMode()) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        if (this.player.bIsDemonstrationMode() && this.player.bHasCompletedTurn()) {
             this.switchPlayerForDemonstrationMode();
         }
 
         this.gameLogic.determineAttackedSquares();
         this.gameLogic.clearAttackedSquares();
+        this.setPlayerCompletedTurn(false);
     }
 
-    bIsDemonstrationMode() { return this.player.isDemonstrationMode(); }
+    bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }
 
     checkRequestedMove(squares: Square) { return this.gameLogic.checkRequestedMove(squares); }
 
-    checkValidMoves(pos: string, piece: IPiece) { return this.gameLogic.squareContainsAttack(pos, piece); }
+    checkValidMoves(pos: string, piece: IPiece) { this.gameLogic.squareContainsAttack(pos, piece); }
 
     incrementMoveCount(piece: IPiece) { piece.incrementMoveCount(); }
 
@@ -229,6 +232,8 @@ class Game {
     setChessboard(board: Board) { this.chessboard = board; }
 
     setSquareActive(active: boolean) { this.isSquareClicked = active; }
+
+    setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
 
 }
 
