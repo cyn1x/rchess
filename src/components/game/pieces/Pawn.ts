@@ -1,15 +1,17 @@
-import { IPiece } from './types';
+import { IPiece, IPawn } from './types';
 import Pieces from './Pieces';
+import Square from '../Square';
 
-class Pawn implements IPiece {
+class Pawn implements IPiece, IPawn {
     type: string;
     colour: string;
     image: string;
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
-    private firstMove!: boolean;
-    private hasUpgraded!: boolean;
+    startingSquare!: Square;
+    firstMove!: boolean;
+    hasUpgraded!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -44,6 +46,8 @@ class Pawn implements IPiece {
         this.update();
     }
 
+    bHasUpgraded() { return this.hasUpgraded; }
+
     getType() { return this.type; }
 
     getColour() { return this.colour; }
@@ -56,13 +60,15 @@ class Pawn implements IPiece {
 
     getMoveCount() { return this.moves; }
 
-    getHasUpgraded() { return this.hasUpgraded; }
+    getStartingSquare() { return this.startingSquare; }
 
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
+
+    setStartingSquare(square: Square) { this.startingSquare = square; }
 
     setHasUpgraded(upgraded: boolean) { this.hasUpgraded = upgraded; }
 

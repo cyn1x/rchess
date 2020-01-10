@@ -1,14 +1,16 @@
-import { IPiece } from './types';
+import { IPiece, IRook } from './types';
 import Pieces from './Pieces';
+import Square from '../Square';
 
-class Rook implements IPiece {
+class Rook implements IPiece, IRook {
     type: string;
     colour: string;
     image: string;
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
-    private canCastle!: boolean;
+    startingSquare!: Square;
+    canCastle!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -31,6 +33,8 @@ class Rook implements IPiece {
         this.setCastledStatus(false);
     }
 
+    bCanCastle() { return this.canCastle; }
+
     getType() { return this.type; }
 
     getColour() { return this.colour; }
@@ -43,13 +47,15 @@ class Rook implements IPiece {
 
     getPosition() { return this.position; }
 
-    getCastleStatus() { return this.canCastle; }
+    getStartingSquare() { return this.startingSquare; }
 
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
+
+    setStartingSquare(square: Square) { this.startingSquare = square; }
 
     setCastledStatus(castled: boolean) { this.canCastle = castled; }
 

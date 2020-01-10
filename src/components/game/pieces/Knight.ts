@@ -1,5 +1,6 @@
 import { IPiece } from './types';
 import Pieces from './Pieces';
+import Square from '../Square';
 
 class Knight implements IPiece {
     type: string;
@@ -8,6 +9,7 @@ class Knight implements IPiece {
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
+    startingSquare!: Square;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -38,11 +40,15 @@ class Knight implements IPiece {
 
     getMoveCount() { return this.moves; }
 
+    getStartingSquare() { return this.startingSquare; }
+
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
+
+    setStartingSquare(square: Square) { this.startingSquare = square; }
 
 }
 

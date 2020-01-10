@@ -1,15 +1,17 @@
-import { IPiece } from './types';
+import { IPiece, IKing } from './types';
 import Pieces from './Pieces';
+import Square from '../Square';
 
-class King implements IPiece {
+class King implements IPiece, IKing {
     type: string;
     colour: string;
     image: string;
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
-    private inCheck!: boolean;
-    private canCastle!: boolean;
+    startingSquare!: Square;
+    inCheck!: boolean;
+    canCastle!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -33,6 +35,10 @@ class King implements IPiece {
         this.setCastledStatus(false);
     }
 
+    bIsInCheck() { return this.inCheck; }
+
+    bCanCastle() { return this.canCastle; }
+
     getType() { return this.type; }
 
     getColour() { return this.colour; }
@@ -45,15 +51,15 @@ class King implements IPiece {
 
     getMoveCount() { return this.moves; }
 
-    getCheckStatus() { return this.inCheck; }
-
-    getCastleStatus() { return this.canCastle; }
+    getStartingSquare() { return this.startingSquare; }
 
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
+
+    setStartingSquare(square: Square) { this.startingSquare = square; }
 
     setCheckStatus(check: boolean) { this.inCheck = check; }
 
