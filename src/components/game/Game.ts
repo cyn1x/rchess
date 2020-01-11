@@ -108,6 +108,7 @@ class Game {
             startingFen.split("").forEach( (pieceToPlace: string) => {
                 if (pieceRequired === pieceToPlace) {
                     const newPiece = (piecesFactory.typeOfPiece(pieceToPlace));
+                    newPiece.setStartingSquare(squaresArray[index]);
                     squaresArray[index].setPiece(newPiece);
                 }
             })

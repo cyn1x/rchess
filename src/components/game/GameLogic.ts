@@ -1,8 +1,11 @@
-import { IPiece } from './pieces/types';
+import { IPiece, IKing, IRook, IPawn } from './pieces/types';
 
 import Board from './Board';
 import Square from './Square';
 import Player from './Player';
+import King from './pieces/King';
+import Rook from './pieces/Rook';
+import Pawn from './pieces/Pawn';
 
 class GameLogic {
     private chessboard: Board;
@@ -33,7 +36,7 @@ class GameLogic {
         }
         
         this.determineMoveCase(pos, piece);
-    
+        
         if (this.bIsKing(piece)) {
             this.castlingDeterminant(piece);
         }
@@ -238,14 +241,94 @@ class GameLogic {
         }
     }
 
-    castlingDeterminant(piece: IPiece) {
-        if (piece.getMoveCount() > 0) { return; }
-        
-    }
-
     enPassantDeterminant(piece: IPiece) {
         if (piece.getMoveCount() === 0) { return; }
 
+    }
+
+    castlingDeterminant(piece: IPiece) {
+        if (piece instanceof King) {
+            if (!piece.bCanCastle() || piece.bIsInCheck()) { return; }
+            else if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
+            
+            this.westCastlingDeterminant(piece.getPosition());
+            this.eastCastlingDeterminant(piece.getPosition());
+        }
+    }
+
+    westCastlingDeterminant(pos: string) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        
+        let file = files.indexOf(pos[0]);
+        const rank = Number(pos[1]);
+        const firstSquareInRow = 0;
+
+        while (file != firstSquareInRow) {
+            file = file - 1;
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
+            if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
+        }
+        file = files.indexOf(pos[0]) - 2;
+        const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        this.attackedSquares.push(squaresArray[targetSquareIndex]);
+    }
+
+    eastCastlingDeterminant(pos: string) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        
+        let file = files.indexOf(pos[0]);
+        const rank = Number(pos[1]);
+        const lastSquareInRow = 7;
+
+        while (file != lastSquareInRow) {
+            file = file + 1;
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
+            if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
+        }
+        file = files.indexOf(pos[0]) + 2;
+        const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        this.attackedSquares.push(squaresArray[targetSquareIndex]);
+    }
+
+    bKingPassesThroughAttackedSquare(targetSquareIndex: number, file: number) {
+        const squaresArray = this.chessboard.getSquaresArray();
+
+        if (file === 3 || file === 2 || file === 5 || file === 6) {
+            const attackingPieces = squaresArray[targetSquareIndex].getAttackingPiece();
+            for (let i = 0; i < attackingPieces.length; i++) {
+                if (attackingPieces[i].getColour() !== this.player.getColour()) { return true; }
+            }
+        }
+    }
+
+    bKingCanCastle(targetSquareIndex: number, file: number) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const firstSquareInRow = 0;
+        const lastSquareInRow = 7;
+
+        if ((file === firstSquareInRow || file === lastSquareInRow)) {
+            return (squaresArray[targetSquareIndex].bSquareContainsPiece() && this.bRookCanCastle(squaresArray, targetSquareIndex));
+        }
+        else {
+            return (!this.bCastlingMoveIsObstructed(squaresArray, targetSquareIndex));
+        }
+    }
+
+    bCastlingMoveIsObstructed(squaresArray: Array<Square>, targetSquareIndex: number) {
+        return squaresArray[targetSquareIndex].bSquareContainsPiece();
+    }
+
+    bRookCanCastle(squaresArray: Array<Square>, targetSquareIndex: number) {
+        const piece = squaresArray[targetSquareIndex].getPiece();
+        if (piece instanceof Rook) {
+            return (piece.bCanCastle());
+        }
     }
 
     bKingInCheck(piece: IPiece, attackedPiece: IPiece) {
