@@ -1,4 +1,4 @@
-import { IPiece, IKing, IRook, IPawn } from './pieces/types';
+import { IPiece } from './pieces/types';
 
 import Board from './Board';
 import Square from './Square';
@@ -12,18 +12,27 @@ class GameLogic {
     private player: Player;
     private attackedSquares!: Array<Square>;
     private bVerifyingRequestedMove: boolean;
+    private bVerifyingBoardState: boolean;
 
     constructor(chessboard: Board, player: Player) {
         this.chessboard = chessboard;
         this.player = player;
         this.attackedSquares = [];
         this.bVerifyingRequestedMove = false;
+        this.bVerifyingBoardState = false;
     }
 
     checkRequestedMove(attackedSquare: Square) {
         for (let i = 0; i < this.attackedSquares.length; i++) {
             if (this.attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
+                const activePiece = this.chessboard.getActiveSquare().getPiece();
+
                 this.verifyRequestedMove(attackedSquare);
+
+                if (!this.player.bIsInCheck()) {
+                    this.enPassantOpeningDeterminant(attackedSquare);
+                }
+
                 return !this.player.bIsInCheck();
             }
         }
@@ -39,14 +48,17 @@ class GameLogic {
                     return westCastlingSquare;
                 case this.chessboard.getEastCastlingSquare():
                     return eastCastlingSquare;
-                default:
-                    return square;
             }
+        }
+        if (square.bIsEnPassantSquare()) {
+            const enPassantSquare = this.chessboard.getEnPassantSquare();
+
+            return enPassantSquare;
         }
     }
 
     squareContainsAttack(pos: string, piece: IPiece) {
-        if (this.bIsVerifyingRequestedMove()) {
+        if (this.bIsVerifyingRequestedMove() || this.bIsVerifyingNewBoardState()) {
             this.determineMoveCase(pos, piece);
             return;
         }
@@ -57,7 +69,7 @@ class GameLogic {
             this.castlingDeterminant(piece);
         }
         else if (this.bIsPawn(piece)) {
-            this.enPassantDeterminant(piece);
+            this.enPassantDeteriminant(piece);
         }
     }
 
@@ -207,6 +219,8 @@ class GameLogic {
 
     determineAttackedSquares() {
         const squaresArray = this.chessboard.getSquaresArray();
+        
+        this.setVerifyingNewBoardState(true);
 
         for (let i = 0; i < squaresArray.length; i++) {
             squaresArray[i].setSquareAttacked(false);
@@ -217,6 +231,8 @@ class GameLogic {
                 this.squareContainsAttack(squaresArray[i].getPosition(), squaresArray[i].getPiece());
             }
         }
+
+        this.setVerifyingNewBoardState(false);
     }
 
     verifyRequestedMove(attackedSquare: Square) {
@@ -257,15 +273,44 @@ class GameLogic {
         }
     }
 
-    enPassantDeterminant(piece: IPiece) {
-        if (piece.getMoveCount() === 0) { return; }
+    enPassantOpeningDeterminant(attackedSquare: Square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
 
+        if (activePiece instanceof Pawn) {
+            if (activePiece.getMoveCount() !== 0) { return; }
+
+            const files = this.chessboard.getFiles();
+            const boardLength = squaresArray.length / 8;
+            
+            const pos = attackedSquare.getPosition();
+            const file = files.indexOf(pos[0]);
+            const rank = Number(pos[1]) - 1;
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+
+            const oldPos = activeSquare.getPosition();
+            const oldFile = files.indexOf(oldPos[0])
+            const oldRank = Number(oldPos[1]) + 1;
+            const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
+
+            if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
+                squaresArray[targetSquareIndex].setEnPassantSquare(true);
+                this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
+            }
+        }
+    }
+
+    enPassantDeteriminant(piece: IPiece) {
+        if (piece instanceof Pawn) {
+
+        }
     }
 
     castlingDeterminant(piece: IPiece) {
         if (piece instanceof King) {
             if (!piece.bCanCastle() || piece.bIsInCheck()) { return; }
-            else if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
+            if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
             
             this.westCastlingDeterminant(piece.getPosition());
             this.eastCastlingDeterminant(piece.getPosition());
@@ -287,6 +332,7 @@ class GameLogic {
             if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
             if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
         }
+
         file = files.indexOf(pos[0]) - 2;
         const targetSquareIndex = (boardLength - rank) * boardLength + file;
         squaresArray[targetSquareIndex].setCastlingSquare(true);
@@ -309,6 +355,7 @@ class GameLogic {
             if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
             if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
         }
+
         file = files.indexOf(pos[0]) + 2;
         const targetSquareIndex = (boardLength - rank) * boardLength + file;
         squaresArray[targetSquareIndex].setCastlingSquare(true);
@@ -358,6 +405,8 @@ class GameLogic {
 
     bIsVerifyingRequestedMove() { return this.bVerifyingRequestedMove; }
 
+    bIsVerifyingNewBoardState() { return this.bVerifyingBoardState; }
+
     bIsPawn(piece: IPiece) { return piece.getType() === 'P' || piece.getType() === 'p'; }
 
     bIsKnight(piece: IPiece) { return piece.getType() === 'N' || piece.getType() === 'n'; }
@@ -379,6 +428,8 @@ class GameLogic {
     setAttackedSquares(attacked: Array<Square>) { this.attackedSquares = attacked; }
 
     setVerifyingMove(verifying: boolean) { this.bVerifyingRequestedMove = verifying; }
+
+    setVerifyingNewBoardState(verifying: boolean) { this.bVerifyingBoardState = verifying; }
     
 }
 

@@ -12,6 +12,7 @@ class Board {
     private activeSquare!: Square;
     private westCastlingSquare!: Square;
     private eastCastlingSquare!: Square;
+    private enPassantSquare!: Square;
 
     constructor() {
         this.initialise();
@@ -41,6 +42,8 @@ class Board {
 
     getEastCastlingSquare() { return this.eastCastlingSquare; }
 
+    getEnPassantSquare() { return this.enPassantSquare; }
+
     setSquaresArray(squares: Array<Square>) { this.squares = squares }
 
     setPiecePositionsArray(pieces: Array<string>) { this.piecePositionsArray = pieces; }
@@ -52,6 +55,8 @@ class Board {
     setWestCastlingSquare(square: Square) { this.westCastlingSquare = square; }
 
     setEastCastlingSquare(square: Square) { this.eastCastlingSquare = square; }
+
+    setEnPassantSquare(square: Square) { this.enPassantSquare = square; }
 
 }
 

@@ -13,7 +13,7 @@ class Game {
     private chessboard: Board;
     private isSquareClicked: boolean;
     private player!: Player;
-    private specialMoveInProgress!: boolean;
+    private specialMoveInProgress: boolean;
     private specialMoveSquare!: Square;
 
     constructor(player: string, fen: string, turn: string) {
@@ -201,7 +201,6 @@ class Game {
     }
     
     postMoveCalculations() {
-        const squaresArray = this.chessboard.getSquaresArray();
         if (this.player.bIsDemonstrationMode() && this.player.bHasCompletedTurn()) {
             this.switchPlayerForDemonstrationMode();
         }
@@ -218,6 +217,9 @@ class Game {
                 this.setSpecialMoveInProgress(true);
                 return;
             }
+        }
+        if (this.gameLogic.bIsPawn(activePiece)) {
+            
         }
         this.setSpecialMoveInProgress(false);
     }
@@ -307,11 +309,7 @@ class Game {
 
     getSpecialMoveSquare() { return this.specialMoveSquare; }
 
-    setChessboard(board: Board) { this.chessboard = board; }
-
     setSquareActive(active: boolean) { this.isSquareClicked = active; }
-
-    setSpecialSquareActive(active: boolean) {  }
 
     setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
 

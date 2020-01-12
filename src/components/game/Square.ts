@@ -78,9 +78,9 @@ class Square {
 
     setColour(colour: string) { this.colour = colour; }
 
-    setEnPassantSquare(isEnPassantSquare: boolean) { this.isEnPassantSquare = isEnPassantSquare; }
-
     setCastlingSquare(isCastlingSquare: boolean) { this.isCastlingSquare = isCastlingSquare; }
+
+    setEnPassantSquare(isEnPassantSquare: boolean) { this.isEnPassantSquare = isEnPassantSquare; }
 
 }
 
