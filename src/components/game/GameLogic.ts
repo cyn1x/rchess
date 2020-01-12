@@ -29,6 +29,22 @@ class GameLogic {
         }
     }
 
+    checkSpecialMove(square: Square) {
+        if (square.bIsCastlingSquare()) {
+            const westCastlingSquare = this.chessboard.getWestCastlingSquare();
+            const eastCastlingSquare = this.chessboard.getEastCastlingSquare();
+
+            switch(square) {
+                case this.chessboard.getWestCastlingSquare():
+                    return westCastlingSquare;
+                case this.chessboard.getEastCastlingSquare():
+                    return eastCastlingSquare;
+                default:
+                    return square;
+            }
+        }
+    }
+
     squareContainsAttack(pos: string, piece: IPiece) {
         if (this.bIsVerifyingRequestedMove()) {
             this.determineMoveCase(pos, piece);
@@ -273,6 +289,8 @@ class GameLogic {
         }
         file = files.indexOf(pos[0]) - 2;
         const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        squaresArray[targetSquareIndex].setCastlingSquare(true);
+        this.chessboard.setWestCastlingSquare(squaresArray[targetSquareIndex]);
         this.attackedSquares.push(squaresArray[targetSquareIndex]);
     }
 
@@ -293,6 +311,8 @@ class GameLogic {
         }
         file = files.indexOf(pos[0]) + 2;
         const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        squaresArray[targetSquareIndex].setCastlingSquare(true);
+        this.chessboard.setEastCastlingSquare(squaresArray[targetSquareIndex]);
         this.attackedSquares.push(squaresArray[targetSquareIndex]);
     }
 
