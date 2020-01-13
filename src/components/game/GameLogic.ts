@@ -25,7 +25,6 @@ class GameLogic {
     checkRequestedMove(attackedSquare: Square) {
         for (let i = 0; i < this.attackedSquares.length; i++) {
             if (this.attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
-                const activePiece = this.chessboard.getActiveSquare().getPiece();
 
                 this.verifyRequestedMove(attackedSquare);
 
@@ -69,7 +68,7 @@ class GameLogic {
             this.castlingDeterminant(piece);
         }
         else if (this.bIsPawn(piece)) {
-            this.enPassantDeteriminant(piece);
+            this.enPassantCaptureDeteriminant(piece);
         }
     }
 
@@ -301,7 +300,7 @@ class GameLogic {
         }
     }
 
-    enPassantDeteriminant(piece: IPiece) {
+    enPassantCaptureDeteriminant(piece: IPiece) {
         if (piece instanceof Pawn) {
 
         }
@@ -309,9 +308,10 @@ class GameLogic {
 
     castlingDeterminant(piece: IPiece) {
         if (piece instanceof King) {
+
             if (!piece.bCanCastle() || piece.bIsInCheck()) { return; }
             if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
-            
+
             this.westCastlingDeterminant(piece.getPosition());
             this.eastCastlingDeterminant(piece.getPosition());
         }
@@ -332,7 +332,7 @@ class GameLogic {
             if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
             if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
         }
-
+        
         file = files.indexOf(pos[0]) - 2;
         const targetSquareIndex = (boardLength - rank) * boardLength + file;
         squaresArray[targetSquareIndex].setCastlingSquare(true);
@@ -363,13 +363,57 @@ class GameLogic {
         this.attackedSquares.push(squaresArray[targetSquareIndex]);
     }
 
+    castleRookQueenSide(square: Square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const boardLength = squaresArray.length / 8;
+        const files = this.chessboard.getFiles();
+
+        const pos = square.getPosition();
+        const file = files.indexOf(pos[0]) - 2;
+        const rank = Number(pos[1]);
+        const queenSideRookSquareIndex = (boardLength - rank) * boardLength + file;
+
+        const newPos = square.getPosition();
+        const newFile = files.indexOf(newPos[0]) + 1;
+        const newRank = Number(newPos[1]);
+        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
+
+        squaresArray[newRookPosSquareIndex].setPiece(squaresArray[queenSideRookSquareIndex].getPiece());
+        squaresArray[queenSideRookSquareIndex].removePiece();
+
+        return queenSideRookSquareIndex;
+    }
+
+    castleRookKingSide(square: Square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const boardLength = squaresArray.length / 8;
+        const files = this.chessboard.getFiles();
+
+        const pos = square.getPosition();
+        const file = files.indexOf(pos[0]) + 1;
+        const rank = Number(pos[1]);
+        const kingSideRookSquareIndex = (boardLength - rank) * boardLength + file;
+
+        const newPos = square.getPosition();
+        const newFile = files.indexOf(newPos[0]) - 1;
+        const newRank = Number(newPos[1]);
+        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
+
+        squaresArray[newRookPosSquareIndex].setPiece(squaresArray[kingSideRookSquareIndex].getPiece());
+        squaresArray[kingSideRookSquareIndex].removePiece();
+
+        return kingSideRookSquareIndex;
+    }
+
     bKingPassesThroughAttackedSquare(targetSquareIndex: number, file: number) {
         const squaresArray = this.chessboard.getSquaresArray();
 
         if (file === 3 || file === 2 || file === 5 || file === 6) {
             const attackingPieces = squaresArray[targetSquareIndex].getAttackingPiece();
+            const activePiece = this.chessboard.getActiveSquare().getPiece();
+
             for (let i = 0; i < attackingPieces.length; i++) {
-                if (attackingPieces[i].getColour() !== this.player.getColour()) { return true; }
+                if (attackingPieces[i].getColour() !== activePiece.getColour()) { return true; }
             }
         }
     }

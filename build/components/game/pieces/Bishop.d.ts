@@ -1,22 +1,26 @@
 import { IPiece } from './types';
-declare class Rook implements IPiece {
+import Square from '../Square';
+declare class Bishop implements IPiece {
     type: string;
     colour: string;
     image: string;
     position: string;
     moves: number;
     moveDirections: Map<string, number>;
+    startingSquare: Square;
     constructor(type: string, colour: string, image: string);
     initialise(): void;
-    incrementMoveNumber(move: number): void;
+    incrementMoveCount(): void;
     getType(): string;
     getColour(): string;
     getImage(): string;
     getMoveDirections(): Map<string, number>;
-    getMoveNumber(): number;
     getPosition(): string;
+    getMoveCount(): number;
+    getStartingSquare(): Square;
     setImage(image: string): void;
     setMoveDirections(directions: Map<string, number>): void;
     setPosition(pos: string): void;
+    setStartingSquare(square: Square): void;
 }
-export default Rook;
+export default Bishop;

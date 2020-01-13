@@ -1,22 +1,31 @@
-import { IPiece } from './types';
-declare class Knight implements IPiece {
+import { IPiece, IPawn } from './types';
+import Square from '../Square';
+declare class Pawn implements IPiece, IPawn {
     type: string;
     colour: string;
     image: string;
     position: string;
     moves: number;
     moveDirections: Map<string, number>;
+    startingSquare: Square;
+    firstMove: boolean;
+    hasUpgraded: boolean;
     constructor(type: string, colour: string, image: string);
     initialise(): void;
-    incrementMoveNumber(move: number): void;
+    update(): void;
+    incrementMoveCount(): void;
+    bHasUpgraded(): boolean;
     getType(): string;
     getColour(): string;
     getImage(): string;
     getMoveDirections(): Map<string, number>;
     getPosition(): string;
-    getMoveNumber(): number;
+    getMoveCount(): number;
+    getStartingSquare(): Square;
     setImage(image: string): void;
     setMoveDirections(directions: Map<string, number>): void;
     setPosition(pos: string): void;
+    setStartingSquare(square: Square): void;
+    setHasUpgraded(upgraded: boolean): void;
 }
-export default Knight;
+export default Pawn;

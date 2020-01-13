@@ -5,7 +5,9 @@ declare class Board {
     private piecePositionsArray;
     private piecesArray;
     private activeSquare;
-    private activePiece;
+    private westCastlingSquare;
+    private eastCastlingSquare;
+    private enPassantSquare;
     constructor();
     initialise(): void;
     getFiles(): string[];
@@ -15,11 +17,15 @@ declare class Board {
     getPiecePositionsArray(): string[];
     getPieceObjectArray(): IPiece[];
     getActiveSquare(): Square;
-    getActivePiece(): IPiece;
+    getWestCastlingSquare(): Square;
+    getEastCastlingSquare(): Square;
+    getEnPassantSquare(): Square;
     setSquaresArray(squares: Array<Square>): void;
     setPiecePositionsArray(pieces: Array<string>): void;
     setPieceObjectArray(piece: IPiece): void;
-    setActiveSquare(squarePos: Square): void;
-    setActivePiece(piece: IPiece): void;
+    setActiveSquare(square: Square): void;
+    setWestCastlingSquare(square: Square): void;
+    setEastCastlingSquare(square: Square): void;
+    setEnPassantSquare(square: Square): void;
 }
 export default Board;

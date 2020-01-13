@@ -1,24 +1,29 @@
-import { IPiece } from './types';
-declare class King implements IPiece {
+import { IPiece, IRook } from './types';
+import Square from '../Square';
+declare class Rook implements IPiece, IRook {
     type: string;
     colour: string;
     image: string;
     position: string;
     moves: number;
     moveDirections: Map<string, number>;
-    private inCheck;
+    startingSquare: Square;
+    canCastle: boolean;
     constructor(type: string, colour: string, image: string);
     initialise(): void;
-    incrementMoveNumber(move: number): void;
+    incrementMoveCount(): void;
+    bCanCastle(): boolean;
     getType(): string;
     getColour(): string;
     getImage(): string;
     getMoveDirections(): Map<string, number>;
+    getMoveCount(): number;
     getPosition(): string;
-    getMoveNumber(): number;
+    getStartingSquare(): Square;
     setImage(image: string): void;
     setMoveDirections(directions: Map<string, number>): void;
     setPosition(pos: string): void;
-    setCheck(check: boolean): void;
+    setStartingSquare(square: Square): void;
+    setCastledStatus(castled: boolean): void;
 }
-export default King;
+export default Rook;

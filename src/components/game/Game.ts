@@ -140,7 +140,13 @@ class Game {
 
     fenCreator() {
         const fenPositions = this.createFenPositions();
-        const newFenString = this.appendFenState(fenPositions);
+        const fenCurrentTurn = this.createFenCurrentTurn();
+        const fenCastling = this.createFenCastlingStatus();
+        const fenEnPassant = this.createFenEnPassantSquare();
+        const fenHalfmoveClock = this.createFenHalfmoveClock();
+        const fenFullmoveClock = this.createFenFullmoveClock();
+
+        const newFenString = fenPositions + fenCurrentTurn + fenCastling + fenEnPassant + fenHalfmoveClock + fenFullmoveClock;
 
         return newFenString;
     }
@@ -174,11 +180,29 @@ class Game {
         return newFenString;
     }
 
-    appendFenState(newFenString: string) {
+    createFenCurrentTurn() {
         const currentTurn = this.gameState.getCurrentTurn();
-        currentTurn[0] === 'W' ? newFenString += " b " : newFenString += " w ";
 
-        return newFenString;
+        if (currentTurn[0] === 'W') {
+            return " b ";
+        }
+        return " w ";
+    }
+
+    createFenCastlingStatus() {
+        
+    }
+
+    createFenEnPassantSquare() {
+
+    }
+
+    createFenHalfmoveClock() {
+
+    }
+
+    createFenFullmoveClock() {
+
     }
 
     handleActivatedSquare(activeSquare: Square) {
@@ -210,10 +234,16 @@ class Game {
         this.setPlayerCompletedTurn(false);
     }
 
-    determineSpecialMoveCase(square: Square) {
+    determinePlayerSpecialMoveCase(square: Square) {
         const activePiece = this.chessboard.getActiveSquare().getPiece();
         if (this.gameLogic.bIsKing(activePiece)) {
-            if (square === this.chessboard.getEastCastlingSquare() || square === this.chessboard.getWestCastlingSquare()) {
+            if (square === this.chessboard.getWestCastlingSquare()) {
+                this.player.setHasCastledQueenSide();
+                this.setSpecialMoveInProgress(true);
+                return;
+            }
+            if (square === this.chessboard.getEastCastlingSquare()) {
+                this.player.setHasCastledKingSide();
                 this.setSpecialMoveInProgress(true);
                 return;
             }
@@ -241,44 +271,16 @@ class Game {
 
     castleRookQueenSide(square: Square) {
         const squaresArray = this.chessboard.getSquaresArray();
-        const boardLength = squaresArray.length / 8;
-        const files = this.chessboard.getFiles();
-
-        const pos = square.getPosition();
-        const file = files.indexOf(pos[0]) - 2;
-        const rank = Number(pos[1]);
-        const queenSideRookSquareIndex = (boardLength - rank) * boardLength + file;
-
-        const newPos = square.getPosition();
-        const newFile = files.indexOf(newPos[0]) + 1;
-        const newRank = Number(newPos[1]);
-        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
-
-        squaresArray[newRookPosSquareIndex].setPiece(squaresArray[queenSideRookSquareIndex].getPiece());
-        squaresArray[queenSideRookSquareIndex].removePiece();
+        const queenSideRookSquareIndex = this.gameLogic.castleRookQueenSide(square);
 
         this.setSpecialMoveSquare(squaresArray[queenSideRookSquareIndex]);
     }
 
     castleRookKingSide(square: Square) {
         const squaresArray = this.chessboard.getSquaresArray();
-        const boardLength = squaresArray.length / 8;
-        const files = this.chessboard.getFiles();
+        const kingSideRookSquareIndex = this.gameLogic.castleRookKingSide(square);
 
-        const pos = square.getPosition();
-        const file = files.indexOf(pos[0]) + 1;
-        const rank = Number(pos[1]);
-        const queenSideRookSquareIndex = (boardLength - rank) * boardLength + file;
-
-        const newPos = square.getPosition();
-        const newFile = files.indexOf(newPos[0]) - 1;
-        const newRank = Number(newPos[1]);
-        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
-
-        squaresArray[newRookPosSquareIndex].setPiece(squaresArray[queenSideRookSquareIndex].getPiece());
-        squaresArray[queenSideRookSquareIndex].removePiece();
-
-        this.setSpecialMoveSquare(squaresArray[queenSideRookSquareIndex]);
+        this.setSpecialMoveSquare(squaresArray[kingSideRookSquareIndex]);
     }
 
     bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }

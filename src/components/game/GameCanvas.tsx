@@ -59,7 +59,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             this.resetGame();
             return;
         }
-        else if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour()) {
+        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour()) {
             this.updateOpponentMove();
         }
         this.game.postMoveCalculations();
@@ -75,7 +75,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     updateOpponentMove() {
         const updatedSquare = this.game.updateGameState(this.props.game);
         if (updatedSquare) {
-            this.overwriteSquare(updatedSquare);
+            this.handleOpponentMove(updatedSquare);
         }
     }
 
@@ -201,7 +201,8 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     handlePlayerMove(attackedSquare: Square) {
         if (!this.game.bRequestedMoveIsValid(attackedSquare)) { return; }
         
-        this.game.determineSpecialMoveCase(attackedSquare)
+        this.game.determinePlayerSpecialMoveCase(attackedSquare);
+
         if (this.game.bSpecialMoveInProgress()) {
             this.handleSpecialSquare(attackedSquare);
         }
@@ -213,10 +214,24 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
     }
 
+    handleOpponentMove(updatedSquare: Square) {
+        const activeSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
+        const activePiece = this.game.getChessboard().getActiveSquare().getPiece();
+
+        this.game.checkValidMoves(activeSquarePos, activePiece);
+        this.game.determinePlayerSpecialMoveCase(updatedSquare);
+
+        if (this.game.bSpecialMoveInProgress()) {
+            this.handleSpecialSquare(updatedSquare);
+        }
+
+        this.overwriteSquare(updatedSquare);
+    }
+
     handleSpecialSquare(attackedSquare: Square) {
         this.game.checkSpecialMoves(attackedSquare);
         const oldSquare = this.game.getSpecialMoveSquare();
-
+        
         this.selectCell(oldSquare);
         this.game.setSpecialMoveInProgress(false);
         this.game.removeSpecialSquare();
@@ -261,11 +276,6 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         this.selectCell(activeSquare);
 
         this.drawImg(img, ranks.indexOf(Number(activeSquare.getPosition()[1])), files.indexOf(activeSquare.getPosition()[0]));
-    }
-
-    overWriteSpecialSquare(oldSquare: Square, newSquare: Square) {
-        
-        this.selectCell(newSquare);
     }
 
     manageValidSquares() {

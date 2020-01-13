@@ -1,9 +1,10 @@
 /// <reference types="node" />
 import React from 'react';
-import { IGameCanvas, IState } from './types';
+import { IGameCanvas } from '../types';
+import { IState } from './types';
 import { IPiece } from './pieces/types';
 import Square from './Square';
-declare class Canvas extends React.Component<IGameCanvas, IState> {
+declare class GameCanvas extends React.Component<IGameCanvas, IState> {
     private game;
     private canvas;
     private width;
@@ -12,7 +13,6 @@ declare class Canvas extends React.Component<IGameCanvas, IState> {
     constructor(props: IGameCanvas);
     initialise(): void;
     resizeCallback: () => NodeJS.Timeout;
-    isDemonstrationMode(): boolean;
     componentDidMount(): void;
     componentWillUnmount(): void;
     componentDidUpdate(): void;
@@ -25,6 +25,9 @@ declare class Canvas extends React.Component<IGameCanvas, IState> {
     drawImg(img: HTMLImageElement, file: number, rank: number): void;
     interceptClick(event: any): void;
     handleClick(event: MouseEvent): void;
+    handlePlayerMove(attackedSquare: Square): void;
+    handleOpponentMove(updatedSquare: Square): void;
+    handleSpecialSquare(attackedSquare: Square): void;
     activateSquare(activeSquare: Square): void;
     deactivateSquare(activeSquare: Square): void;
     overwriteSquare(activeSquare: Square): void;
@@ -40,4 +43,4 @@ declare class Canvas extends React.Component<IGameCanvas, IState> {
         ch: number;
     };
 }
-export default Canvas;
+export default GameCanvas;

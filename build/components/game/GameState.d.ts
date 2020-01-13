@@ -8,6 +8,7 @@ declare class GameState {
         nextMove: string;
     };
     setMoveState(prev: string, next: string): void;
+    setPlayerCheck(): void;
     getFenString(): string;
     getCurrentTurn(): string;
     setFenString(fen: string): void;

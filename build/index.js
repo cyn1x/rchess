@@ -4,16 +4,25 @@ Object.defineProperty(exports, '__esModule', { value: true });
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var React = _interopDefault(require('react'));
+var React = require('react');
+var React__default = _interopDefault(React);
 var ReactDOM = _interopDefault(require('react-dom'));
 
-const App = () => {
-    return (React.createElement(React.Fragment, null,
-        React.createElement("div", { id: "unichess-heading" },
-            React.createElement("h1", null, "Cyn1x Chess Engine")),
-        React.createElement("div", { id: "unichess-app" },
-            React.createElement("div", { id: "unichess-info" }))));
+const initialGameState = {
+    player: "Demo",
+    game: {
+        nextFenString: "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1",
+        nextPlayerTurn: "White",
+        movePieceFrom: "",
+        movePieceTo: ""
+    },
+    resetGame: false
 };
+const defaultGameState = {
+    getGameState: initialGameState,
+    setGameState: () => { }
+};
+const GameContext = React.createContext(defaultGameState);
 
 const initialState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 class GameState {
@@ -26,6 +35,7 @@ class GameState {
         this.previousActivePiecePos = prev;
         this.nextActivePiecePos = next;
     }
+    setPlayerCheck() { }
     getFenString() { return this.fenString; }
     getCurrentTurn() { return this.currentTurn; }
     setFenString(fen) {
@@ -125,6 +135,73 @@ class Pieces {
     getChessPieceImgs() { return this.pieceImages; }
 }
 
+class King {
+    constructor(type, colour, image) {
+        this.type = type;
+        this.colour = colour;
+        this.image = image;
+        this.initialise();
+    }
+    initialise() {
+        this.moves = 0;
+        this.inCheck = false;
+        this.canCastle = true;
+        const pieces = new Pieces();
+        this.setMoveDirections(pieces.kingMoves());
+    }
+    incrementMoveCount() {
+        this.moves += 1;
+        this.setCastledStatus(false);
+    }
+    bIsInCheck() { return this.inCheck; }
+    bCanCastle() { return this.canCastle; }
+    getType() { return this.type; }
+    getColour() { return this.colour; }
+    getImage() { return this.image; }
+    getMoveDirections() { return this.moveDirections; }
+    getPosition() { return this.position; }
+    getMoveCount() { return this.moves; }
+    getStartingSquare() { return this.startingSquare; }
+    setImage(image) { this.image = image; }
+    setMoveDirections(directions) { this.moveDirections = directions; }
+    setPosition(pos) { this.position = pos; }
+    setStartingSquare(square) { this.startingSquare = square; }
+    setCheckStatus(check) { this.inCheck = check; }
+    setCastledStatus(castled) { this.canCastle = castled; }
+}
+
+class Rook {
+    constructor(type, colour, image) {
+        this.type = type;
+        this.colour = colour;
+        this.image = image;
+        this.initialise();
+    }
+    initialise() {
+        this.moves = 0;
+        const pieces = new Pieces();
+        this.canCastle = true;
+        this.setMoveDirections(pieces.rookMoves());
+    }
+    incrementMoveCount() {
+        this.moves += 1;
+        this.setCastledStatus(false);
+    }
+    bCanCastle() { return this.canCastle; }
+    getType() { return this.type; }
+    getColour() { return this.colour; }
+    getImage() { return this.image; }
+    getMoveDirections() { return this.moveDirections; }
+    getMoveCount() { return this.moves; }
+    getPosition() { return this.position; }
+    getStartingSquare() { return this.startingSquare; }
+    setImage(image) { this.image = image; }
+    setMoveDirections(directions) { this.moveDirections = directions; }
+    setPosition(pos) { this.position = pos; }
+    setStartingSquare(square) { this.startingSquare = square; }
+    setCastledStatus(castled) { this.canCastle = castled; }
+}
+
 class Pawn {
     constructor(type, colour, image) {
         this.type = type;
@@ -149,21 +226,421 @@ class Pawn {
             }
         }
     }
-    incrementMoveNumber(move) {
-        this.moves += move;
+    incrementMoveCount() {
+        this.moves += 1;
         this.update();
     }
+    bHasUpgraded() { return this.hasUpgraded; }
     getType() { return this.type; }
     getColour() { return this.colour; }
     getImage() { return this.image; }
     getMoveDirections() { return this.moveDirections; }
     getPosition() { return this.position; }
-    getMoveNumber() { return this.moves; }
-    getHasUpgraded() { return this.hasUpgraded; }
+    getMoveCount() { return this.moves; }
+    getStartingSquare() { return this.startingSquare; }
     setImage(image) { this.image = image; }
     setMoveDirections(directions) { this.moveDirections = directions; }
     setPosition(pos) { this.position = pos; }
+    setStartingSquare(square) { this.startingSquare = square; }
     setHasUpgraded(upgraded) { this.hasUpgraded = upgraded; }
+}
+
+class GameLogic {
+    constructor(chessboard, player) {
+        this.chessboard = chessboard;
+        this.player = player;
+        this.attackedSquares = [];
+        this.bVerifyingRequestedMove = false;
+        this.bVerifyingBoardState = false;
+    }
+    checkRequestedMove(attackedSquare) {
+        for (let i = 0; i < this.attackedSquares.length; i++) {
+            if (this.attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
+                this.verifyRequestedMove(attackedSquare);
+                if (!this.player.bIsInCheck()) {
+                    this.enPassantOpeningDeterminant(attackedSquare);
+                }
+                return !this.player.bIsInCheck();
+            }
+        }
+    }
+    checkSpecialMove(square) {
+        if (square.bIsCastlingSquare()) {
+            const westCastlingSquare = this.chessboard.getWestCastlingSquare();
+            const eastCastlingSquare = this.chessboard.getEastCastlingSquare();
+            switch (square) {
+                case this.chessboard.getWestCastlingSquare():
+                    return westCastlingSquare;
+                case this.chessboard.getEastCastlingSquare():
+                    return eastCastlingSquare;
+            }
+        }
+        if (square.bIsEnPassantSquare()) {
+            const enPassantSquare = this.chessboard.getEnPassantSquare();
+            return enPassantSquare;
+        }
+    }
+    squareContainsAttack(pos, piece) {
+        if (this.bIsVerifyingRequestedMove() || this.bIsVerifyingNewBoardState()) {
+            this.determineMoveCase(pos, piece);
+            return;
+        }
+        this.determineMoveCase(pos, piece);
+        if (this.bIsKing(piece)) {
+            this.castlingDeterminant(piece);
+        }
+        else if (this.bIsPawn(piece)) {
+            this.enPassantCaptureDeteriminant(piece);
+        }
+    }
+    determineMoveCase(pos, piece) {
+        if (this.bIsKnight(piece)) {
+            this.knightSpecialCases(pos, piece);
+            return;
+        }
+        this.generalMoveCases(pos, piece);
+    }
+    generalMoveCases(pos, piece) {
+        const files = this.chessboard.getFiles();
+        const pieceMoveDirections = piece.getMoveDirections();
+        const file = files.indexOf(pos[0]);
+        const rank = Number(pos[1]);
+        const moveDirections = {
+            'N': () => (this.checkAttackableSquares(file, rank + currentMove, piece)),
+            'S': () => (this.checkAttackableSquares(file, rank - currentMove, piece)),
+            'E': () => (this.checkAttackableSquares(file + currentMove, rank, piece)),
+            'W': () => (this.checkAttackableSquares(file - currentMove, rank, piece)),
+            'NE': () => (this.checkAttackableSquares(file + currentMove, rank + currentMove, piece)),
+            'SE': () => (this.checkAttackableSquares(file + currentMove, rank - currentMove, piece)),
+            'NW': () => (this.checkAttackableSquares(file - currentMove, rank + currentMove, piece)),
+            'SW': () => (this.checkAttackableSquares(file - currentMove, rank - currentMove, piece))
+        };
+        let currentMove = 0;
+        pieceMoveDirections.forEach((totalMoveCount, cardinalDirection) => {
+            currentMove = 1;
+            while (currentMove <= totalMoveCount) {
+                if (!moveDirections[cardinalDirection]()) {
+                    return;
+                }
+                currentMove++;
+            }
+        });
+    }
+    knightSpecialCases(pos, piece) {
+        const files = this.chessboard.getFiles();
+        const pieceMoves = piece.getMoveDirections();
+        const file = files.indexOf(pos[0]);
+        const rank = Number(pos[1]);
+        const moveDirections = {
+            'NNE': () => (this.checkAttackableSquares(file + 1, rank + 2, piece)),
+            'ENE': () => (this.checkAttackableSquares(file + 2, rank + 1, piece)),
+            'ESE': () => (this.checkAttackableSquares(file + 2, rank - 1, piece)),
+            'SSE': () => (this.checkAttackableSquares(file + 1, rank - 2, piece)),
+            'SSW': () => (this.checkAttackableSquares(file - 1, rank - 2, piece)),
+            'WSW': () => (this.checkAttackableSquares(file - 2, rank - 1, piece)),
+            'WNW': () => (this.checkAttackableSquares(file - 2, rank + 1, piece)),
+            'NWN': () => (this.checkAttackableSquares(file - 1, rank + 2, piece))
+        };
+        pieceMoves.forEach((totalMoveCount, cardinalDirection) => {
+            if (!moveDirections[cardinalDirection]()) {
+                return;
+            }
+        });
+    }
+    checkAttackableSquares(file, rank, piece) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        const attackedSquareIndex = (boardLength - rank) * boardLength + file;
+        if (attackedSquareIndex < 0 || attackedSquareIndex > squaresArray.length - 1) {
+            return;
+        }
+        if (squaresArray[attackedSquareIndex].getPosition() === (files[file] + rank)) {
+            return this.checkSquareContainsPiece(piece, attackedSquareIndex);
+        }
+    }
+    checkSquareContainsPiece(piece, attackedSquareIndex) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        if (!squaresArray[attackedSquareIndex].bSquareContainsPiece()) {
+            return this.bAttackUnoccupiedSquares(piece, attackedSquareIndex);
+        }
+        else {
+            this.playerInCheckDeterminant(piece, attackedSquareIndex);
+        }
+        if (!this.bIsVerifyingRequestedMove()) {
+            return this.bAttackOccupiedSquares(piece, attackedSquareIndex);
+        }
+    }
+    bAttackUnoccupiedSquares(piece, attackedSquareIndex) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        if (this.bIsPawn(piece) && !this.bPawnCanAttack(squaresArray[attackedSquareIndex], piece)) {
+            this.setSquareAttack(attackedSquareIndex, piece);
+            return false;
+        }
+        else {
+            if (!this.bIsPawn(piece)) {
+                this.setSquareAttack(attackedSquareIndex, piece);
+            }
+        }
+        if (this.bIsKing(piece)) {
+            const attackingPieces = squaresArray[attackedSquareIndex].getAttackingPiece();
+            for (let i = 0; i < attackingPieces.length; i++) {
+                if (attackingPieces[i].getColour() !== piece.getColour()) {
+                    return;
+                }
+            }
+        }
+        this.attackedSquares.push(squaresArray[attackedSquareIndex]);
+        return true;
+    }
+    bAttackOccupiedSquares(piece, attackedSquareIndex) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        if (piece.getColour() === squaresArray[attackedSquareIndex].getPiece().getColour()) {
+            this.setSquareAttack(attackedSquareIndex, piece);
+            return false;
+        }
+        if (this.bIsPawn(piece)) {
+            if (this.bPawnCanAttack(squaresArray[attackedSquareIndex], piece)) {
+                return true;
+            }
+            else {
+                this.setSquareAttack(attackedSquareIndex, piece);
+            }
+        }
+        else {
+            this.setSquareAttack(attackedSquareIndex, piece);
+        }
+        if (this.bIsKing(squaresArray[attackedSquareIndex].getPiece())) {
+            return false;
+        }
+        if (this.bIsKing(piece)) {
+            const attackingPieces = squaresArray[attackedSquareIndex].getAttackingPiece();
+            for (let i = 0; i < attackingPieces.length; i++) {
+                if (attackingPieces[i].getColour() !== piece.getColour()) {
+                    return;
+                }
+            }
+        }
+        this.attackedSquares.push(squaresArray[attackedSquareIndex]);
+        return false;
+    }
+    setSquareAttack(attackedSquare, piece) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        squaresArray[attackedSquare].setSquareAttacked(true);
+        squaresArray[attackedSquare].setAttackingPiece(piece);
+    }
+    determineAttackedSquares() {
+        const squaresArray = this.chessboard.getSquaresArray();
+        this.setVerifyingNewBoardState(true);
+        for (let i = 0; i < squaresArray.length; i++) {
+            squaresArray[i].setSquareAttacked(false);
+            squaresArray[i].clearAttackingPieces();
+        }
+        for (let i = 0; i < squaresArray.length; i++) {
+            if (squaresArray[i].bSquareContainsPiece()) {
+                this.squareContainsAttack(squaresArray[i].getPosition(), squaresArray[i].getPiece());
+            }
+        }
+        this.setVerifyingNewBoardState(false);
+    }
+    verifyRequestedMove(attackedSquare) {
+        if (this.player.bIsInCheck()) {
+            this.player.setCheckStatus(false);
+        }
+        const squaresArray = this.chessboard.getSquaresArray();
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        activeSquare.removePiece();
+        this.chessboard.setActiveSquare(attackedSquare);
+        attackedSquare.setPiece(activePiece);
+        this.setVerifyingMove(true);
+        this.clearAttackedSquares();
+        for (let i = 0; i < squaresArray.length; i++) {
+            if (squaresArray[i].bSquareContainsPiece()) {
+                this.squareContainsAttack(squaresArray[i].getPosition(), squaresArray[i].getPiece());
+            }
+        }
+        this.clearAttackedSquares();
+        attackedSquare.removePiece();
+        activeSquare.setPiece(activePiece);
+        this.chessboard.setActiveSquare(activeSquare);
+        this.setVerifyingMove(false);
+        this.squareContainsAttack(activePiece.getPosition(), activePiece);
+    }
+    playerInCheckDeterminant(piece, attackedSquareIndex) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const attackedPiece = squaresArray[attackedSquareIndex].getPiece();
+        if (this.bIsKing(attackedPiece) && this.bKingInCheck(piece, attackedPiece)) {
+            this.player.setCheckStatus(true);
+        }
+    }
+    enPassantOpeningDeterminant(attackedSquare) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        if (activePiece instanceof Pawn) {
+            if (activePiece.getMoveCount() !== 0) {
+                return;
+            }
+            const files = this.chessboard.getFiles();
+            const boardLength = squaresArray.length / 8;
+            const pos = attackedSquare.getPosition();
+            const file = files.indexOf(pos[0]);
+            const rank = Number(pos[1]) - 1;
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            const oldPos = activeSquare.getPosition();
+            const oldFile = files.indexOf(oldPos[0]);
+            const oldRank = Number(oldPos[1]) + 1;
+            const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
+            if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
+                squaresArray[targetSquareIndex].setEnPassantSquare(true);
+                this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
+            }
+        }
+    }
+    enPassantCaptureDeteriminant(piece) {
+    }
+    castlingDeterminant(piece) {
+        if (piece instanceof King) {
+            if (!piece.bCanCastle() || piece.bIsInCheck()) {
+                return;
+            }
+            if (piece.getStartingSquare().getPosition() !== piece.getPosition()) {
+                return;
+            }
+            this.westCastlingDeterminant(piece.getPosition());
+            this.eastCastlingDeterminant(piece.getPosition());
+        }
+    }
+    westCastlingDeterminant(pos) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        let file = files.indexOf(pos[0]);
+        const rank = Number(pos[1]);
+        const firstSquareInRow = 0;
+        while (file != firstSquareInRow) {
+            file = file - 1;
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) {
+                return false;
+            }
+            if (!this.bKingCanCastle(targetSquareIndex, file)) {
+                return false;
+            }
+        }
+        file = files.indexOf(pos[0]) - 2;
+        const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        squaresArray[targetSquareIndex].setCastlingSquare(true);
+        this.chessboard.setWestCastlingSquare(squaresArray[targetSquareIndex]);
+        this.attackedSquares.push(squaresArray[targetSquareIndex]);
+    }
+    eastCastlingDeterminant(pos) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        let file = files.indexOf(pos[0]);
+        const rank = Number(pos[1]);
+        const lastSquareInRow = 7;
+        while (file != lastSquareInRow) {
+            file = file + 1;
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) {
+                return false;
+            }
+            if (!this.bKingCanCastle(targetSquareIndex, file)) {
+                return false;
+            }
+        }
+        file = files.indexOf(pos[0]) + 2;
+        const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        squaresArray[targetSquareIndex].setCastlingSquare(true);
+        this.chessboard.setEastCastlingSquare(squaresArray[targetSquareIndex]);
+        this.attackedSquares.push(squaresArray[targetSquareIndex]);
+    }
+    castleRookQueenSide(square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const boardLength = squaresArray.length / 8;
+        const files = this.chessboard.getFiles();
+        const pos = square.getPosition();
+        const file = files.indexOf(pos[0]) - 2;
+        const rank = Number(pos[1]);
+        const queenSideRookSquareIndex = (boardLength - rank) * boardLength + file;
+        const newPos = square.getPosition();
+        const newFile = files.indexOf(newPos[0]) + 1;
+        const newRank = Number(newPos[1]);
+        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
+        squaresArray[newRookPosSquareIndex].setPiece(squaresArray[queenSideRookSquareIndex].getPiece());
+        squaresArray[queenSideRookSquareIndex].removePiece();
+        return queenSideRookSquareIndex;
+    }
+    castleRookKingSide(square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const boardLength = squaresArray.length / 8;
+        const files = this.chessboard.getFiles();
+        const pos = square.getPosition();
+        const file = files.indexOf(pos[0]) + 1;
+        const rank = Number(pos[1]);
+        const kingSideRookSquareIndex = (boardLength - rank) * boardLength + file;
+        const newPos = square.getPosition();
+        const newFile = files.indexOf(newPos[0]) - 1;
+        const newRank = Number(newPos[1]);
+        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
+        squaresArray[newRookPosSquareIndex].setPiece(squaresArray[kingSideRookSquareIndex].getPiece());
+        squaresArray[kingSideRookSquareIndex].removePiece();
+        return kingSideRookSquareIndex;
+    }
+    bKingPassesThroughAttackedSquare(targetSquareIndex, file) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        if (file === 3 || file === 2 || file === 5 || file === 6) {
+            const attackingPieces = squaresArray[targetSquareIndex].getAttackingPiece();
+            const activePiece = this.chessboard.getActiveSquare().getPiece();
+            for (let i = 0; i < attackingPieces.length; i++) {
+                if (attackingPieces[i].getColour() !== activePiece.getColour()) {
+                    return true;
+                }
+            }
+        }
+    }
+    bKingCanCastle(targetSquareIndex, file) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const firstSquareInRow = 0;
+        const lastSquareInRow = 7;
+        if ((file === firstSquareInRow || file === lastSquareInRow)) {
+            return (squaresArray[targetSquareIndex].bSquareContainsPiece() && this.bRookCanCastle(squaresArray, targetSquareIndex));
+        }
+        else {
+            return (!this.bCastlingMoveIsObstructed(squaresArray, targetSquareIndex));
+        }
+    }
+    bCastlingMoveIsObstructed(squaresArray, targetSquareIndex) {
+        return squaresArray[targetSquareIndex].bSquareContainsPiece();
+    }
+    bRookCanCastle(squaresArray, targetSquareIndex) {
+        const piece = squaresArray[targetSquareIndex].getPiece();
+        if (piece instanceof Rook) {
+            return (piece.bCanCastle());
+        }
+    }
+    bKingInCheck(piece, attackedPiece) {
+        if (this.bIsPawn(piece) && piece.getPosition()[0] === attackedPiece.getPosition()[0])
+            return;
+        return (piece.getColour() !== attackedPiece.getColour() && this.player.getColour() === attackedPiece.getColour());
+    }
+    bIsVerifyingRequestedMove() { return this.bVerifyingRequestedMove; }
+    bIsVerifyingNewBoardState() { return this.bVerifyingBoardState; }
+    bIsPawn(piece) { return piece.getType() === 'P' || piece.getType() === 'p'; }
+    bIsKnight(piece) { return piece.getType() === 'N' || piece.getType() === 'n'; }
+    bIsBishop(piece) { return piece.getType() === 'B' || piece.getType() === 'b'; }
+    bIsRook(piece) { return piece.getType() === 'R' || piece.getType() === 'r'; }
+    bisQueen(piece) { return piece.getType() === 'Q' || piece.getType() === 'q'; }
+    bIsKing(piece) { return piece.getType() === 'K' || piece.getType() === 'k'; }
+    bPawnCanAttack(square, piece) { return square.getPosition()[0] === piece.getPosition()[0]; }
+    clearAttackedSquares() { this.attackedSquares = []; }
+    getAttackedSquares() { return this.attackedSquares; }
+    setAttackedSquares(attacked) { this.attackedSquares = attacked; }
+    setVerifyingMove(verifying) { this.bVerifyingRequestedMove = verifying; }
+    setVerifyingNewBoardState(verifying) { this.bVerifyingBoardState = verifying; }
 }
 
 class Knight {
@@ -178,16 +655,18 @@ class Knight {
         const pieces = new Pieces();
         this.setMoveDirections(pieces.knightMoves());
     }
-    incrementMoveNumber(move) { this.moves += move; }
+    incrementMoveCount() { this.moves += 1; }
     getType() { return this.type; }
     getColour() { return this.colour; }
     getImage() { return this.image; }
     getMoveDirections() { return this.moveDirections; }
     getPosition() { return this.position; }
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
+    getStartingSquare() { return this.startingSquare; }
     setImage(image) { this.image = image; }
     setMoveDirections(directions) { this.moveDirections = directions; }
     setPosition(pos) { this.position = pos; }
+    setStartingSquare(square) { this.startingSquare = square; }
 }
 
 class Bishop {
@@ -202,40 +681,18 @@ class Bishop {
         const pieces = new Pieces();
         this.setMoveDirections(pieces.bishopMoves());
     }
-    incrementMoveNumber(move) { this.moves += move; }
+    incrementMoveCount() { this.moves += 1; }
     getType() { return this.type; }
     getColour() { return this.colour; }
     getImage() { return this.image; }
     getMoveDirections() { return this.moveDirections; }
     getPosition() { return this.position; }
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
+    getStartingSquare() { return this.startingSquare; }
     setImage(image) { this.image = image; }
     setMoveDirections(directions) { this.moveDirections = directions; }
     setPosition(pos) { this.position = pos; }
-}
-
-class Rook {
-    constructor(type, colour, image) {
-        this.type = type;
-        this.colour = colour;
-        this.image = image;
-        this.initialise();
-    }
-    initialise() {
-        this.moves = 0;
-        const pieces = new Pieces();
-        this.setMoveDirections(pieces.rookMoves());
-    }
-    incrementMoveNumber(move) { this.moves += move; }
-    getType() { return this.type; }
-    getColour() { return this.colour; }
-    getImage() { return this.image; }
-    getMoveDirections() { return this.moveDirections; }
-    getMoveNumber() { return this.moves; }
-    getPosition() { return this.position; }
-    setImage(image) { this.image = image; }
-    setMoveDirections(directions) { this.moveDirections = directions; }
-    setPosition(pos) { this.position = pos; }
+    setStartingSquare(square) { this.startingSquare = square; }
 }
 
 class Queen {
@@ -250,42 +707,18 @@ class Queen {
         const pieces = new Pieces();
         this.setMoveDirections(pieces.queenMoves());
     }
-    incrementMoveNumber(move) { this.moves += move; }
+    incrementMoveCount() { this.moves += 1; }
     getType() { return this.type; }
     getColour() { return this.colour; }
     getImage() { return this.image; }
     getMoveDirections() { return this.moveDirections; }
-    getMoveNumber() { return this.moves; }
+    getMoveCount() { return this.moves; }
     getPosition() { return this.position; }
+    getStartingSquare() { return this.startingSquare; }
     setImage(image) { this.image = image; }
     setMoveDirections(directions) { this.moveDirections = directions; }
     setPosition(pos) { this.position = pos; }
-}
-
-class King {
-    constructor(type, colour, image) {
-        this.type = type;
-        this.colour = colour;
-        this.image = image;
-        this.initialise();
-    }
-    initialise() {
-        this.moves = 0;
-        this.inCheck = false;
-        const pieces = new Pieces();
-        this.setMoveDirections(pieces.kingMoves());
-    }
-    incrementMoveNumber(move) { this.moves += move; }
-    getType() { return this.type; }
-    getColour() { return this.colour; }
-    getImage() { return this.image; }
-    getMoveDirections() { return this.moveDirections; }
-    getPosition() { return this.position; }
-    getMoveNumber() { return this.moves; }
-    setImage(image) { this.image = image; }
-    setMoveDirections(directions) { this.moveDirections = directions; }
-    setPosition(pos) { this.position = pos; }
-    setCheck(check) { this.inCheck = check; }
+    setStartingSquare(square) { this.startingSquare = square; }
 }
 
 class PiecesFactory extends Pieces {
@@ -414,12 +847,16 @@ class Board {
     getPiecePositionsArray() { return this.piecePositionsArray; }
     getPieceObjectArray() { return this.piecesArray; }
     getActiveSquare() { return this.activeSquare; }
-    getActivePiece() { return this.activePiece; }
+    getWestCastlingSquare() { return this.westCastlingSquare; }
+    getEastCastlingSquare() { return this.eastCastlingSquare; }
+    getEnPassantSquare() { return this.enPassantSquare; }
     setSquaresArray(squares) { this.squares = squares; }
     setPiecePositionsArray(pieces) { this.piecePositionsArray = pieces; }
     setPieceObjectArray(piece) { this.piecesArray.push(piece); }
-    setActiveSquare(squarePos) { this.activeSquare = squarePos; }
-    setActivePiece(piece) { this.activePiece = piece; }
+    setActiveSquare(square) { this.activeSquare = square; }
+    setWestCastlingSquare(square) { this.westCastlingSquare = square; }
+    setEastCastlingSquare(square) { this.eastCastlingSquare = square; }
+    setEnPassantSquare(square) { this.enPassantSquare = square; }
 }
 
 class Square {
@@ -429,12 +866,21 @@ class Square {
         this.y = y;
         this.w = w;
         this.h = h;
+        this.attackingPieces = [];
+        this.isCastlingSquare = false;
+        this.isEnPassantSquare = false;
     }
     removePiece() {
         delete this.piece;
         this.hasPiece = false;
+        this.isAttacked = false;
     }
-    squareContainsPiece() { return this.hasPiece; }
+    bSquareContainsPiece() { return this.hasPiece; }
+    bSquareIsAttacked() { return this.isAttacked; }
+    bIsCastlingSquare() { return this.isCastlingSquare; }
+    bIsEnPassantSquare() { return this.isEnPassantSquare; }
+    clearAttackingPieces() { this.attackingPieces = []; }
+    getAttackingPiece() { return this.attackingPieces; }
     getPiece() { return this.piece; }
     getPosition() { return this.pos; }
     getX() { return this.x; }
@@ -442,7 +888,6 @@ class Square {
     getWidth() { return this.w; }
     getHeight() { return this.h; }
     getColour() { return this.colour; }
-    getEnPassant() { return this.enPassant; }
     setX(x) { this.x = x; }
     setY(y) { this.y = y; }
     setWidth(width) { this.w = width; }
@@ -452,53 +897,77 @@ class Square {
         this.hasPiece = true;
         piece.setPosition(this.pos);
     }
+    setSquareAttacked(attacked) { this.isAttacked = attacked; }
+    setAttackingPiece(piece) { this.attackingPieces.push(piece); }
     setColour(colour) { this.colour = colour; }
-    setEnPassant(enPassant) { this.enPassant = enPassant; }
+    setCastlingSquare(isCastlingSquare) { this.isCastlingSquare = isCastlingSquare; }
+    setEnPassantSquare(isEnPassantSquare) { this.isEnPassantSquare = isEnPassantSquare; }
 }
 
 class Player {
     constructor(colour) {
         this.colour = colour;
+        this.inCheck = false;
+        this.turnComplete = false;
+        this.canCastleQueenSide = true;
+        this.canCastleKingSide = true;
     }
+    bIsInCheck() { return this.inCheck; }
+    bIsDemonstrationMode() { return this.isDemo; }
+    bHasCompletedTurn() { return this.turnComplete; }
+    bCanCastleKingSide() { return this.canCastleKingSide; }
+    bCanCastleQueenSide() { return this.canCastleQueenSide; }
     getColour() { return this.colour; }
+    setDemonstrationMode() { this.isDemo = true; }
+    setColour(colour) { this.colour = colour; }
+    setCheckStatus(check) { this.inCheck = check; }
+    setTurnComplete(completed) { this.turnComplete = completed; }
+    setHasCastledQueenSide() { this.canCastleQueenSide = false; }
+    setHasCastledKingSide() { this.canCastleKingSide = false; }
 }
 
 class Game {
     constructor(player, fen, turn) {
         this.gameState = new GameState();
-        this.chessBoard = new Board();
+        this.chessboard = new Board();
+        this.setPlayer(player);
+        this.gameLogic = new GameLogic(this.chessboard, this.player);
         this.isSquareClicked = false;
-        this.validMoves = [];
-        if (player === "Demo") {
-            this.currentPlayer = new Player("Demo");
-        }
-        else {
-            this.currentPlayer = new Player(this.determinePlayerColour(player));
-        }
+        this.specialMoveInProgress = false;
         this.gameState.setFenString(fen);
         this.gameState.setCurrentTurn(turn);
     }
+    setPlayer(player) {
+        if (player === "Demo") {
+            this.player = new Player("White");
+            this.player.setDemonstrationMode();
+            return;
+        }
+        player === "Player 1" ? this.player = new Player("White") : this.player = new Player("Black");
+    }
+    switchPlayerForDemonstrationMode() {
+        this.player.getColour() === "White" ? this.player.setColour("Black") : this.player.setColour("White");
+        this.player.setDemonstrationMode();
+        this.player.setCheckStatus(false);
+    }
     initialise(cw, ch) {
-        const files = this.chessBoard.getFiles();
-        const ranks = this.chessBoard.getRanks();
-        let squaresArray = this.chessBoard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const ranks = this.chessboard.getRanks();
+        let squaresArray = this.chessboard.getSquaresArray();
         for (let i = 0; i < files.length; i++) {
             for (let j = 0; j < ranks.length; j++) {
                 squaresArray[i + j * 8] = new Square(files[i] + ranks[j], i * cw, j * cw, cw, ch);
             }
         }
-        this.chessBoard.setSquaresArray(squaresArray);
+        this.chessboard.setSquaresArray(squaresArray);
         this.setPiecePositions();
     }
-    determinePlayerColour(player) {
-        return player === "Player 1" ? "White" : "Black";
-    }
     updateGameState(gameProps) {
-        const squaresArray = this.chessBoard.getSquaresArray();
+        const squaresArray = this.chessboard.getSquaresArray();
         if (gameProps.nextPlayerTurn !== this.gameState.getCurrentTurn()) {
             for (let i = 0; i < squaresArray.length; i++) {
                 if (squaresArray[i].getPosition() === gameProps.movePieceFrom) {
-                    this.chessBoard.setActiveSquare(squaresArray[i]);
+                    this.chessboard.setActiveSquare(squaresArray[i]);
                 }
             }
             for (let i = 0; i < squaresArray.length; i++) {
@@ -511,9 +980,9 @@ class Game {
         }
     }
     updateSquareSizeProps(cw, ch) {
-        const files = this.chessBoard.getFiles();
-        const ranks = this.chessBoard.getRanks();
-        let squaresArray = this.chessBoard.getSquaresArray();
+        const files = this.chessboard.getFiles();
+        const ranks = this.chessboard.getRanks();
+        let squaresArray = this.chessboard.getSquaresArray();
         for (let i = 0; i < files.length; i++) {
             for (let j = 0; j < ranks.length; j++) {
                 squaresArray[i + j * 8].setX(i * cw);
@@ -522,17 +991,18 @@ class Game {
                 squaresArray[i + j * 8].setHeight(ch);
             }
         }
-        this.chessBoard.setSquaresArray(squaresArray);
+        this.chessboard.setSquaresArray(squaresArray);
     }
     setPiecePositions() {
         const piecesFactory = new PiecesFactory();
         const startingFen = this.gameState.getFenString();
-        const squaresArray = this.chessBoard.getSquaresArray();
+        const squaresArray = this.chessboard.getSquaresArray();
         const piecesArray = this.fenParser(startingFen);
         piecesArray.forEach((pieceRequired, index) => {
             startingFen.split("").forEach((pieceToPlace) => {
                 if (pieceRequired === pieceToPlace) {
                     const newPiece = (piecesFactory.typeOfPiece(pieceToPlace));
+                    newPiece.setStartingSquare(squaresArray[index]);
                     squaresArray[index].setPiece(newPiece);
                 }
             });
@@ -541,7 +1011,7 @@ class Game {
     fenParser(fen) {
         const fenString = fen.split(" ");
         const positions = fenString[0].split("/");
-        const pieces = this.chessBoard.getPiecePositionsArray();
+        const pieces = this.chessboard.getPiecePositionsArray();
         let currentSquare = 0;
         positions.forEach(rank => {
             rank.split("").forEach(char => {
@@ -557,6 +1027,16 @@ class Game {
         return pieces;
     }
     fenCreator() {
+        const fenPositions = this.createFenPositions();
+        const fenCurrentTurn = this.createFenCurrentTurn();
+        const fenCastling = this.createFenCastlingStatus();
+        const fenEnPassant = this.createFenEnPassantSquare();
+        const fenHalfmoveClock = this.createFenHalfmoveClock();
+        const fenFullmoveClock = this.createFenFullmoveClock();
+        const newFenString = fenPositions + fenCurrentTurn + fenCastling + fenEnPassant + fenHalfmoveClock + fenFullmoveClock;
+        return newFenString;
+    }
+    createFenPositions() {
         const board = this.getChessboard().getSquaresArray();
         let newFenString = "";
         let emptySquares = 0;
@@ -565,17 +1045,17 @@ class Game {
                 newFenString += "/";
                 emptySquares = 0;
             }
-            if (board[i].squareContainsPiece()) {
+            if (board[i].bSquareContainsPiece()) {
                 newFenString += board[i].getPiece().getType();
                 emptySquares = 0;
             }
             else {
                 emptySquares++;
-                if ((i + 1) < 63) {
+                if ((i + 1) < board.length) {
                     if ((i + 1) % 8 === 0) {
                         newFenString += emptySquares;
                     }
-                    else if (board[i + 1].squareContainsPiece()) {
+                    else if (board[i + 1].bSquareContainsPiece()) {
                         newFenString += emptySquares;
                     }
                 }
@@ -583,122 +1063,109 @@ class Game {
         }
         return newFenString;
     }
+    createFenCurrentTurn() {
+        const currentTurn = this.gameState.getCurrentTurn();
+        if (currentTurn[0] === 'W') {
+            return " b ";
+        }
+        return " w ";
+    }
+    createFenCastlingStatus() {
+    }
+    createFenEnPassantSquare() {
+    }
+    createFenHalfmoveClock() {
+    }
+    createFenFullmoveClock() {
+    }
     handleActivatedSquare(activeSquare) {
         this.setSquareActive(true);
-        this.chessBoard.setActiveSquare(activeSquare);
+        this.chessboard.setActiveSquare(activeSquare);
     }
     handleDeactivatedSquare() {
         const emptySquare = new Square('0', 0, 0, 0, 0);
-        this.chessBoard.setActiveSquare(emptySquare);
+        this.chessboard.setActiveSquare(emptySquare);
         this.setSquareActive(false);
     }
     handleOverwriteSquare(activeSquare, activePiece) {
-        this.chessBoard.getActiveSquare().removePiece();
-        this.chessBoard.setActiveSquare(activeSquare);
+        this.chessboard.getActiveSquare().removePiece();
+        this.chessboard.setActiveSquare(activeSquare);
         this.incrementMoveCount(activePiece);
         activeSquare.setPiece(activePiece);
     }
-    checkValidMoves(pos, piece) {
-        const files = this.chessBoard.getFiles();
-        const pieceMoves = piece.getMoveDirections();
-        const file = files.indexOf(pos[0]);
-        const rank = Number(pos[1]);
-        let currentMove = 0;
-        if (pieceMoves) {
-            pieceMoves.forEach((step, cardinal) => {
-                const generalMoveDirections = {
-                    'N': () => (this.checkBounds(file, rank + currentMove, piece)),
-                    'S': () => (this.checkBounds(file, rank - currentMove, piece)),
-                    'E': () => (this.checkBounds(file + currentMove, rank, piece)),
-                    'W': () => (this.checkBounds(file - currentMove, rank, piece)),
-                    'NE': () => (this.checkBounds(file + currentMove, rank + currentMove, piece)),
-                    'SE': () => (this.checkBounds(file + currentMove, rank - currentMove, piece)),
-                    'NW': () => (this.checkBounds(file - currentMove, rank + currentMove, piece)),
-                    'SW': () => (this.checkBounds(file - currentMove, rank - currentMove, piece))
-                };
-                const knightMoveDirections = {
-                    'NNE': () => (this.checkBounds(file + 1, rank + 2, piece)),
-                    'ENE': () => (this.checkBounds(file + 2, rank + 1, piece)),
-                    'ESE': () => (this.checkBounds(file + 2, rank - 1, piece)),
-                    'SSE': () => (this.checkBounds(file + 1, rank - 2, piece)),
-                    'SSW': () => (this.checkBounds(file - 1, rank - 2, piece)),
-                    'WSW': () => (this.checkBounds(file - 2, rank - 1, piece)),
-                    'WNW': () => (this.checkBounds(file - 2, rank + 1, piece)),
-                    'NWN': () => (this.checkBounds(file - 1, rank + 2, piece))
-                };
-                const isKnight = (piece.getType() === 'n' || piece.getType() === 'N');
-                currentMove = 1;
-                if (isKnight) {
-                    if (knightMoveDirections[cardinal]()) {
-                        return;
-                    }
-                    return;
-                }
-                while (currentMove <= step) {
-                    if (generalMoveDirections[cardinal]()) {
-                        return;
-                    }
-                    currentMove++;
-                }
-            });
+    postMoveCalculations() {
+        if (this.player.bIsDemonstrationMode() && this.player.bHasCompletedTurn()) {
+            this.switchPlayerForDemonstrationMode();
         }
+        this.gameLogic.determineAttackedSquares();
+        this.gameLogic.clearAttackedSquares();
+        this.setPlayerCompletedTurn(false);
     }
-    checkBounds(file, rank, piece) {
-        const squaresArray = this.chessBoard.getSquaresArray();
-        const files = this.chessBoard.getFiles();
-        for (let i = 0; i < squaresArray.length; i++) {
-            if (squaresArray[i].getPosition() === (files[file] + rank)) {
-                if (!squaresArray[i].squareContainsPiece()) {
-                    if (piece.getType() === 'P' || piece.getType() === 'p') {
-                        if (squaresArray[i].getPosition()[0] === piece.getPosition()[0]) {
-                            this.validMoves.push(squaresArray[i]);
-                        }
-                        return;
-                    }
-                    this.validMoves.push(squaresArray[i]);
-                    return false;
+    determinePlayerSpecialMoveCase(square) {
+        const activePiece = this.chessboard.getActiveSquare().getPiece();
+        if (this.gameLogic.bIsKing(activePiece)) {
+            if (square === this.chessboard.getWestCastlingSquare()) {
+                this.player.setHasCastledQueenSide();
+                this.setSpecialMoveInProgress(true);
+                return;
+            }
+            if (square === this.chessboard.getEastCastlingSquare()) {
+                this.player.setHasCastledKingSide();
+                this.setSpecialMoveInProgress(true);
+                return;
+            }
+        }
+        if (this.gameLogic.bIsPawn(activePiece)) ;
+        this.setSpecialMoveInProgress(false);
+    }
+    checkSpecialMoves(square) {
+        const specialMoveSquare = this.gameLogic.checkSpecialMove(square);
+        if (specialMoveSquare) {
+            if (specialMoveSquare.bIsCastlingSquare()) {
+                if (specialMoveSquare === this.chessboard.getWestCastlingSquare()) {
+                    this.castleRookQueenSide(specialMoveSquare);
                 }
-                if (piece.getColour() === squaresArray[i].getPiece().colour) {
-                    return true;
+                else if (specialMoveSquare === this.chessboard.getEastCastlingSquare()) {
+                    this.castleRookKingSide(specialMoveSquare);
                 }
-                if (piece.getType() === 'P' || piece.getType() === 'p') {
-                    if (piece.colour === squaresArray[i].getPiece().colour) {
-                        return true;
-                    }
-                    if (piece.getPosition()[0] === squaresArray[i].getPosition()[0]) {
-                        return true;
-                    }
-                }
-                this.validMoves.push(squaresArray[i]);
-                return true;
             }
         }
     }
-    checkRequestedMove(squares) {
-        for (let i = 0; i < this.validMoves.length; i++) {
-            if (this.validMoves[i].getPosition() === squares.getPosition()) {
-                return true;
-            }
-        }
-        return false;
+    castleRookQueenSide(square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const queenSideRookSquareIndex = this.gameLogic.castleRookQueenSide(square);
+        this.setSpecialMoveSquare(squaresArray[queenSideRookSquareIndex]);
     }
-    incrementMoveCount(piece) { piece.incrementMoveNumber(1); }
-    getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? ("Black") : ("White")); }
-    getChessboard() { return this.chessBoard; }
-    getSquareActive() { return this.isSquareClicked; }
-    getValidMoves() { return this.validMoves; }
+    castleRookKingSide(square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const kingSideRookSquareIndex = this.gameLogic.castleRookKingSide(square);
+        this.setSpecialMoveSquare(squaresArray[kingSideRookSquareIndex]);
+    }
+    bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }
+    bRequestedMoveIsValid(squares) { return this.gameLogic.checkRequestedMove(squares); }
+    bSquareIsActive() { return this.isSquareClicked; }
+    bSpecialMoveInProgress() { return this.specialMoveInProgress; }
+    checkValidMoves(pos, piece) { this.gameLogic.squareContainsAttack(pos, piece); }
+    incrementMoveCount(piece) { piece.incrementMoveCount(); }
+    clearAttackedSquares() { this.gameLogic.clearAttackedSquares(); }
+    removeSpecialSquare() { delete this.specialMoveSquare; }
+    getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? "Black" : "White"); }
+    getChessboard() { return this.chessboard; }
+    getAttackedSquares() { return this.gameLogic.getAttackedSquares(); }
     getGameState() { return this.gameState; }
-    getCurrentPlayer() { return this.currentPlayer; }
-    setChessboard(board) { this.chessBoard = board; }
+    getCurrentPlayer() { return this.player; }
+    getSpecialMoveSquare() { return this.specialMoveSquare; }
     setSquareActive(active) { this.isSquareClicked = active; }
-    setValidMoves(valid) { this.validMoves = valid; }
+    setPlayerCompletedTurn(completed) { this.player.setTurnComplete(completed); }
+    setSpecialMoveInProgress(moving) { this.specialMoveInProgress = moving; }
+    setSpecialMoveSquare(move) { this.specialMoveSquare = move; }
 }
 
 const boardSize = () => { return ((window.innerWidth > window.innerHeight)); };
-class Canvas extends React.Component {
+class GameCanvas extends React__default.Component {
     constructor(props) {
         super(props);
-        this.canvas = React.createRef();
+        this.canvas = React__default.createRef();
         this.width = (boardSize() ? window.innerWidth : window.innerHeight) / 2.5;
         this.height = this.width;
         this.ratio = this.width / this.height;
@@ -716,15 +1183,15 @@ class Canvas extends React.Component {
             this.props.controller.bind(this.props.game);
         }
         this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
-        this.initialise();
     }
     initialise() {
         const { cw, ch } = this.getCellDimensions();
         this.game.initialise(cw, ch);
+        this.drawBoard();
+        this.drawPieces();
     }
-    isDemonstrationMode() { return this.game.getCurrentPlayer().getColour() === "Demo"; }
     componentDidMount() {
-        this.update();
+        this.initialise();
         window.addEventListener('resize', this.resizeCallback, false);
         this.state.canvas.current.addEventListener("click", (event) => { this.interceptClick(event); }, false);
     }
@@ -732,23 +1199,23 @@ class Canvas extends React.Component {
     componentDidUpdate() {
         if (this.props.resetGame) {
             this.resetGame();
+            return;
         }
-        else if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour()
-            && this.game.getGameState().getFenString() !== this.props.game.nextFenString) {
+        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour()) {
             this.updateOpponentMove();
         }
+        this.game.postMoveCalculations();
     }
     resetGame() {
         this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
         this.initialise();
         this.drawBoard();
         this.drawPieces();
-        console.log('here');
     }
     updateOpponentMove() {
         const updatedSquare = this.game.updateGameState(this.props.game);
         if (updatedSquare) {
-            this.overwriteSquare(updatedSquare);
+            this.handleOpponentMove(updatedSquare);
         }
     }
     update() {
@@ -826,8 +1293,7 @@ class Canvas extends React.Component {
         }
     }
     interceptClick(event) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()
-            || this.isDemonstrationMode()) {
+        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
             this.handleClick(event);
         }
     }
@@ -841,30 +1307,53 @@ class Canvas extends React.Component {
             const sw = squaresArray[i].getWidth();
             const sh = squaresArray[i].getHeight();
             if (cx >= sx && cx <= sx + sw && cy >= sy && cy <= sy + sh) {
-                if (this.game.getSquareActive()) {
+                if (this.game.bSquareIsActive()) {
                     if (this.game.getChessboard().getActiveSquare() === squaresArray[i]) {
                         this.deactivateSquare(squaresArray[i]);
                     }
                     else if (this.game.getChessboard().getActiveSquare() !== squaresArray[i]) {
-                        if (!this.game.checkRequestedMove(squaresArray[i])) {
-                            return;
-                        }
-                        const prevActiveSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
-                        const nextActiveSquarePos = squaresArray[i].getPosition();
-                        this.game.setSquareActive(false);
-                        this.overwriteSquare(squaresArray[i]);
-                        this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
+                        this.handlePlayerMove(squaresArray[i]);
                     }
                     return;
                 }
-                if (squaresArray[i].squareContainsPiece()) {
-                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()
-                        || this.isDemonstrationMode()) {
+                if (squaresArray[i].bSquareContainsPiece()) {
+                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
                         this.activateSquare(squaresArray[i]);
                     }
                 }
             }
         }
+    }
+    handlePlayerMove(attackedSquare) {
+        if (!this.game.bRequestedMoveIsValid(attackedSquare)) {
+            return;
+        }
+        this.game.determinePlayerSpecialMoveCase(attackedSquare);
+        if (this.game.bSpecialMoveInProgress()) {
+            this.handleSpecialSquare(attackedSquare);
+        }
+        const prevActiveSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
+        const nextActiveSquarePos = attackedSquare.getPosition();
+        this.game.setSquareActive(false);
+        this.overwriteSquare(attackedSquare);
+        this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
+    }
+    handleOpponentMove(updatedSquare) {
+        const activeSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
+        const activePiece = this.game.getChessboard().getActiveSquare().getPiece();
+        this.game.checkValidMoves(activeSquarePos, activePiece);
+        this.game.determinePlayerSpecialMoveCase(updatedSquare);
+        if (this.game.bSpecialMoveInProgress()) {
+            this.handleSpecialSquare(updatedSquare);
+        }
+        this.overwriteSquare(updatedSquare);
+    }
+    handleSpecialSquare(attackedSquare) {
+        this.game.checkSpecialMoves(attackedSquare);
+        const oldSquare = this.game.getSpecialMoveSquare();
+        this.selectCell(oldSquare);
+        this.game.setSpecialMoveInProgress(false);
+        this.game.removeSpecialSquare();
     }
     activateSquare(activeSquare) {
         const files = this.game.getChessboard().getFiles();
@@ -899,24 +1388,24 @@ class Canvas extends React.Component {
         this.drawImg(img, ranks.indexOf(Number(activeSquare.getPosition()[1])), files.indexOf(activeSquare.getPosition()[0]));
     }
     manageValidSquares() {
-        if (this.game.getSquareActive()) {
-            const activeSquare = this.game.getChessboard().getActiveSquare().getPosition();
+        if (this.game.bSquareIsActive()) {
+            const activeSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
             const activePiece = this.game.getChessboard().getActiveSquare().getPiece();
-            this.game.checkValidMoves(activeSquare, activePiece);
+            this.game.checkValidMoves(activeSquarePos, activePiece);
             this.drawValidSquares();
             return;
         }
         this.drawValidSquares();
-        this.game.setValidMoves([]);
+        this.game.clearAttackedSquares();
     }
     drawValidSquares() {
         const files = this.game.getChessboard().getFiles();
         const ranks = this.game.getChessboard().getRanks();
-        if (this.game.getValidMoves().length > 0) {
-            const validMoves = this.game.getValidMoves();
+        if (this.game.getAttackedSquares().length > 0) {
+            const validMoves = this.game.getAttackedSquares();
             for (let i = 0; i < validMoves.length; i++) {
                 this.selectCell(validMoves[i]);
-                if (validMoves[i].squareContainsPiece()) {
+                if (validMoves[i].bSquareContainsPiece()) {
                     const img = this.drawPiece(validMoves[i].getPiece());
                     this.drawImg(img, ranks.indexOf(Number(validMoves[i].getPosition()[1])), files.indexOf(validMoves[i].getPosition()[0]));
                 }
@@ -941,7 +1430,7 @@ class Canvas extends React.Component {
         const sy = square.getY();
         const sw = square.getWidth();
         const sh = square.getHeight();
-        if (this.game.getSquareActive()) {
+        if (this.game.bSquareIsActive() && !this.game.bSpecialMoveInProgress()) {
             ctx.fillStyle = '#6F9EFF';
         }
         else {
@@ -953,6 +1442,7 @@ class Canvas extends React.Component {
     setNextState(prevPos, nextPos) {
         const newFenSequence = this.game.fenCreator();
         const nextPlayerMove = this.game.getNextMove();
+        this.game.setPlayerCompletedTurn(true);
         this.game.getGameState().setCurrentTurn(nextPlayerMove);
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
@@ -967,7 +1457,7 @@ class Canvas extends React.Component {
         }
     }
     render() {
-        return (React.createElement("canvas", { id: "canvas", ref: this.state.canvas, width: this.state.screen.width * this.state.screen.ratio, height: this.state.screen.height * this.state.screen.ratio }));
+        return (React__default.createElement("canvas", { id: "canvas", ref: this.state.canvas, width: this.state.screen.width * this.state.screen.ratio, height: this.state.screen.height * this.state.screen.ratio }));
     }
     getCellDimensions() {
         const cw = (this.state.screen.width * this.state.screen.ratio) / 8;
@@ -976,7 +1466,12 @@ class Canvas extends React.Component {
     }
 }
 
-ReactDOM.render(React.createElement(App, null), document.getElementById("root"));
+const App = () => {
+    return (React__default.createElement("div", { id: "unichess-heading" },
+        React__default.createElement("h1", null, "Cyn1x Chess Engine")));
+};
 
-exports.Canvas = Canvas;
+ReactDOM.render(React__default.createElement(App, null), document.getElementById("root"));
+
+exports.Canvas = GameCanvas;
 //# sourceMappingURL=index.js.map
