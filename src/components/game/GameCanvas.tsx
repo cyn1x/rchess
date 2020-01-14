@@ -209,7 +209,9 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
         const prevActiveSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
         const nextActiveSquarePos = attackedSquare.getPosition();
+
         this.game.setSquareActive(false);
+        this.game.beforeMoveProcessing(attackedSquare);
         this.overwriteSquare(attackedSquare);
         this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
     }
@@ -345,11 +347,12 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     setNextState(prevPos: string, nextPos: string) {
-        const newFenSequence = this.game.fenCreator();
-        const nextPlayerMove = this.game.getNextMove();
-        
         this.game.setPlayerCompletedTurn(true);
+
+        const nextPlayerMove = this.game.getNextMove();
         this.game.getGameState().setCurrentTurn(nextPlayerMove);
+
+        const newFenSequence = this.game.fenCreator();
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
 

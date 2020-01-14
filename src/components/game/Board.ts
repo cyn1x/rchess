@@ -24,6 +24,21 @@ class Board {
         this.piecesArray = [];
     }
 
+    clearSpecialSquares() {
+        if (this.getEastCastlingSquare()) {
+            this.eastCastlingSquare.setCastlingSquare(false);
+            delete this.westCastlingSquare;
+        }
+        if (this.getWestCastlingSquare()) {
+            this.westCastlingSquare.setCastlingSquare(false);
+            delete this.eastCastlingSquare;
+        }
+        if (this.getEnPassantSquare()) {
+            this.enPassantSquare.setEnPassantSquare(false);
+            delete this.enPassantSquare;
+        }
+    }
+
     getFiles() { return files; }
 
     getRanks() { return ranks; }

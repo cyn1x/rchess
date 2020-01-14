@@ -10,8 +10,8 @@ class Player {
         this.colour = colour;
         this.inCheck = false;
         this.turnComplete = false;
-        this.canCastleQueenSide = true;
-        this.canCastleKingSide = true;
+        this.canCastleQueenSide = false;
+        this.canCastleKingSide = false;
     }
 
     bIsInCheck() { return this.inCheck; }
@@ -34,9 +34,9 @@ class Player {
 
     setTurnComplete(completed: boolean) { this.turnComplete = completed; }
 
-    setHasCastledQueenSide() { this.canCastleQueenSide = false; }
+    setCanCastledQueenSide(canCastle: boolean) { this.canCastleQueenSide = canCastle; }
 
-    setHasCastledKingSide() { this.canCastleKingSide = false; }
+    setCanCastledKingSide(canCastle: boolean) { this.canCastleKingSide = canCastle; }
 
 }
 

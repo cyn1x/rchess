@@ -25,12 +25,7 @@ class GameLogic {
     checkRequestedMove(attackedSquare: Square) {
         for (let i = 0; i < this.attackedSquares.length; i++) {
             if (this.attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
-
                 this.verifyRequestedMove(attackedSquare);
-
-                if (!this.player.bIsInCheck()) {
-                    this.enPassantOpeningDeterminant(attackedSquare);
-                }
 
                 return !this.player.bIsInCheck();
             }
@@ -56,6 +51,22 @@ class GameLogic {
         }
     }
 
+    checkMoveSideEffects(activeSquare: Square, attackedSquare: Square) {
+        const activePiece = activeSquare.getPiece();
+
+        switch(true) {
+            case activePiece instanceof Pawn:
+                this.enPassantOpeningDeterminant(attackedSquare);
+                break;
+            case activePiece instanceof Rook:
+                this.rookCanCastleDeterminant();
+                break;
+            case activePiece instanceof King:
+                this.kingCanCastleDeterminant();
+                break;
+        }
+    }
+
     squareContainsAttack(pos: string, piece: IPiece) {
         if (this.bIsVerifyingRequestedMove() || this.bIsVerifyingNewBoardState()) {
             this.determineMoveCase(pos, piece);
@@ -65,7 +76,7 @@ class GameLogic {
         this.determineMoveCase(pos, piece);
         
         if (this.bIsKing(piece)) {
-            this.castlingDeterminant(piece);
+            this.playerCanCastleDeterminant(piece);
         }
         else if (this.bIsPawn(piece)) {
             this.enPassantCaptureDeteriminant(piece);
@@ -285,12 +296,12 @@ class GameLogic {
             
             const pos = attackedSquare.getPosition();
             const file = files.indexOf(pos[0]);
-            const rank = Number(pos[1]) - 1;
+            const rank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1) 
             const targetSquareIndex = (boardLength - rank) * boardLength + file;
 
             const oldPos = activeSquare.getPosition();
             const oldFile = files.indexOf(oldPos[0])
-            const oldRank = Number(oldPos[1]) + 1;
+            const oldRank = (activePiece.getColour() === "White" ? Number(oldPos[1]) + 1 : Number(oldPos[1]) - 1) 
             const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
 
             if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
@@ -301,12 +312,66 @@ class GameLogic {
     }
 
     enPassantCaptureDeteriminant(piece: IPiece) {
-        if (piece instanceof Pawn) {
+        
+    }
 
+    determineEnPassantSquare(enPassantSquare: string) {
+        if (enPassantSquare !== "-") {
+            const squaresArray = this.chessboard.getSquaresArray();
+            const files = this.chessboard.getFiles();
+            const boardLength = squaresArray.length / 8;
+            
+            const pos = enPassantSquare;
+            let file = files.indexOf(pos[0]);
+            const rank = Number(pos[1]);
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+
+            squaresArray[targetSquareIndex].setEnPassantSquare(true);
+            this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
         }
     }
 
-    castlingDeterminant(piece: IPiece) {
+    kingCanCastleDeterminant() {
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        
+        if (activePiece.getColour() === "White") {
+            if (activeSquare.getPosition() === "E1") {
+                this.player.setCanCastledKingSide(false);
+                this.player.setCanCastledQueenSide(false);
+            }
+        }
+        else if (activePiece.getColour() === "Black") {
+            if (activePiece.getPosition() === "E8") {
+                this.player.setCanCastledKingSide(false);
+                this.player.setCanCastledQueenSide(false);
+            }
+        }
+    }
+
+    rookCanCastleDeterminant() {
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+
+        if (activePiece.getColour() === "White") {
+            if (activeSquare.getPosition() === "A1") {
+                this.player.setCanCastledQueenSide(false);
+            }
+            else if (activeSquare.getPosition() === "H1") {
+                this.player.setCanCastledKingSide(false);
+            }
+        }
+        else if (activePiece.getColour() === "Black") {
+            if (activeSquare.getPosition() === "A8") {
+                this.player.setCanCastledQueenSide(false);
+            }
+            else if (activeSquare.getPosition() === "H8") {
+                this.player.setCanCastledKingSide(false);
+            }
+        }
+    }
+
+    playerCanCastleDeterminant(piece: IPiece) {
         if (piece instanceof King) {
 
             if (!piece.bCanCastle() || piece.bIsInCheck()) { return; }
