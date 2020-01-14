@@ -9,6 +9,7 @@ const GameSettings = () => {
     const [playerTurn, setPlayerTurn] = useState("");
 
     const [playerError, setPlayerError] = useState("")
+    const [fenError, setFenError] = useState("");
     const [turnError, setTurnError] = useState("");
 
     const handleSubmit = (event: React.FormEvent) => {
@@ -17,19 +18,23 @@ const GameSettings = () => {
 
         if (isValid) {
             setPlayerError("");
+            setFenError("");
             setTurnError("");
         }
     }
 
     const validate = () => {
         let playerError = "";
+        let fenError = "";
         let turnError = "";
 
         if (currentPlayer === "") { playerError = "Player can only be Player 1, Player 2, or Demo"; }
+        if (fenString.length > 0 && fenString.length < 6) { fenError = "Invalid FEN string." }
         if (playerTurn === "") { turnError = "Turn can only be Black or White" }
 
-        if (playerError || turnError) {
+        if (playerError || fenError || turnError) {
             setPlayerError(playerError);
+            setFenError(fenError);
             setTurnError(turnError);
             return false;
         }
@@ -60,6 +65,7 @@ const GameSettings = () => {
                         }} />
                     </label>
                 </div>
+                <div className="input-error">{fenError}</div>
                 <div id="currentTurn" className="form-field" >
                     <label>
                         <p>Turn</p>
