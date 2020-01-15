@@ -7,7 +7,7 @@ import GameInfo from './components/GameInfo';
 import './styles.css'
 
 const App = () => {
-    const debug = false;
+    const debug = true;
 
     if (debug) {
         return (
