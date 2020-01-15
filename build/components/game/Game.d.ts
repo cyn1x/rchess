@@ -45,7 +45,9 @@ declare class Game {
     fullMoveClockProcessing(): void;
     determinePlayerSpecialMoveCase(square: Square): void;
     initiateCastling(): void;
+    initiateEnPassantCapture(): void;
     checkSpecialMoves(square: Square): void;
+    performEnPassantCapture(square: Square): void;
     castleRookQueenSide(square: Square): void;
     castleRookKingSide(square: Square): void;
     postMoveCalculations(): void;

@@ -388,7 +388,10 @@ class Game {
             }
         }
         if (this.gameLogic.bIsPawn(activePiece)) {
-            
+            if (square === this.chessboard.getEnPassantSquare()) {
+                this.initiateEnPassantCapture();
+                return;
+            }
         }
         this.setSpecialMoveInProgress(false);
     }
@@ -398,6 +401,10 @@ class Game {
         this.player.setCanCastledQueenSide(false);
         this.setSpecialMoveInProgress(true);
         this.createFenCastlingStatus();
+    }
+
+    initiateEnPassantCapture() {
+        this.setSpecialMoveInProgress(true);
     }
 
     checkSpecialMoves(square: Square) {
@@ -412,7 +419,16 @@ class Game {
                     this.castleRookKingSide(specialMoveSquare);
                 }
             }
+            if (specialMoveSquare.bIsEnPassantSquare()) {
+                this.performEnPassantCapture(specialMoveSquare);
+            }
         }
+    }
+
+    performEnPassantCapture(square: Square) {
+        const capturedEnPassantSquare = this.gameLogic.performEnPassantCapture(square);
+
+        this.setSpecialMoveSquare(capturedEnPassantSquare);
     }
 
     castleRookQueenSide(square: Square) {

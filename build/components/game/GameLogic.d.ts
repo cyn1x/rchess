@@ -24,9 +24,10 @@ declare class GameLogic {
     determineAttackedSquares(): void;
     verifyRequestedMove(attackedSquare: Square): void;
     playerInCheckDeterminant(piece: IPiece, attackedSquareIndex: number): void;
+    determineEnPassantSquare(enPassantSquare: string): void;
     enPassantOpeningDeterminant(attackedSquare: Square): void;
     enPassantCaptureDeteriminant(piece: IPiece): void;
-    determineEnPassantSquare(enPassantSquare: string): void;
+    performEnPassantCapture(attackedSquare: Square): Square;
     kingCanCastleDeterminant(): void;
     rookCanCastleDeterminant(): void;
     playerCanCastleDeterminant(piece: IPiece): void;

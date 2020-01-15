@@ -289,38 +289,6 @@ class GameLogic {
         }
     }
 
-    enPassantOpeningDeterminant(attackedSquare: Square) {
-        const squaresArray = this.chessboard.getSquaresArray();
-        const activeSquare = this.chessboard.getActiveSquare();
-        const activePiece = activeSquare.getPiece();
-
-        if (activePiece instanceof Pawn) {
-            if (activePiece.getMoveCount() !== 0) { return; }
-
-            const files = this.chessboard.getFiles();
-            const boardLength = squaresArray.length / 8;
-            
-            const pos = attackedSquare.getPosition();
-            const file = files.indexOf(pos[0]);
-            const rank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1) 
-            const targetSquareIndex = (boardLength - rank) * boardLength + file;
-
-            const oldPos = activeSquare.getPosition();
-            const oldFile = files.indexOf(oldPos[0])
-            const oldRank = (activePiece.getColour() === "White" ? Number(oldPos[1]) + 1 : Number(oldPos[1]) - 1) 
-            const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
-
-            if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
-                squaresArray[targetSquareIndex].setEnPassantSquare(true);
-                this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
-            }
-        }
-    }
-
-    enPassantCaptureDeteriminant(piece: IPiece) {
-        
-    }
-
     determineEnPassantSquare(enPassantSquare: string) {
         if (enPassantSquare !== "-") {
             const squaresArray = this.chessboard.getSquaresArray();
@@ -335,6 +303,77 @@ class GameLogic {
             squaresArray[targetSquareIndex].setEnPassantSquare(true);
             this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
         }
+    }
+
+    enPassantOpeningDeterminant(attackedSquare: Square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+
+        if (activePiece instanceof Pawn) {
+            if (activePiece.getMoveCount() !== 0) { return; }
+
+            const files = this.chessboard.getFiles();
+            const boardLength = squaresArray.length / 8;
+            
+            const pos = attackedSquare.getPosition();
+            const file = files.indexOf(pos[0]);
+            const rank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1);
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+
+            const oldPos = activeSquare.getPosition();
+            const oldFile = files.indexOf(oldPos[0])
+            const oldRank = (activePiece.getColour() === "White" ? Number(oldPos[1]) + 1 : Number(oldPos[1]) - 1);
+            const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
+
+            if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
+                squaresArray[targetSquareIndex].setEnPassantSquare(true);
+                this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
+            }
+        }
+    }
+
+    enPassantCaptureDeteriminant(piece: IPiece) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        
+        const pos = activePiece.getPosition();
+        const northEastFile = files.indexOf(pos[0]) + 1;
+        const northEastRank = (activePiece.getColour() === "White" ? Number(pos[1]) + 1 : Number(pos[1]) - 1);
+        const northEastSquareIndex = (boardLength - northEastRank) * boardLength + northEastFile;
+
+        const northWestFile = files.indexOf(pos[0]) - 1;
+        const northWestRank = (activePiece.getColour() === "White" ? Number(pos[1]) + 1 : Number(pos[1]) - 1);
+        const northWestSquareIndex = (boardLength - northWestRank) * boardLength + northWestFile;
+
+        if (squaresArray[northEastSquareIndex].bIsEnPassantSquare()) {
+            this.attackedSquares.push(squaresArray[northEastSquareIndex]);
+        }
+        else if (squaresArray[northWestSquareIndex].bIsEnPassantSquare()) {
+            this.attackedSquares.push(squaresArray[northWestSquareIndex])
+        }
+    }
+
+    performEnPassantCapture(attackedSquare: Square) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+
+        const files = this.chessboard.getFiles();
+        const boardLength = squaresArray.length / 8;
+        
+        const pos = attackedSquare.getPosition();
+        const capturedPawnFile = files.indexOf(pos[0]);
+        const capturedPawnRank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1);
+        const capturedPawnSquareIndex = (boardLength - capturedPawnRank) * boardLength + capturedPawnFile;
+
+        (squaresArray[capturedPawnSquareIndex]).removePiece();
+        
+        return squaresArray[capturedPawnSquareIndex];
     }
 
     kingCanCastleDeterminant() {
