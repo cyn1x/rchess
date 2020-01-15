@@ -151,7 +151,7 @@ class GameLogic {
         const attackedSquareIndex = (boardLength - rank) * boardLength + file;
         
         if (attackedSquareIndex < 0 || attackedSquareIndex > squaresArray.length - 1) { return; }
-        
+
         if (squaresArray[attackedSquareIndex].getPosition() === (files[file] + rank)) {
             return this.checkSquareContainsPiece(piece, attackedSquareIndex);
         }
@@ -253,6 +253,7 @@ class GameLogic {
         const squaresArray = this.chessboard.getSquaresArray();
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
+        const defendingPiece = attackedSquare.getPiece();
 
         activeSquare.removePiece();
         this.chessboard.setActiveSquare(attackedSquare);
@@ -269,6 +270,11 @@ class GameLogic {
         this.clearAttackedSquares();
         attackedSquare.removePiece();
         activeSquare.setPiece(activePiece);
+
+        if (defendingPiece) { 
+            attackedSquare.setPiece(defendingPiece);
+        }
+
         this.chessboard.setActiveSquare(activeSquare);
         this.setVerifyingMove(false);
         this.squareContainsAttack(activePiece.getPosition(), activePiece);

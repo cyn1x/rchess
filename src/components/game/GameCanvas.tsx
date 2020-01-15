@@ -180,11 +180,12 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             const sh = squaresArray[i].getHeight();
 
             if (cx >= sx && cx <= sx + sw && cy >= sy && cy <= sy + sh) {
+
                 if (this.game.bSquareIsActive()) {
                     if (this.game.getChessboard().getActiveSquare() === squaresArray[i]) {
                         this.deactivateSquare(squaresArray[i]);
                     }
-                    else if (this.game.getChessboard().getActiveSquare() !== squaresArray[i]) {
+                    else if (this.game.getChessboard().getActiveSquare() !== squaresArray[i]) {                        
                         this.handlePlayerMove(squaresArray[i]);
                     }
                     return;
@@ -200,7 +201,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
     handlePlayerMove(attackedSquare: Square) {
         if (!this.game.bRequestedMoveIsValid(attackedSquare)) { return; }
-        
+
         this.game.determinePlayerSpecialMoveCase(attackedSquare);
 
         if (this.game.bSpecialMoveInProgress()) {
@@ -211,7 +212,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         const nextActiveSquarePos = attackedSquare.getPosition();
 
         this.game.setSquareActive(false);
-        this.game.beforeMoveProcessing(attackedSquare);
+        this.game.preMoveProcessing(attackedSquare);
         this.overwriteSquare(attackedSquare);
         this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
     }

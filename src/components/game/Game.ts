@@ -12,9 +12,11 @@ class Game {
     private gameLogic: GameLogic;
     private chessboard: Board;
     private player!: Player;
+    private specialMoveSquare!: Square;
     private isSquareClicked: boolean;
     private specialMoveInProgress: boolean;
-    private specialMoveSquare!: Square;
+    private pawnisBeingMoved: boolean;
+    private pieceIsBeingCaptured: boolean;
     private halfmoveClock!: number;
     private fullmoveClock!: number;
 
@@ -25,6 +27,8 @@ class Game {
         this.gameLogic = new GameLogic(this.chessboard, this.player);
         this.isSquareClicked = false;
         this.specialMoveInProgress = false;
+        this.pawnisBeingMoved = false;
+        this.pieceIsBeingCaptured = false;
 
         this.gameState.setCurrentTurn(turn);
         this.setPlayerCastlingState(fen);
@@ -329,13 +333,42 @@ class Game {
         activeSquare.setPiece(activePiece);
     }
 
-    beforeMoveProcessing(attackedSquare: Square) {
+    preMoveProcessing(attackedSquare: Square) {
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
 
         this.chessboard.clearSpecialSquares();
         this.gameLogic.checkMoveSideEffects(activeSquare, attackedSquare);
         this.incrementMoveCount(activePiece);
+
+        this.fiftyMoveRuleDeterminant(attackedSquare, activePiece);
+        this.fiftyMoveRuleProcessing();
+        this.fullMoveClockProcessing();
+    }
+
+    fiftyMoveRuleDeterminant(attackedSquare: Square, activePiece: IPiece) {
+        if (attackedSquare.bSquareContainsPiece()) {
+            this.setPieceIsBeingCaptured(true);
+        }
+        else if (this.gameLogic.bIsPawn(activePiece)) {
+            this.setPawnIsBeingMoved(true);
+        }
+    }
+
+    fiftyMoveRuleProcessing() {
+        if (!this.bPawnIsBeingMoved() && !this.bPieceIsBeingCaptured()) {
+            this.incrementHalfmoveClock();
+            return;
+        }
+        
+        this.resetHalfmoveClock();
+        this.setPawnIsBeingMoved(false);
+        this.setPieceIsBeingCaptured(false);
+    }
+
+    fullMoveClockProcessing() {
+        if (this.player.getColour() === "White" && this.getFullmoveClock() === 1) { return; }
+
         this.incrementFullmoveClock();
     }
 
@@ -410,6 +443,8 @@ class Game {
 
     incrementFullmoveClock() { this.fullmoveClock += 1; }
 
+    resetHalfmoveClock() { this.halfmoveClock = 0; }
+
     bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }
 
     bRequestedMoveIsValid(squares: Square) { return this.gameLogic.checkRequestedMove(squares); }
@@ -417,6 +452,10 @@ class Game {
     bSquareIsActive() { return this.isSquareClicked; }
 
     bSpecialMoveInProgress() { return this.specialMoveInProgress; }
+
+    bPawnIsBeingMoved() { return this.pawnisBeingMoved; }
+
+    bPieceIsBeingCaptured() { return this.pieceIsBeingCaptured; }
 
     checkValidMoves(pos: string, piece: IPiece) { this.gameLogic.squareContainsAttack(pos, piece); }
 
@@ -427,12 +466,12 @@ class Game {
     removeSpecialSquare() { delete this.specialMoveSquare; }
 
     getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? "Black" : "White"); }
-
-    getChessboard() { return this.chessboard; }
  
     getAttackedSquares() { return this.gameLogic.getAttackedSquares(); }
 
     getGameState() { return this.gameState; }
+
+    getChessboard() { return this.chessboard; }
 
     getCurrentPlayer() { return this.player; }
 
@@ -442,13 +481,17 @@ class Game {
 
     getFullmoveClock() { return this.fullmoveClock; }
 
-    setSquareActive(active: boolean) { this.isSquareClicked = active; }
+    setSpecialMoveSquare(move: Square) { this.specialMoveSquare = move; }
 
-    setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
+    setSquareActive(active: boolean) { this.isSquareClicked = active; }
 
     setSpecialMoveInProgress(moving: boolean) { this.specialMoveInProgress = moving; }
 
-    setSpecialMoveSquare(move: Square) { this.specialMoveSquare = move; }
+    setPawnIsBeingMoved(moving: boolean) { this.pawnisBeingMoved = moving; }
+
+    setPieceIsBeingCaptured(captured: boolean) { this.pieceIsBeingCaptured = captured; }
+
+    setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
 
 }
 
