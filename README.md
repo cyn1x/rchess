@@ -39,7 +39,7 @@ ___
 - Refactor to further break up code into smaller, and reusable functions
 - Improved demonstration mode
 - Abstract the core engine logic so AI can be added without muddling through the code
-- Possible port over to rust, having the Rust program compute the game logic on the server-side, while the TypeScript code will render only the UI on the client-side
+- Possible port over to Rust, having the Rust program compute the game logic on the server-side, while the TypeScript code will render only the UI on the client-side
 - Documentation to show how it works
 
 ### What will not be done?
@@ -149,7 +149,7 @@ GNU General Public License v3.0
 * [ ] Checkmate detection
 * [ ] Fifty-move rule
 * [x] Castling ability
-* [ ] En Passant ability
+* [x] En Passant capture ability
 * [ ] Pawn upgrade ability
 * [x] Separate pipeline for actioning multiplayer opponent moves over websockets
 * [ ] In-Game Menu or extra prop allowing customisation of certain features
@@ -159,3 +159,4 @@ GNU General Public License v3.0
 * [ ] Ability to plug in AI code for PvE gameplay without having to deal with the core engine logic
 * [ ] Port all core logic to Rust to compute on the server-side
 * [ ] Branched 'lite' version to reflect changes on the UI from the Rust program
+* [ ] General game statistics
