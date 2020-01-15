@@ -10,6 +10,7 @@ declare class Board {
     private enPassantSquare;
     constructor();
     initialise(): void;
+    clearSpecialSquares(): void;
     getFiles(): string[];
     getRanks(): number[];
     getStartingPieces(): string;

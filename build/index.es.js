@@ -24,13 +24,13 @@ class GameState {
         const nextMove = this.nextActivePiecePos;
         return { prevMove, nextMove };
     }
+    getFenString() { return this.fenString; }
+    getCurrentTurn() { return this.currentTurn; }
+    getFenCastlingState() { return this.fenCastlingState; }
     setMoveState(prev, next) {
         this.previousActivePiecePos = prev;
         this.nextActivePiecePos = next;
     }
-    setPlayerCheck() { }
-    getFenString() { return this.fenString; }
-    getCurrentTurn() { return this.currentTurn; }
     setFenString(fen) {
         if (fen === "") {
             this.fenString = initialState;
@@ -39,6 +39,9 @@ class GameState {
         this.fenString = fen;
     }
     setCurrentTurn(player) { this.currentTurn = player; }
+    setFenCastlingState(fen) {
+        this.fenCastlingState = fen;
+    }
 }
 
 var whitePawn = "data:image/png;base64,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";
@@ -250,9 +253,6 @@ class GameLogic {
         for (let i = 0; i < this.attackedSquares.length; i++) {
             if (this.attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
                 this.verifyRequestedMove(attackedSquare);
-                if (!this.player.bIsInCheck()) {
-                    this.enPassantOpeningDeterminant(attackedSquare);
-                }
                 return !this.player.bIsInCheck();
             }
         }
@@ -273,6 +273,20 @@ class GameLogic {
             return enPassantSquare;
         }
     }
+    checkMoveSideEffects(activeSquare, attackedSquare) {
+        const activePiece = activeSquare.getPiece();
+        switch (true) {
+            case activePiece instanceof Pawn:
+                this.enPassantOpeningDeterminant(attackedSquare);
+                break;
+            case activePiece instanceof Rook:
+                this.rookCanCastleDeterminant();
+                break;
+            case activePiece instanceof King:
+                this.kingCanCastleDeterminant();
+                break;
+        }
+    }
     squareContainsAttack(pos, piece) {
         if (this.bIsVerifyingRequestedMove() || this.bIsVerifyingNewBoardState()) {
             this.determineMoveCase(pos, piece);
@@ -280,7 +294,7 @@ class GameLogic {
         }
         this.determineMoveCase(pos, piece);
         if (this.bIsKing(piece)) {
-            this.castlingDeterminant(piece);
+            this.playerCanCastleDeterminant(piece);
         }
         else if (this.bIsPawn(piece)) {
             this.enPassantCaptureDeteriminant(piece);
@@ -443,6 +457,7 @@ class GameLogic {
         const squaresArray = this.chessboard.getSquaresArray();
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
+        const defendingPiece = attackedSquare.getPiece();
         activeSquare.removePiece();
         this.chessboard.setActiveSquare(attackedSquare);
         attackedSquare.setPiece(activePiece);
@@ -456,6 +471,9 @@ class GameLogic {
         this.clearAttackedSquares();
         attackedSquare.removePiece();
         activeSquare.setPiece(activePiece);
+        if (defendingPiece) {
+            attackedSquare.setPiece(defendingPiece);
+        }
         this.chessboard.setActiveSquare(activeSquare);
         this.setVerifyingMove(false);
         this.squareContainsAttack(activePiece.getPosition(), activePiece);
@@ -479,11 +497,11 @@ class GameLogic {
             const boardLength = squaresArray.length / 8;
             const pos = attackedSquare.getPosition();
             const file = files.indexOf(pos[0]);
-            const rank = Number(pos[1]) - 1;
+            const rank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1);
             const targetSquareIndex = (boardLength - rank) * boardLength + file;
             const oldPos = activeSquare.getPosition();
             const oldFile = files.indexOf(oldPos[0]);
-            const oldRank = Number(oldPos[1]) + 1;
+            const oldRank = (activePiece.getColour() === "White" ? Number(oldPos[1]) + 1 : Number(oldPos[1]) - 1);
             const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
             if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
                 squaresArray[targetSquareIndex].setEnPassantSquare(true);
@@ -493,7 +511,56 @@ class GameLogic {
     }
     enPassantCaptureDeteriminant(piece) {
     }
-    castlingDeterminant(piece) {
+    determineEnPassantSquare(enPassantSquare) {
+        if (enPassantSquare !== "-") {
+            const squaresArray = this.chessboard.getSquaresArray();
+            const files = this.chessboard.getFiles();
+            const boardLength = squaresArray.length / 8;
+            const pos = enPassantSquare;
+            let file = files.indexOf(pos[0]);
+            const rank = Number(pos[1]);
+            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            squaresArray[targetSquareIndex].setEnPassantSquare(true);
+            this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
+        }
+    }
+    kingCanCastleDeterminant() {
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        if (activePiece.getColour() === "White") {
+            if (activeSquare.getPosition() === "E1") {
+                this.player.setCanCastledKingSide(false);
+                this.player.setCanCastledQueenSide(false);
+            }
+        }
+        else if (activePiece.getColour() === "Black") {
+            if (activePiece.getPosition() === "E8") {
+                this.player.setCanCastledKingSide(false);
+                this.player.setCanCastledQueenSide(false);
+            }
+        }
+    }
+    rookCanCastleDeterminant() {
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        if (activePiece.getColour() === "White") {
+            if (activeSquare.getPosition() === "A1") {
+                this.player.setCanCastledQueenSide(false);
+            }
+            else if (activeSquare.getPosition() === "H1") {
+                this.player.setCanCastledKingSide(false);
+            }
+        }
+        else if (activePiece.getColour() === "Black") {
+            if (activeSquare.getPosition() === "A8") {
+                this.player.setCanCastledQueenSide(false);
+            }
+            else if (activeSquare.getPosition() === "H8") {
+                this.player.setCanCastledKingSide(false);
+            }
+        }
+    }
+    playerCanCastleDeterminant(piece) {
         if (piece instanceof King) {
             if (!piece.bCanCastle() || piece.bIsInCheck()) {
                 return;
@@ -833,6 +900,20 @@ class Board {
         this.piecePositionsArray = [];
         this.piecesArray = [];
     }
+    clearSpecialSquares() {
+        if (this.getEastCastlingSquare()) {
+            this.eastCastlingSquare.setCastlingSquare(false);
+            delete this.westCastlingSquare;
+        }
+        if (this.getWestCastlingSquare()) {
+            this.westCastlingSquare.setCastlingSquare(false);
+            delete this.eastCastlingSquare;
+        }
+        if (this.getEnPassantSquare()) {
+            this.enPassantSquare.setEnPassantSquare(false);
+            delete this.enPassantSquare;
+        }
+    }
     getFiles() { return files; }
     getRanks() { return ranks; }
     getStartingPieces() { return pieces; }
@@ -902,8 +983,8 @@ class Player {
         this.colour = colour;
         this.inCheck = false;
         this.turnComplete = false;
-        this.canCastleQueenSide = true;
-        this.canCastleKingSide = true;
+        this.canCastleQueenSide = false;
+        this.canCastleKingSide = false;
     }
     bIsInCheck() { return this.inCheck; }
     bIsDemonstrationMode() { return this.isDemo; }
@@ -915,24 +996,28 @@ class Player {
     setColour(colour) { this.colour = colour; }
     setCheckStatus(check) { this.inCheck = check; }
     setTurnComplete(completed) { this.turnComplete = completed; }
-    setHasCastledQueenSide() { this.canCastleQueenSide = false; }
-    setHasCastledKingSide() { this.canCastleKingSide = false; }
+    setCanCastledQueenSide(canCastle) { this.canCastleQueenSide = canCastle; }
+    setCanCastledKingSide(canCastle) { this.canCastleKingSide = canCastle; }
 }
 
 class Game {
     constructor(player, fen, turn) {
+        this.setPlayer(player, turn);
         this.gameState = new GameState();
         this.chessboard = new Board();
-        this.setPlayer(player);
         this.gameLogic = new GameLogic(this.chessboard, this.player);
         this.isSquareClicked = false;
         this.specialMoveInProgress = false;
-        this.gameState.setFenString(fen);
+        this.pawnisBeingMoved = false;
+        this.pieceIsBeingCaptured = false;
         this.gameState.setCurrentTurn(turn);
+        this.setPlayerCastlingState(fen);
+        this.setMoveClocks(fen);
+        this.gameState.setFenString(fen);
     }
-    setPlayer(player) {
+    setPlayer(player, turn) {
         if (player === "Demo") {
-            this.player = new Player("White");
+            this.player = new Player(turn);
             this.player.setDemonstrationMode();
             return;
         }
@@ -942,6 +1027,12 @@ class Game {
         this.player.getColour() === "White" ? this.player.setColour("Black") : this.player.setColour("White");
         this.player.setDemonstrationMode();
         this.player.setCheckStatus(false);
+        this.setCastlingStatusforDemoMode();
+    }
+    setCastlingStatusforDemoMode() {
+        this.player.setCanCastledKingSide(false);
+        this.player.setCanCastledQueenSide(false);
+        this.setPlayerCastlingState(this.gameState.getFenString());
     }
     initialise(cw, ch) {
         const files = this.chessboard.getFiles();
@@ -1020,13 +1111,13 @@ class Game {
         return pieces;
     }
     fenCreator() {
-        const fenPositions = this.createFenPositions();
-        const fenCurrentTurn = this.createFenCurrentTurn();
-        const fenCastling = this.createFenCastlingStatus();
-        const fenEnPassant = this.createFenEnPassantSquare();
-        const fenHalfmoveClock = this.createFenHalfmoveClock();
-        const fenFullmoveClock = this.createFenFullmoveClock();
-        const newFenString = fenPositions + fenCurrentTurn + fenCastling + fenEnPassant + fenHalfmoveClock + fenFullmoveClock;
+        const positions = this.createFenPositions();
+        const currentTurn = this.createFenCurrentTurn();
+        const castling = this.createFenCastlingStatus();
+        const enPassant = this.createFenEnPassantSquare();
+        const halfmoveClock = this.createFenHalfmoveClock();
+        const fullmoveClock = this.createFenFullmoveClock();
+        const newFenString = positions + currentTurn + castling + enPassant + halfmoveClock + fullmoveClock;
         return newFenString;
     }
     createFenPositions() {
@@ -1058,18 +1149,113 @@ class Game {
     }
     createFenCurrentTurn() {
         const currentTurn = this.gameState.getCurrentTurn();
-        if (currentTurn[0] === 'W') {
-            return " b ";
-        }
-        return " w ";
+        const fenCurrentTurn = (currentTurn[0] === "W" ? " w " : " b ");
+        return fenCurrentTurn;
     }
     createFenCastlingStatus() {
+        let fenCastlingState = "";
+        if (this.player.getColour() === "White") {
+            if (this.player.bCanCastleKingSide()) {
+                fenCastlingState += "K";
+            }
+            if (this.player.bCanCastleQueenSide()) {
+                fenCastlingState += "Q";
+            }
+            this.gameState.getFenCastlingState().split("").forEach(char => {
+                switch (char) {
+                    case "k":
+                        fenCastlingState += char;
+                        break;
+                    case "q":
+                        fenCastlingState += char;
+                        break;
+                }
+            });
+        }
+        else if (this.player.getColour() === "Black") {
+            this.gameState.getFenCastlingState().split("").forEach(char => {
+                switch (char) {
+                    case "K":
+                        fenCastlingState += char;
+                        break;
+                    case "Q":
+                        fenCastlingState += char;
+                        break;
+                }
+            });
+            if (this.player.bCanCastleKingSide()) {
+                fenCastlingState += "k";
+            }
+            if (this.player.bCanCastleQueenSide()) {
+                fenCastlingState += "q";
+            }
+        }
+        if (fenCastlingState.length === 0) {
+            fenCastlingState += "-";
+        }
+        this.gameState.setFenCastlingState(fenCastlingState);
+        return fenCastlingState;
     }
     createFenEnPassantSquare() {
+        const enPassantSquare = this.chessboard.getEnPassantSquare();
+        const fenEnPassantSquare = (enPassantSquare ? " " + enPassantSquare.getPosition() + " " : " - ");
+        return fenEnPassantSquare;
     }
-    createFenHalfmoveClock() {
+    createFenHalfmoveClock() { return " " + this.getHalfmoveClock() + " "; }
+    createFenFullmoveClock() { return " " + this.getFullmoveClock(); }
+    setPlayerCastlingState(fen) {
+        let fenCastling = "";
+        if (fen.length === 0) {
+            fenCastling += this.gameState.getFenString();
+        }
+        else {
+            fenCastling = fen.split(" ")[2];
+        }
+        if (fenCastling.length === 0) {
+            return "-";
+        }
+        let newFenCastlingState = "";
+        fenCastling.split("").forEach((char) => {
+            switch (char) {
+                case "K":
+                    this.setPlayerCanCastleKingSide(char);
+                    newFenCastlingState += char;
+                    break;
+                case "Q":
+                    this.setPlayerCanCastleQueenSide(char);
+                    newFenCastlingState += char;
+                    break;
+                case "k":
+                    this.setPlayerCanCastleKingSide(char);
+                    newFenCastlingState += char;
+                    break;
+                case "q":
+                    this.setPlayerCanCastleQueenSide(char);
+                    newFenCastlingState += char;
+                    break;
+            }
+        });
+        this.gameState.setFenCastlingState(newFenCastlingState);
     }
-    createFenFullmoveClock() {
+    setPlayerCanCastleKingSide(kingSide) {
+        if (this.player.getColour() === "White" && kingSide === "K") {
+            this.player.setCanCastledKingSide(true);
+        }
+        else if (this.player.getColour() === "Black" && kingSide === "k") {
+            this.player.setCanCastledKingSide(true);
+        }
+    }
+    setPlayerCanCastleQueenSide(kingSide) {
+        if (this.player.getColour() === "White" && kingSide === "Q") {
+            this.player.setCanCastledQueenSide(true);
+        }
+        else if (this.player.getColour() === "Black" && kingSide === "q") {
+            this.player.setCanCastledQueenSide(true);
+        }
+    }
+    setMoveClocks(fen) {
+        this.halfmoveClock = Number(fen.split(" ")[4]);
+        this.fullmoveClock = Number(fen.split(" ")[5]);
     }
     handleActivatedSquare(activeSquare) {
         this.setSquareActive(true);
@@ -1083,33 +1269,61 @@ class Game {
     handleOverwriteSquare(activeSquare, activePiece) {
         this.chessboard.getActiveSquare().removePiece();
         this.chessboard.setActiveSquare(activeSquare);
-        this.incrementMoveCount(activePiece);
         activeSquare.setPiece(activePiece);
     }
-    postMoveCalculations() {
-        if (this.player.bIsDemonstrationMode() && this.player.bHasCompletedTurn()) {
-            this.switchPlayerForDemonstrationMode();
+    preMoveProcessing(attackedSquare) {
+        const activeSquare = this.chessboard.getActiveSquare();
+        const activePiece = activeSquare.getPiece();
+        this.chessboard.clearSpecialSquares();
+        this.gameLogic.checkMoveSideEffects(activeSquare, attackedSquare);
+        this.incrementMoveCount(activePiece);
+        this.fiftyMoveRuleDeterminant(attackedSquare, activePiece);
+        this.fiftyMoveRuleProcessing();
+        this.fullMoveClockProcessing();
+    }
+    fiftyMoveRuleDeterminant(attackedSquare, activePiece) {
+        if (attackedSquare.bSquareContainsPiece()) {
+            this.setPieceIsBeingCaptured(true);
         }
-        this.gameLogic.determineAttackedSquares();
-        this.gameLogic.clearAttackedSquares();
-        this.setPlayerCompletedTurn(false);
+        else if (this.gameLogic.bIsPawn(activePiece)) {
+            this.setPawnIsBeingMoved(true);
+        }
+    }
+    fiftyMoveRuleProcessing() {
+        if (!this.bPawnIsBeingMoved() && !this.bPieceIsBeingCaptured()) {
+            this.incrementHalfmoveClock();
+            return;
+        }
+        this.resetHalfmoveClock();
+        this.setPawnIsBeingMoved(false);
+        this.setPieceIsBeingCaptured(false);
+    }
+    fullMoveClockProcessing() {
+        if (this.player.getColour() === "White" && this.getFullmoveClock() === 1) {
+            return;
+        }
+        this.incrementFullmoveClock();
     }
     determinePlayerSpecialMoveCase(square) {
         const activePiece = this.chessboard.getActiveSquare().getPiece();
         if (this.gameLogic.bIsKing(activePiece)) {
             if (square === this.chessboard.getWestCastlingSquare()) {
-                this.player.setHasCastledQueenSide();
-                this.setSpecialMoveInProgress(true);
+                this.initiateCastling();
                 return;
             }
             if (square === this.chessboard.getEastCastlingSquare()) {
-                this.player.setHasCastledKingSide();
-                this.setSpecialMoveInProgress(true);
+                this.initiateCastling();
                 return;
             }
         }
         if (this.gameLogic.bIsPawn(activePiece)) ;
         this.setSpecialMoveInProgress(false);
+    }
+    initiateCastling() {
+        this.player.setCanCastledKingSide(false);
+        this.player.setCanCastledQueenSide(false);
+        this.setSpecialMoveInProgress(true);
+        this.createFenCastlingStatus();
     }
     checkSpecialMoves(square) {
         const specialMoveSquare = this.gameLogic.checkSpecialMove(square);
@@ -1134,24 +1348,43 @@ class Game {
         const kingSideRookSquareIndex = this.gameLogic.castleRookKingSide(square);
         this.setSpecialMoveSquare(squaresArray[kingSideRookSquareIndex]);
     }
+    postMoveCalculations() {
+        if (this.player.bIsDemonstrationMode() && this.player.bHasCompletedTurn()) {
+            this.switchPlayerForDemonstrationMode();
+        }
+        const enPassantSquare = this.gameState.getFenString().split(" ")[3];
+        this.gameLogic.determineEnPassantSquare(enPassantSquare);
+        this.gameLogic.determineAttackedSquares();
+        this.gameLogic.clearAttackedSquares();
+        this.setPlayerCompletedTurn(false);
+    }
+    incrementHalfmoveClock() { this.halfmoveClock += 1; }
+    incrementFullmoveClock() { this.fullmoveClock += 1; }
+    resetHalfmoveClock() { this.halfmoveClock = 0; }
     bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }
     bRequestedMoveIsValid(squares) { return this.gameLogic.checkRequestedMove(squares); }
     bSquareIsActive() { return this.isSquareClicked; }
     bSpecialMoveInProgress() { return this.specialMoveInProgress; }
+    bPawnIsBeingMoved() { return this.pawnisBeingMoved; }
+    bPieceIsBeingCaptured() { return this.pieceIsBeingCaptured; }
     checkValidMoves(pos, piece) { this.gameLogic.squareContainsAttack(pos, piece); }
     incrementMoveCount(piece) { piece.incrementMoveCount(); }
     clearAttackedSquares() { this.gameLogic.clearAttackedSquares(); }
     removeSpecialSquare() { delete this.specialMoveSquare; }
     getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? "Black" : "White"); }
-    getChessboard() { return this.chessboard; }
     getAttackedSquares() { return this.gameLogic.getAttackedSquares(); }
     getGameState() { return this.gameState; }
+    getChessboard() { return this.chessboard; }
     getCurrentPlayer() { return this.player; }
     getSpecialMoveSquare() { return this.specialMoveSquare; }
-    setSquareActive(active) { this.isSquareClicked = active; }
-    setPlayerCompletedTurn(completed) { this.player.setTurnComplete(completed); }
-    setSpecialMoveInProgress(moving) { this.specialMoveInProgress = moving; }
+    getHalfmoveClock() { return this.halfmoveClock; }
+    getFullmoveClock() { return this.fullmoveClock; }
     setSpecialMoveSquare(move) { this.specialMoveSquare = move; }
+    setSquareActive(active) { this.isSquareClicked = active; }
+    setSpecialMoveInProgress(moving) { this.specialMoveInProgress = moving; }
+    setPawnIsBeingMoved(moving) { this.pawnisBeingMoved = moving; }
+    setPieceIsBeingCaptured(captured) { this.pieceIsBeingCaptured = captured; }
+    setPlayerCompletedTurn(completed) { this.player.setTurnComplete(completed); }
 }
 
 const boardSize = () => { return ((window.innerWidth > window.innerHeight)); };
@@ -1328,6 +1561,7 @@ class GameCanvas extends React.Component {
         const prevActiveSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
         const nextActiveSquarePos = attackedSquare.getPosition();
         this.game.setSquareActive(false);
+        this.game.preMoveProcessing(attackedSquare);
         this.overwriteSquare(attackedSquare);
         this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
     }
@@ -1433,10 +1667,10 @@ class GameCanvas extends React.Component {
         ctx.fillRect(sx, sy, sw, sh);
     }
     setNextState(prevPos, nextPos) {
-        const newFenSequence = this.game.fenCreator();
-        const nextPlayerMove = this.game.getNextMove();
         this.game.setPlayerCompletedTurn(true);
+        const nextPlayerMove = this.game.getNextMove();
         this.game.getGameState().setCurrentTurn(nextPlayerMove);
+        const newFenSequence = this.game.fenCreator();
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
         if (this.props.controller) {

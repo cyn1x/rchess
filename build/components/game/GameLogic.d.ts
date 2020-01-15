@@ -11,6 +11,7 @@ declare class GameLogic {
     constructor(chessboard: Board, player: Player);
     checkRequestedMove(attackedSquare: Square): boolean | undefined;
     checkSpecialMove(square: Square): Square | undefined;
+    checkMoveSideEffects(activeSquare: Square, attackedSquare: Square): void;
     squareContainsAttack(pos: string, piece: IPiece): void;
     determineMoveCase(pos: string, piece: IPiece): void;
     generalMoveCases(pos: string, piece: IPiece): void;
@@ -25,7 +26,10 @@ declare class GameLogic {
     playerInCheckDeterminant(piece: IPiece, attackedSquareIndex: number): void;
     enPassantOpeningDeterminant(attackedSquare: Square): void;
     enPassantCaptureDeteriminant(piece: IPiece): void;
-    castlingDeterminant(piece: IPiece): void;
+    determineEnPassantSquare(enPassantSquare: string): void;
+    kingCanCastleDeterminant(): void;
+    rookCanCastleDeterminant(): void;
+    playerCanCastleDeterminant(piece: IPiece): void;
     westCastlingDeterminant(pos: string): false | undefined;
     eastCastlingDeterminant(pos: string): false | undefined;
     castleRookQueenSide(square: Square): number;

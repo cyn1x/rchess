@@ -16,7 +16,7 @@ declare class Player {
     setColour(colour: string): void;
     setCheckStatus(check: boolean): void;
     setTurnComplete(completed: boolean): void;
-    setHasCastledQueenSide(): void;
-    setHasCastledKingSide(): void;
+    setCanCastledQueenSide(canCastle: boolean): void;
+    setCanCastledKingSide(canCastle: boolean): void;
 }
 export default Player;

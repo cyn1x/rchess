@@ -3,15 +3,17 @@ declare class GameState {
     private currentTurn;
     private previousActivePiecePos;
     private nextActivePiecePos;
+    private fenCastlingState;
     getMoveState(): {
         prevMove: string;
         nextMove: string;
     };
-    setMoveState(prev: string, next: string): void;
-    setPlayerCheck(): void;
     getFenString(): string;
     getCurrentTurn(): string;
+    getFenCastlingState(): string;
+    setMoveState(prev: string, next: string): void;
     setFenString(fen: string): void;
     setCurrentTurn(player: string): void;
+    setFenCastlingState(fen: string): void;
 }
 export default GameState;
