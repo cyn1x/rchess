@@ -3,6 +3,7 @@ import GameState from './GameState';
 import Board from './Board';
 import Square from './Square';
 import Player from './Player';
+import { IGameState } from '../..';
 declare class Game {
     private gameState;
     private gameLogic;
@@ -20,7 +21,7 @@ declare class Game {
     switchPlayerForDemonstrationMode(): void;
     setCastlingStatusforDemoMode(): void;
     initialise(cw: number, ch: number): void;
-    updateGameState(gameProps: any): Square | undefined;
+    updateGameState(gameProps: IGameState): Square | undefined;
     updateSquareSizeProps(cw: number, ch: number): void;
     setPiecePositions(): void;
     fenParser(fen: string): string[];
@@ -30,7 +31,7 @@ declare class Game {
     createFenCastlingStatus(): string;
     createFenEnPassantSquare(): string;
     createFenHalfmoveClock(): string;
-    createFenFullmoveClock(): string;
+    createFenFullmoveClock(): number;
     setPlayerCastlingState(fen: string): "-" | undefined;
     setPlayerCanCastleKingSide(kingSide: string): void;
     setPlayerCanCastleQueenSide(kingSide: string): void;
@@ -75,5 +76,7 @@ declare class Game {
     setPawnIsBeingMoved(moving: boolean): void;
     setPieceIsBeingCaptured(captured: boolean): void;
     setPlayerCompletedTurn(completed: boolean): void;
+    setHalfmoveClock(move: number): void;
+    setFullmoveClock(move: number): void;
 }
 export default Game;

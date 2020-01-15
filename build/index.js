@@ -1065,6 +1065,8 @@ class Game {
                 if (squaresArray[i].getPosition() === gameProps.movePieceTo) {
                     this.gameState.setCurrentTurn(gameProps.nextPlayerTurn);
                     this.gameState.setFenString(gameProps.nextFenString);
+                    this.setHalfmoveClock(Number(gameProps.nextFenString.split(" ")[4]));
+                    this.setFullmoveClock(Number(gameProps.nextFenString.split(" ")[5]));
                     return squaresArray[i];
                 }
             }
@@ -1208,8 +1210,8 @@ class Game {
         const fenEnPassantSquare = (enPassantSquare ? " " + enPassantSquare.getPosition() + " " : " - ");
         return fenEnPassantSquare;
     }
-    createFenHalfmoveClock() { return " " + this.getHalfmoveClock() + " "; }
-    createFenFullmoveClock() { return " " + this.getFullmoveClock(); }
+    createFenHalfmoveClock() { return this.getHalfmoveClock() + " "; }
+    createFenFullmoveClock() { return this.getFullmoveClock(); }
     setPlayerCastlingState(fen) {
         let fenCastling = "";
         if (fen.length === 0) {
@@ -1261,8 +1263,8 @@ class Game {
         }
     }
     setMoveClocks(fen) {
-        this.halfmoveClock = Number(fen.split(" ")[4]);
-        this.fullmoveClock = Number(fen.split(" ")[5]);
+        this.setHalfmoveClock(Number(fen.split(" ")[4]));
+        this.setFullmoveClock(Number(fen.split(" ")[5]));
     }
     handleActivatedSquare(activeSquare) {
         this.setSquareActive(true);
@@ -1392,6 +1394,8 @@ class Game {
     setPawnIsBeingMoved(moving) { this.pawnisBeingMoved = moving; }
     setPieceIsBeingCaptured(captured) { this.pieceIsBeingCaptured = captured; }
     setPlayerCompletedTurn(completed) { this.player.setTurnComplete(completed); }
+    setHalfmoveClock(move) { this.halfmoveClock = move; }
+    setFullmoveClock(move) { this.fullmoveClock = move; }
 }
 
 const boardSize = () => { return ((window.innerWidth > window.innerHeight)); };

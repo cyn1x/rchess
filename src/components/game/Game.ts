@@ -6,6 +6,7 @@ import PiecesFactory from './PiecesFactory';
 import Board from './Board';
 import Square from './Square';
 import Player from './Player';
+import { IGameState } from '../..';
 
 class Game {
     private gameState: GameState;
@@ -72,7 +73,7 @@ class Game {
         this.setPiecePositions();
     }
 
-    updateGameState(gameProps: any) {
+    updateGameState(gameProps: IGameState) {
         const squaresArray = this.chessboard.getSquaresArray();
         
         if (gameProps.nextPlayerTurn !== this.gameState.getCurrentTurn()) {
@@ -85,6 +86,8 @@ class Game {
                 if (squaresArray[i].getPosition() === gameProps.movePieceTo) {
                     this.gameState.setCurrentTurn(gameProps.nextPlayerTurn);
                     this.gameState.setFenString(gameProps.nextFenString);
+                    this.setHalfmoveClock(Number(gameProps.nextFenString.split(" ")[4]));
+                    this.setFullmoveClock(Number(gameProps.nextFenString.split(" ")[5]));
                     return squaresArray[i];
                 }
             }
@@ -254,9 +257,9 @@ class Game {
         return fenEnPassantSquare;
     }
 
-    createFenHalfmoveClock() { return " " + this.getHalfmoveClock() + " "; }
+    createFenHalfmoveClock() { return this.getHalfmoveClock() + " "; }
 
-    createFenFullmoveClock() { return " " + this.getFullmoveClock(); }
+    createFenFullmoveClock() { return this.getFullmoveClock(); }
 
     setPlayerCastlingState(fen: string) {
         let fenCastling = "";
@@ -311,8 +314,8 @@ class Game {
     }
 
     setMoveClocks(fen: string) {
-        this.halfmoveClock = Number(fen.split(" ")[4]);
-        this.fullmoveClock = Number(fen.split(" ")[5]);
+        this.setHalfmoveClock(Number(fen.split(" ")[4]));
+        this.setFullmoveClock(Number(fen.split(" ")[5]));
     }
 
     handleActivatedSquare(activeSquare: Square) {
@@ -492,6 +495,10 @@ class Game {
     setPieceIsBeingCaptured(captured: boolean) { this.pieceIsBeingCaptured = captured; }
 
     setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
+
+    setHalfmoveClock(move: number) { this.halfmoveClock = move; }
+
+    setFullmoveClock(move: number) { this.fullmoveClock = move; }
 
 }
 
