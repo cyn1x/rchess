@@ -23,6 +23,7 @@ class Game {
 
     constructor(player: string, fen: string, turn: string) {
         this.setPlayer(player, turn);
+
         this.gameState = new GameState();
         this.chessboard = new Board();
         this.gameLogic = new GameLogic(this.chessboard, this.player);
@@ -31,10 +32,17 @@ class Game {
         this.pawnisBeingMoved = false;
         this.pieceIsBeingCaptured = false;
 
+        this.setGameState(fen, turn);
+    }
+
+    setGameState(fen: string, turn: string) {
+        const defaultState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        const fenString = fen.length === 6 ? fen : defaultState;
+
+        this.gameState.setFenString(fenString);
         this.gameState.setCurrentTurn(turn);
-        this.setPlayerCastlingState(fen);
-        this.setMoveClocks(fen);
-        this.gameState.setFenString(fen);
+        this.setPlayerCastlingState(fenString);
+        this.setMoveClocks(fenString);
     }
 
     setPlayer(player: string, turn: string) {
