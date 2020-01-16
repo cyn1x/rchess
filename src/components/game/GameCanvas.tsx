@@ -11,6 +11,11 @@ import Square from './Square';
 
 const boardSize = () => { return ( (window.innerWidth > window.innerHeight) ); }
 
+enum ClickSquare {
+    select = 1,
+    deselect = 0
+}
+
 class GameCanvas extends React.Component<IGameCanvas, IState> {
     private game: Game;
     private canvas = React.createRef<HTMLCanvasElement>();
@@ -164,11 +169,11 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
     interceptClick(event: any) {
         if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
-            this.handleClick(event);
+            this.determineClick(event);
         }
     }
 
-    handleClick(event: MouseEvent) {
+    determineClick(event: MouseEvent) {
         const cx = event.offsetX;
         const cy = event.offsetY;
         const squaresArray = this.game.getChessboard().getSquaresArray();
@@ -180,34 +185,44 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             const sh = squaresArray[i].getHeight();
 
             if (cx >= sx && cx <= sx + sw && cy >= sy && cy <= sy + sh) {
+                this.handleClick(squaresArray[i]);
+            }
+        }
+    }
 
-                if (this.game.bSquareIsActive()) {
-                    if (this.game.getChessboard().getActiveSquare() === squaresArray[i]) {
-                        this.deactivateSquare(squaresArray[i]);
-                    }
-                    else if (this.game.getChessboard().getActiveSquare() !== squaresArray[i]) {                        
-                        this.handlePlayerMove(squaresArray[i]);
-                    }
-                    return;
-                }
-                if (squaresArray[i].bSquareContainsPiece()) {
-                    if (squaresArray[i].getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
-                        this.activateSquare(squaresArray[i]);
-                    }
-                }
+    handleClick(clickedSquare: Square) {
+
+        if (this.game.bSquareIsActive()) {
+            if (this.game.getChessboard().getActiveSquare() === clickedSquare) {
+                this.selectSquare(clickedSquare, ClickSquare.deselect);
+            }
+            else if (this.game.getChessboard().getActiveSquare() !== clickedSquare) {                        
+                this.handlePlayerMove(clickedSquare);
+            }
+            return;
+        }
+        if (clickedSquare.bSquareContainsPiece()) {
+            if (clickedSquare.getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
+                this.selectSquare(clickedSquare, ClickSquare.select);
             }
         }
     }
 
     handlePlayerMove(attackedSquare: Square) {
-        if (!this.game.bRequestedMoveIsValid(attackedSquare)) { return; }
+        if (!this.game.bRequestedMoveIsValid(attackedSquare)) {
+            return;
+        }
 
         this.game.determinePlayerSpecialMoveCase(attackedSquare);
-
+        
         if (this.game.bSpecialMoveInProgress()) {
             this.handleSpecialSquare(attackedSquare);
         }
+        
+        this.processPlayerMove(attackedSquare);
+    }
 
+    processPlayerMove(attackedSquare: Square) {
         const prevActiveSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
         const nextActiveSquarePos = attackedSquare.getPosition();
 
@@ -240,27 +255,14 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         this.game.removeSpecialSquare();
     }
 
-    activateSquare(activeSquare: Square) {
+    selectSquare(activeSquare: Square, instruction: number) {
         const files = this.game.getChessboard().getFiles();
         const ranks = this.game.getChessboard().getRanks();
         const activePiece = activeSquare.getPiece();
         const img = this.constructImage(activePiece);
 
-        this.game.handleActivatedSquare(activeSquare);
-
-        this.manageValidSquares();
-        this.selectCell(activeSquare);
-        this.drawImg(img, ranks.indexOf(Number(activeSquare.getPosition()[1])), files.indexOf(activeSquare.getPosition()[0]));
-    }
-
-    deactivateSquare(activeSquare: Square) {
-        const files = this.game.getChessboard().getFiles();
-        const ranks = this.game.getChessboard().getRanks();
-        const activePiece = activeSquare.getPiece();
-        const img = this.constructImage(activePiece);
-
-        this.game.handleDeactivatedSquare();
-
+        instruction === ClickSquare.select ? this.game.handleActivatedSquare(activeSquare) : this.game.handleDeactivatedSquare();
+        
         this.manageValidSquares();
         this.selectCell(activeSquare);
         this.drawImg(img, ranks.indexOf(Number(activeSquare.getPosition()[1])), files.indexOf(activeSquare.getPosition()[0]));
@@ -296,20 +298,23 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     drawValidSquares() {
-        const files = this.game.getChessboard().getFiles();
-        const ranks = this.game.getChessboard().getRanks();
-
         if (this.game.getAttackedSquares().length > 0) {
             const validMoves = this.game.getAttackedSquares();
             for (let i = 0; i < validMoves.length; i++) {
-
-                this.selectCell(validMoves[i]);
-
-                if (validMoves[i].bSquareContainsPiece()) {
-                    const img = this.drawPiece(validMoves[i].getPiece());
-                    this.drawImg(img, ranks.indexOf(Number(validMoves[i].getPosition()[1])), files.indexOf(validMoves[i].getPosition()[0]));
-                }
+                this.highlightValidSquares(validMoves[i]);
             }
+        }
+    }
+
+    highlightValidSquares(validSquare: Square) {
+        const files = this.game.getChessboard().getFiles();
+        const ranks = this.game.getChessboard().getRanks();
+
+        this.selectCell(validSquare);
+
+        if (validSquare.bSquareContainsPiece()) {
+            const img = this.drawPiece(validSquare.getPiece());
+            this.drawImg(img, ranks.indexOf(Number(validSquare.getPosition()[1])), files.indexOf(validSquare.getPosition()[0]));
         }
     }
 
