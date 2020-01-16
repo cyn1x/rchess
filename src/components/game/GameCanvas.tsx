@@ -4,8 +4,8 @@ import {
     IGameCanvas, IGameState
 } from '../types';
 import { IState } from './types';
-
 import { IPiece } from './pieces/types';
+
 import Game from './Game';
 import Square from './Square';
 
@@ -25,7 +25,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     
     constructor(props: IGameCanvas) {
         super(props);
-        this.update = this.update.bind(this)
+        this.update = this.update.bind(this);
         this.state = {
             canvas: this.canvas,
             screen: {
@@ -79,6 +79,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
     updateOpponentMove() {
         const updatedSquare = this.game.updateGameState(this.props.game);
+
         if (updatedSquare) {
             this.handleOpponentMove(updatedSquare);
         }
@@ -87,6 +88,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     update() {
         this.width = (boardSize() ? window.innerWidth: window.innerHeight) / 2.5
         this.height = this.width
+
         this.setState({
             canvas: this.canvas,
             screen: {
@@ -95,7 +97,13 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
                 ratio: this.ratio
             }
         })
+
+        this.updateBoardSize();
+    }
+
+    updateBoardSize() {
         const {cw, ch} = this.getCellDimensions();
+        
         this.game.updateSquareSizeProps(cw, ch);
         this.drawBoard();
         this.drawPieces();
@@ -116,9 +124,9 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
             if (i % 8 === 0) { rank++; }
 
-            this.setSequareColours(i, rank, ctx)
-            ctx.strokeRect(x, y, w, h)
-            ctx.fillRect(x, y, w, h)
+            this.setSequareColours(i, rank, ctx);
+            ctx.strokeRect(x, y, w, h);
+            ctx.fillRect(x, y, w, h);
         }
     }
 
@@ -142,13 +150,13 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
         squaresArray.forEach( (square: Square, index: number) => {
             if (square.getPiece()) {
-                const piece = square.getPiece()
-                const position = piece.getPosition().split("")
+                const piece = square.getPiece();
+                const position = piece.getPosition().split("");
                 const img = new Image();
                 img.src = piece.getImage();
                 img.id = piece.getType();
 
-                this.drawImg(img, ranks.indexOf(Number(position[1])), files.indexOf(position[0]))
+                this.drawImg(img, ranks.indexOf(Number(position[1])), files.indexOf(position[0]));
             }
         })
     }
@@ -160,10 +168,10 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             setTimeout(() => { this.drawImg(img, file, rank) }, 50);
         }
         if (img.id === 'P' || img.id === 'p') {
-            ctx.drawImage(img, (cw * rank) + cw * 0.2, (ch * file) + ch * 0.1, cw * 0.6, ch * 0.8)
+            ctx.drawImage(img, (cw * rank) + cw * 0.2, (ch * file) + ch * 0.1, cw * 0.6, ch * 0.8);
         }
         else {
-            ctx.drawImage(img, (cw * rank) + cw * 0.1, (ch * file) + ch * 0.1, cw * 0.8, ch * 0.8)
+            ctx.drawImage(img, (cw * rank) + cw * 0.1, (ch * file) + ch * 0.1, cw * 0.8, ch * 0.8);
         }
     }
 
@@ -191,7 +199,6 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     handleClick(clickedSquare: Square) {
-
         if (this.game.bSquareIsActive()) {
             if (this.game.getChessboard().getActiveSquare() === clickedSquare) {
                 this.selectSquare(clickedSquare, ClickSquare.deselect);
@@ -356,9 +363,11 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         this.game.setPlayerCompletedTurn(true);
 
         const nextPlayerMove = this.game.getNextMove();
-        this.game.getGameState().setCurrentTurn(nextPlayerMove);
+
+        this.game.getGameState().setCurrentTurn(this.game.getNextMove());
 
         const newFenSequence = this.game.fenCreator();
+
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);
 
@@ -385,8 +394,10 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     getCellDimensions() {
         const cw = (this.state.screen.width * this.state.screen.ratio) / 8;
         const ch = (this.state.screen.height * this.state.screen.ratio) / 8;
+
         return {cw, ch}
     }
+
 }
 
 export default GameCanvas;
