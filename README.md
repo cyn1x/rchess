@@ -36,7 +36,6 @@ ___
 ## Plans
 
 ### What else will be done?
-- Refactor to further break up code into smaller, and reusable functions
 - Improved demonstration mode
 - Abstract the core engine logic so AI can be added without muddling through the code
 - Possible port over to Rust, having the Rust program compute the game logic on the server-side, while the TypeScript code will render only the UI on the client-side
@@ -109,7 +108,7 @@ This applies to both external usage and using the provided fields on the UI.
 * `player`
     * must be a string, and exactly `"Player 1"` for white or `"Player 2"` for black
 * `nextFenString`
-    * should be in the format of `"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"`
+    * should be in the format of `"rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"` or empty for the default state
 * `nextPlayerTurn`
     * must be a string, and exactly `"White"` for white to have the first turn, or `"Black"` to have the first turn.
 * `movePieceFrom` and `movePieceTo`

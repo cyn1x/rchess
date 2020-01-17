@@ -1,3 +1,4 @@
+import { IGameState } from '../types';
 import { IPiece } from './pieces/types';
 
 import GameState from './GameState';
@@ -6,7 +7,6 @@ import PiecesFactory from './PiecesFactory';
 import Board from './Board';
 import Square from './Square';
 import Player from './Player';
-import { IGameState } from '../..';
 
 class Game {
     private gameState: GameState;
@@ -49,6 +49,7 @@ class Game {
         if (player === "Demo") {
             this.player = new Player(turn);
             this.player.setDemonstrationMode();
+
             return;
         }
         
@@ -96,11 +97,11 @@ class Game {
                     this.gameState.setFenString(gameProps.nextFenString);
                     this.setHalfmoveClock(Number(gameProps.nextFenString.split(" ")[4]));
                     this.setFullmoveClock(Number(gameProps.nextFenString.split(" ")[5]));
+
                     return squaresArray[i];
                 }
             }
         }
-
     }
 
     updateSquareSizeProps(cw: number, ch: number) {
@@ -123,6 +124,7 @@ class Game {
         const startingFen = this.gameState.getFenString();
         const squaresArray = this.chessboard.getSquaresArray();
         const piecesArray = this.fenParser(startingFen);
+
         let currentRank = 0;
         let currentFile = 0;
         
@@ -225,24 +227,12 @@ class Game {
             if (this.player.bCanCastleQueenSide()) {
                 fenCastlingState += "Q";
             }
-            this.gameState.getFenCastlingState().split("").forEach(char => {
-                switch(char) {
-                    case "k": fenCastlingState += char;
-                        break;
-                    case "q": fenCastlingState += char;
-                        break;
-                }
-            })
+
+            fenCastlingState += this.appendFenCastlingBlackStatus();
         }
         else if (this.player.getColour() === "Black") {
-            this.gameState.getFenCastlingState().split("").forEach(char => {
-                switch(char) {
-                    case "K": fenCastlingState += char;
-                        break;
-                    case "Q": fenCastlingState += char;
-                        break;
-                }
-            })
+            fenCastlingState = this.appendFenCastlingWhiteStatus();
+
             if (this.player.bCanCastleKingSide()) {
                 fenCastlingState += "k";
             }
@@ -251,11 +241,43 @@ class Game {
             }
         }
 
-        if (fenCastlingState.length === 0) { fenCastlingState += "-"; }
+        if (fenCastlingState.length === 0) {
+            return "-";
+        }
 
         this.gameState.setFenCastlingState(fenCastlingState);
 
         return fenCastlingState;
+    }
+
+    appendFenCastlingWhiteStatus() {
+        let fenWhiteCastlingState = "";
+
+        this.gameState.getFenCastlingState().split("").forEach(char => {
+            switch(char) {
+                case "K": fenWhiteCastlingState += char;
+                    break;
+                case "Q": fenWhiteCastlingState += char;
+                    break;
+            }
+        })
+
+        return fenWhiteCastlingState;
+    }
+
+    appendFenCastlingBlackStatus() {
+        let fenBlackCastlingState = "";
+
+        this.gameState.getFenCastlingState().split("").forEach(char => {
+            switch(char) {
+                case "k": fenBlackCastlingState += char;
+                    break;
+                case "q": fenBlackCastlingState += char;
+                    break;
+            }
+        })
+
+        return fenBlackCastlingState;
     }
 
     createFenEnPassantSquare() {
@@ -270,12 +292,11 @@ class Game {
     createFenFullmoveClock() { return this.getFullmoveClock(); }
 
     setPlayerCastlingState(fen: string) {
-        let fenCastling = "";
+        const fenCastling = fen.split(" ")[2];
 
-        if (fen.length === 0) { fenCastling += this.gameState.getFenString(); }
-        else { fenCastling = fen.split(" ")[2]; }
-
-        if (fenCastling.length === 0) { return "-"; }
+        if (fenCastling.length === 0) {
+            return "-";
+        }
         
         let newFenCastlingState = "";
 
@@ -473,6 +494,8 @@ class Game {
     resetHalfmoveClock() { this.halfmoveClock = 0; }
 
     bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }
+
+    bIsMultiplayerGame(nextPlayerTurn: string) { return nextPlayerTurn === this.getCurrentPlayer().getColour(); }
 
     bRequestedMoveIsValid(squares: Square) { return this.gameLogic.checkRequestedMove(squares); }
 

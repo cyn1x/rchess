@@ -32,19 +32,19 @@ class GameLogic {
         }
     }
 
-    checkSpecialMove(square: Square) {
-        if (square.bIsCastlingSquare()) {
+    checkSpecialMove(specialMoveSquare: Square) {
+        if (specialMoveSquare.bIsCastlingSquare()) {
             const westCastlingSquare = this.chessboard.getWestCastlingSquare();
             const eastCastlingSquare = this.chessboard.getEastCastlingSquare();
 
-            switch(square) {
+            switch(specialMoveSquare) {
                 case this.chessboard.getWestCastlingSquare():
                     return westCastlingSquare;
                 case this.chessboard.getEastCastlingSquare():
                     return eastCastlingSquare;
             }
         }
-        if (square.bIsEnPassantSquare()) {
+        if (specialMoveSquare.bIsEnPassantSquare()) {
             const enPassantSquare = this.chessboard.getEnPassantSquare();
 
             return enPassantSquare;
@@ -147,8 +147,8 @@ class GameLogic {
     checkAttackableSquares(file: number, rank: number, piece: IPiece) {
         const squaresArray = this.chessboard.getSquaresArray();
         const files = this.chessboard.getFiles();
-        const boardLength = squaresArray.length / 8;
-        const attackedSquareIndex = (boardLength - rank) * boardLength + file;
+
+        const attackedSquareIndex = this.calculateArrayIndex(file, rank);
         
         if (attackedSquareIndex < 0 || attackedSquareIndex > squaresArray.length - 1) { return; }
 
@@ -293,12 +293,11 @@ class GameLogic {
         if (enPassantSquare !== "-") {
             const squaresArray = this.chessboard.getSquaresArray();
             const files = this.chessboard.getFiles();
-            const boardLength = squaresArray.length / 8;
             
             const pos = enPassantSquare;
             let file = files.indexOf(pos[0]);
             const rank = Number(pos[1]);
-            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            const targetSquareIndex = this.calculateArrayIndex(file, rank);
 
             squaresArray[targetSquareIndex].setEnPassantSquare(true);
             this.chessboard.setEnPassantSquare(squaresArray[targetSquareIndex]);
@@ -314,17 +313,16 @@ class GameLogic {
             if (activePiece.getMoveCount() !== 0) { return; }
 
             const files = this.chessboard.getFiles();
-            const boardLength = squaresArray.length / 8;
             
             const pos = attackedSquare.getPosition();
             const file = files.indexOf(pos[0]);
             const rank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1);
-            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            const targetSquareIndex = this.calculateArrayIndex(file, rank);
 
             const oldPos = activeSquare.getPosition();
             const oldFile = files.indexOf(oldPos[0])
             const oldRank = (activePiece.getColour() === "White" ? Number(oldPos[1]) + 1 : Number(oldPos[1]) - 1);
-            const activeSquareIndex = (boardLength - oldRank) * boardLength + oldFile;
+            const activeSquareIndex = this.calculateArrayIndex(oldFile, oldRank);
 
             if (squaresArray[targetSquareIndex] === squaresArray[activeSquareIndex]) {
                 squaresArray[targetSquareIndex].setEnPassantSquare(true);
@@ -339,16 +337,15 @@ class GameLogic {
         const activePiece = activeSquare.getPiece();
         
         const files = this.chessboard.getFiles();
-        const boardLength = squaresArray.length / 8;
         
         const pos = activePiece.getPosition();
         const northEastFile = files.indexOf(pos[0]) + 1;
         const northEastRank = (activePiece.getColour() === "White" ? Number(pos[1]) + 1 : Number(pos[1]) - 1);
-        const northEastSquareIndex = (boardLength - northEastRank) * boardLength + northEastFile;
+        const northEastSquareIndex = this.calculateArrayIndex(northEastFile, northEastRank);
 
         const northWestFile = files.indexOf(pos[0]) - 1;
         const northWestRank = (activePiece.getColour() === "White" ? Number(pos[1]) + 1 : Number(pos[1]) - 1);
-        const northWestSquareIndex = (boardLength - northWestRank) * boardLength + northWestFile;
+        const northWestSquareIndex = this.calculateArrayIndex(northWestFile, northWestRank);
 
         if (squaresArray[northEastSquareIndex].bIsEnPassantSquare()) {
             this.attackedSquares.push(squaresArray[northEastSquareIndex]);
@@ -364,12 +361,11 @@ class GameLogic {
         const activePiece = activeSquare.getPiece();
 
         const files = this.chessboard.getFiles();
-        const boardLength = squaresArray.length / 8;
         
         const pos = attackedSquare.getPosition();
         const capturedPawnFile = files.indexOf(pos[0]);
         const capturedPawnRank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1);
-        const capturedPawnSquareIndex = (boardLength - capturedPawnRank) * boardLength + capturedPawnFile;
+        const capturedPawnSquareIndex = this.calculateArrayIndex(capturedPawnFile, capturedPawnRank);
 
         (squaresArray[capturedPawnSquareIndex]).removePiece();
         
@@ -430,7 +426,6 @@ class GameLogic {
     westCastlingDeterminant(pos: string) {
         const squaresArray = this.chessboard.getSquaresArray();
         const files = this.chessboard.getFiles();
-        const boardLength = squaresArray.length / 8;
         
         let file = files.indexOf(pos[0]);
         const rank = Number(pos[1]);
@@ -438,13 +433,13 @@ class GameLogic {
 
         while (file != firstSquareInRow) {
             file = file - 1;
-            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            const targetSquareIndex = this.calculateArrayIndex(file, rank);
             if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
             if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
         }
         
         file = files.indexOf(pos[0]) - 2;
-        const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        const targetSquareIndex = this.calculateArrayIndex(file, rank);
         squaresArray[targetSquareIndex].setCastlingSquare(true);
         this.chessboard.setWestCastlingSquare(squaresArray[targetSquareIndex]);
         this.attackedSquares.push(squaresArray[targetSquareIndex]);
@@ -453,7 +448,6 @@ class GameLogic {
     eastCastlingDeterminant(pos: string) {
         const squaresArray = this.chessboard.getSquaresArray();
         const files = this.chessboard.getFiles();
-        const boardLength = squaresArray.length / 8;
         
         let file = files.indexOf(pos[0]);
         const rank = Number(pos[1]);
@@ -461,13 +455,13 @@ class GameLogic {
 
         while (file != lastSquareInRow) {
             file = file + 1;
-            const targetSquareIndex = (boardLength - rank) * boardLength + file;
+            const targetSquareIndex = this.calculateArrayIndex(file, rank);
             if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
             if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
         }
 
         file = files.indexOf(pos[0]) + 2;
-        const targetSquareIndex = (boardLength - rank) * boardLength + file;
+        const targetSquareIndex = this.calculateArrayIndex(file, rank);
         squaresArray[targetSquareIndex].setCastlingSquare(true);
         this.chessboard.setEastCastlingSquare(squaresArray[targetSquareIndex]);
         this.attackedSquares.push(squaresArray[targetSquareIndex]);
@@ -475,18 +469,17 @@ class GameLogic {
 
     castleRookQueenSide(square: Square) {
         const squaresArray = this.chessboard.getSquaresArray();
-        const boardLength = squaresArray.length / 8;
         const files = this.chessboard.getFiles();
 
         const pos = square.getPosition();
         const file = files.indexOf(pos[0]) - 2;
         const rank = Number(pos[1]);
-        const queenSideRookSquareIndex = (boardLength - rank) * boardLength + file;
+        const queenSideRookSquareIndex = this.calculateArrayIndex(file, rank);
 
-        const newPos = square.getPosition();
-        const newFile = files.indexOf(newPos[0]) + 1;
-        const newRank = Number(newPos[1]);
-        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
+        const newRookPos = square.getPosition();
+        const newRookFile = files.indexOf(newRookPos[0]) + 1;
+        const newRookRank = Number(newRookPos[1]);
+        const newRookPosSquareIndex = this.calculateArrayIndex(newRookFile, newRookRank);
 
         squaresArray[newRookPosSquareIndex].setPiece(squaresArray[queenSideRookSquareIndex].getPiece());
         squaresArray[queenSideRookSquareIndex].removePiece();
@@ -496,23 +489,29 @@ class GameLogic {
 
     castleRookKingSide(square: Square) {
         const squaresArray = this.chessboard.getSquaresArray();
-        const boardLength = squaresArray.length / 8;
         const files = this.chessboard.getFiles();
 
         const pos = square.getPosition();
         const file = files.indexOf(pos[0]) + 1;
         const rank = Number(pos[1]);
-        const kingSideRookSquareIndex = (boardLength - rank) * boardLength + file;
+        const kingSideRookSquareIndex = this.calculateArrayIndex(file, rank);
 
-        const newPos = square.getPosition();
-        const newFile = files.indexOf(newPos[0]) - 1;
-        const newRank = Number(newPos[1]);
-        const newRookPosSquareIndex = (boardLength - newRank) * boardLength + newFile;
+        const newRookPos = square.getPosition();
+        const newRookFile = files.indexOf(newRookPos[0]) - 1;
+        const newRookRank = Number(newRookPos[1]);
+        const newRookPosSquareIndex = this.calculateArrayIndex(newRookFile, newRookRank);
 
         squaresArray[newRookPosSquareIndex].setPiece(squaresArray[kingSideRookSquareIndex].getPiece());
         squaresArray[kingSideRookSquareIndex].removePiece();
 
         return kingSideRookSquareIndex;
+    }
+
+    calculateArrayIndex(file: number, rank: number) {
+        const squaresArray = this.chessboard.getSquaresArray();
+        const boardLength = squaresArray.length / 8;
+
+        return (boardLength - rank) * boardLength + file;
     }
 
     bKingPassesThroughAttackedSquare(targetSquareIndex: number, file: number) {

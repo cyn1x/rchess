@@ -62,16 +62,19 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     componentDidUpdate() {
         if (this.props.resetGame) {
             this.resetGame();
+
             return;
         }
-        if (this.props.game.nextPlayerTurn === this.game.getCurrentPlayer().getColour()) {
+        if (this.game.bIsMultiplayerGame(this.props.game.nextPlayerTurn)) {
             this.updateOpponentMove();
         }
+
         this.game.postMoveCalculations();
     }
 
     resetGame() {
         this.game = new Game(this.props.player, this.props.game.nextFenString, this.props.game.nextPlayerTurn);
+
         this.initialise();
         this.drawBoard();
         this.drawPieces();
