@@ -169,9 +169,7 @@ class GameLogic implements Logic {
         }
         else { this.playerInCheckDeterminant(piece, attackedSquareIndex); }
         
-        if (!this.bIsVerifyingRequestedMove()) {
-            return this.bAttackOccupiedSquares(piece, attackedSquareIndex);
-        }
+        return this.bAttackOccupiedSquares(piece, attackedSquareIndex);
     }
 
     playerInCheckDeterminant(piece: IPiece, attackedSquareIndex: number) {
@@ -207,7 +205,7 @@ class GameLogic implements Logic {
     bAttackOccupiedSquares(piece: IPiece, attackedSquareIndex: number) {
         const squaresArray = this.chessboard.getSquaresArray();
         const attackedSquares = this.gameData.getAttackedSquares();
-
+        
         if (piece.getColour() === squaresArray[attackedSquareIndex].getPiece().getColour()) {
             this.setSquareAttack(attackedSquareIndex, piece);
             return false;
@@ -329,7 +327,10 @@ class GameLogic implements Logic {
     }
 
     bKingInCheck(piece: IPiece, attackedPiece: IPiece) {
-        if (this.bIsPawn(piece) && piece.getPosition()[0] === attackedPiece.getPosition()[0]) return;
+        if (this.bIsPawn(piece) && piece.getPosition()[0] === attackedPiece.getPosition()[0]) {
+            return;
+        }
+
         return (piece.getColour() !== attackedPiece.getColour() && this.player.getColour() === attackedPiece.getColour());
     }
 
