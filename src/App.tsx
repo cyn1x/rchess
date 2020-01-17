@@ -1,8 +1,8 @@
-import React from "react";
-import { GameProvider } from './components/GameContext'
-import GameSettings from './components/GameSettings';
+import React from 'react';
+import { GameProvider } from './components/provider/GameContext'
+import GameSettings from './components/provider/GameSettings';
 import GameEntryPoint from './components/index';
-import GameInfo from './components/GameInfo';
+import GameInfo from './components/provider/GameInfo';
 
 import './styles.css'
 

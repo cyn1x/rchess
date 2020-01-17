@@ -27,9 +27,9 @@ const GameSettings = () => {
         let playerError = "";
         let fenError = "";
         let turnError = "";
-
+        
         if (currentPlayer === "") { playerError = "Player can only be Player 1, Player 2, or Demo"; }
-        if (fenString.length > 0 && fenString.length < 6) { fenError = "Invalid FEN string." }
+        if (fenString.split(" ").length > 0 && fenString.split(" ").length < 6) { fenError = "Invalid FEN string." }
         if (playerTurn === "") { turnError = "Turn can only be Black or White" }
 
         if (playerError || fenError || turnError) {

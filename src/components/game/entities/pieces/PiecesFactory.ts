@@ -1,11 +1,11 @@
-import { IPiece } from './pieces/types';
-import Pieces from './pieces/Pieces';
-import Pawn from './pieces/Pawn';
-import Knight from './pieces/Knight';
-import Bishop from './pieces/Bishop';
-import Rook from './pieces/Rook';
-import Queen from './pieces/Queen';
-import King from './pieces/King';
+import { IPiece } from './types';
+import Pieces from './Pieces';
+import Pawn from './Pawn';
+import Knight from './Knight';
+import Bishop from './Bishop';
+import Rook from './Rook';
+import Queen from './Queen';
+import King from './King';
 
 class PiecesFactory extends Pieces { 
 

@@ -1,6 +1,6 @@
 import React, { useContext } from 'react';
-import { GameContext } from './GameContext';
-import GameCanvas from './game/GameCanvas';
+import { GameContext } from './provider/GameContext';
+import GameCanvas from './game/ui/GameCanvas';
 import { IGameState } from './types';
 
 const GameEntryPoint = () => {

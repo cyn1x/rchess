@@ -1,6 +1,6 @@
 import React, { useState, createContext } from 'react';
-import { IGameCanvas } from './types';
-import { IGameContext, IGameProviderProps } from './types';
+import { IGameCanvas } from '../types';
+import { IGameContext, IGameProviderProps } from '../types';
 
 const initialGameState: IGameCanvas = {
     player: "Demo",

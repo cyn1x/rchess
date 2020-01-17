@@ -2,12 +2,12 @@ import React from 'react';
 
 import {
     IGameCanvas, IGameState
-} from '../types';
+} from '../../types';
 import { IState } from './types';
-import { IPiece } from './pieces/types';
+import { IPiece } from '../entities/pieces/types';
 
-import Game from './Game';
-import Square from './Square';
+import Game from '../Game';
+import Square from '../entities/Square';
 
 const boardSize = () => { return ( (window.innerWidth > window.innerHeight) ); }
 
@@ -369,7 +369,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
         this.game.getGameState().setCurrentTurn(this.game.getNextMove());
 
-        const newFenSequence = this.game.fenCreator();
+        const newFenSequence = this.game.createFenString();
 
         this.game.getGameState().setFenString(newFenSequence);
         this.game.getGameState().setMoveState(prevPos, nextPos);

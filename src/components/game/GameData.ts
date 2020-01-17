@@ -1,5 +1,5 @@
-import { IPiece } from './pieces/types';
-import Square from './Square';
+import { IPiece } from './entities/pieces/types';
+import Square from './entities/Square';
 
 class GameData {
     private attackedSquares: Array<Square>;

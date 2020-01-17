@@ -1,13 +1,17 @@
 import { IGameState } from '../types';
-import { IPiece } from './pieces/types';
+import { IPiece } from './entities/pieces/types';
 
 import GameData from './GameData';
 import GameState from './GameState';
-import GameLogic from './GameLogic';
-import PiecesFactory from './PiecesFactory';
-import Board from './Board';
-import Square from './Square';
-import Player from './Player';
+import GameLogic from './logic/GameLogic';
+import FenParser from './fen/FenParser';
+import FenBuilder from './fen/FenBuilder';
+import PiecesFactory from './entities/pieces/PiecesFactory';
+import Board from './entities/Board';
+import Square from './entities/Square';
+import Player from './entities/Player';
+import Pawn from './entities/pieces/Pawn';
+import King from './entities/pieces/King';
 
 class Game {
     private gameData: GameData;
@@ -15,13 +19,12 @@ class Game {
     private gameLogic: GameLogic;
     private chessboard: Board;
     private player!: Player;
+
     private specialMoveSquare!: Square;
     private isSquareClicked: boolean;
     private specialMoveInProgress: boolean;
     private pawnisBeingMoved: boolean;
     private pieceIsBeingCaptured: boolean;
-    private halfmoveClock!: number;
-    private fullmoveClock!: number;
 
     constructor(player: string, fen: string, turn: string) {
         this.setPlayer(player, turn);
@@ -40,12 +43,13 @@ class Game {
 
     setGameState(fen: string, turn: string) {
         const defaultState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        const fenString = fen.length === 6 ? fen : defaultState;
+        const fenString = fen.split(" ").length === 6 ? fen : defaultState;
 
         this.gameState.setFenString(fenString);
         this.gameState.setCurrentTurn(turn);
         this.setPlayerCastlingState(fenString);
-        this.setMoveClocks(fenString);
+        this.gameState.setHalfmoveClock(Number(fen.split(" ")[4]));
+        this.gameState.setFullmoveClock(Number(fen.split(" ")[5]));
     }
 
     setPlayer(player: string, turn: string) {
@@ -98,8 +102,8 @@ class Game {
                 if (squaresArray[i].getPosition() === gameProps.movePieceTo) {
                     this.gameState.setCurrentTurn(gameProps.nextPlayerTurn);
                     this.gameState.setFenString(gameProps.nextFenString);
-                    this.setHalfmoveClock(Number(gameProps.nextFenString.split(" ")[4]));
-                    this.setFullmoveClock(Number(gameProps.nextFenString.split(" ")[5]));
+                    this.gameState.setHalfmoveClock(Number(gameProps.nextFenString.split(" ")[4]));
+                    this.gameState.setFullmoveClock(Number(gameProps.nextFenString.split(" ")[5]));
 
                     return squaresArray[i];
                 }
@@ -123,10 +127,11 @@ class Game {
     }
 
     setPiecePositions() {
+        const fenParser = new FenParser(this.chessboard);
         const piecesFactory = new PiecesFactory();
         const startingFen = this.gameState.getFenString();
         const squaresArray = this.chessboard.getSquaresArray();
-        const piecesArray = this.fenParser(startingFen);
+        const piecesArray = fenParser.parseFenString(startingFen);
 
         let currentRank = 0;
         let currentFile = 0;
@@ -149,150 +154,20 @@ class Game {
         })
     }
 
-    fenParser(fen: string) {
-        const fenString = fen.split(" ");
-        const positions = fenString[0].split("/");
-        const pieces = this.chessboard.getPiecePositionsArray();
+    createFenString() {
+        const fenBuilder = new FenBuilder(this.gameState, this.chessboard, this.player);
 
-        let currentSquare = 0;
-        positions.forEach( rank => {
-            rank.split("").forEach( char => {
-                if (!Number(char)) {
-                    pieces[currentSquare] = char;
-                    currentSquare++;
-                }
-                else {
-                    currentSquare += Number(char);
-                }
-            })
-        })
-        return pieces
-    }
-
-    fenCreator() {
-        const positions = this.createFenPositions();
-        const currentTurn = this.createFenCurrentTurn();
-        const castling = this.createFenCastlingStatus();
-        const enPassant = this.createFenEnPassantSquare();
-        const halfmoveClock = this.createFenHalfmoveClock();
-        const fullmoveClock = this.createFenFullmoveClock();
+        const positions = fenBuilder.createFenPositions();
+        const currentTurn = fenBuilder.createFenCurrentTurn();
+        const castling = fenBuilder.createFenCastlingStatus();
+        const enPassant = fenBuilder.createFenEnPassantSquare();
+        const halfmoveClock = fenBuilder.createFenHalfmoveClock();
+        const fullmoveClock = fenBuilder.createFenFullmoveClock();
 
         const newFenString = positions + currentTurn + castling + enPassant + halfmoveClock + fullmoveClock;
 
         return newFenString;
     }
-
-    createFenPositions() {
-        const board = this.getChessboard().getSquaresArray();
-        let newFenString = "";
-        let emptySquares = 0;
-        for (let i = 0; i < board.length; i++) {
-            
-            if (i % 8 === 0 && i !== 0) {
-                newFenString += "/"
-                emptySquares = 0;
-            }
-            
-            if (board[i].bSquareContainsPiece()) {
-                newFenString += board[i].getPiece().getType();
-                emptySquares = 0;
-            }
-            else {
-                emptySquares++;
-                if ((i + 1) < board.length) {
-                    if ((i + 1) % 8 === 0) {
-                        newFenString += emptySquares;
-                    }
-                    else if (board[i + 1].bSquareContainsPiece()) {
-                        newFenString += emptySquares;
-                    }
-                }
-            }
-        }
-
-        return newFenString;
-    }
-
-    createFenCurrentTurn() {
-        const currentTurn = this.gameState.getCurrentTurn();
-        const fenCurrentTurn = (currentTurn[0] === "W" ? " w " : " b ");
-
-        return fenCurrentTurn;
-    }
-
-    createFenCastlingStatus() {
-        let fenCastlingState = "";
-
-        if (this.player.getColour() === "White") {
-            if (this.player.bCanCastleKingSide()) {
-                fenCastlingState += "K";
-            }
-            if (this.player.bCanCastleQueenSide()) {
-                fenCastlingState += "Q";
-            }
-
-            fenCastlingState += this.appendFenCastlingBlackStatus();
-        }
-        else if (this.player.getColour() === "Black") {
-            fenCastlingState = this.appendFenCastlingWhiteStatus();
-
-            if (this.player.bCanCastleKingSide()) {
-                fenCastlingState += "k";
-            }
-            if (this.player.bCanCastleQueenSide()) {
-                fenCastlingState += "q";
-            }
-        }
-
-        if (fenCastlingState.length === 0) {
-            return "-";
-        }
-
-        this.gameState.setFenCastlingState(fenCastlingState);
-
-        return fenCastlingState;
-    }
-
-    appendFenCastlingWhiteStatus() {
-        let fenWhiteCastlingState = "";
-
-        this.gameState.getFenCastlingState().split("").forEach(char => {
-            switch(char) {
-                case "K": fenWhiteCastlingState += char;
-                    break;
-                case "Q": fenWhiteCastlingState += char;
-                    break;
-            }
-        })
-
-        return fenWhiteCastlingState;
-    }
-
-    appendFenCastlingBlackStatus() {
-        let fenBlackCastlingState = "";
-
-        this.gameState.getFenCastlingState().split("").forEach(char => {
-            switch(char) {
-                case "k": fenBlackCastlingState += char;
-                    break;
-                case "q": fenBlackCastlingState += char;
-                    break;
-            }
-        })
-
-        return fenBlackCastlingState;
-    }
-
-    createFenEnPassantSquare() {
-        const enPassantSquare = this.chessboard.getEnPassantSquare();
-        const fenEnPassantSquare = (enPassantSquare ? " " + enPassantSquare.getPosition() + " " : " - ")
-
-        return fenEnPassantSquare;
-    }
-
-    createFenHalfmoveClock() { return this.getHalfmoveClock() + " "; }
-
-    createFenFullmoveClock() { return this.getFullmoveClock(); }
 
     setPlayerCastlingState(fen: string) {
         const fenCastling = fen.split(" ")[2];
@@ -345,11 +220,6 @@ class Game {
         }
     }
 
-    setMoveClocks(fen: string) {
-        this.setHalfmoveClock(Number(fen.split(" ")[4]));
-        this.setFullmoveClock(Number(fen.split(" ")[5]));
-    }
-
     handleActivatedSquare(activeSquare: Square) {
         this.setSquareActive(true);
         this.chessboard.setActiveSquare(activeSquare);
@@ -389,31 +259,35 @@ class Game {
         if (attackedSquare.bSquareContainsPiece()) {
             this.setPieceIsBeingCaptured(true);
         }
-        else if (this.gameLogic.bIsPawn(activePiece)) {
+        else if (activePiece instanceof Pawn) {
             this.setPawnIsBeingMoved(true);
         }
     }
 
     fiftyMoveRuleProcessing() {
         if (!this.bPawnIsBeingMoved() && !this.bPieceIsBeingCaptured()) {
-            this.incrementHalfmoveClock();
+            const halfmoveClock = this.gameState.getHalfmoveClock();
+            this.gameState.setHalfmoveClock(halfmoveClock + 1);
+
             return;
         }
         
-        this.resetHalfmoveClock();
+        this.gameState.setHalfmoveClock(0);
         this.setPawnIsBeingMoved(false);
         this.setPieceIsBeingCaptured(false);
     }
 
     fullMoveClockProcessing() {
-        if (this.player.getColour() === "White" && this.getFullmoveClock() === 1) { return; }
+        if (this.player.getColour() === "White" && this.gameState.getFullmoveClock() === 1) { return; }
 
-        this.incrementFullmoveClock();
+        const fullmoveClock = this.gameState.getFullmoveClock();
+
+        this.gameState.setFullmoveClock(fullmoveClock + 1);
     }
 
     determinePlayerSpecialMoveCase(square: Square) {
         const activePiece = this.chessboard.getActiveSquare().getPiece();
-        if (this.gameLogic.bIsKing(activePiece)) {
+        if (activePiece instanceof King) {
             if (square === this.chessboard.getWestCastlingSquare()) {
                 this.initiateCastling();
                 return;
@@ -423,7 +297,7 @@ class Game {
                 return;
             }
         }
-        if (this.gameLogic.bIsPawn(activePiece)) {
+        if (activePiece instanceof Pawn) {
             if (square === this.chessboard.getEnPassantSquare()) {
                 this.initiateEnPassantCapture();
                 return;
@@ -436,7 +310,6 @@ class Game {
         this.player.setCanCastledKingSide(false);
         this.player.setCanCastledQueenSide(false);
         this.setSpecialMoveInProgress(true);
-        this.createFenCastlingStatus();
     }
 
     initiateEnPassantCapture() {
@@ -499,13 +372,7 @@ class Game {
         this.setPlayerCompletedTurn(false);
     }
 
-    incrementHalfmoveClock() { this.halfmoveClock += 1; }
-
-    incrementFullmoveClock() { this.fullmoveClock += 1; }
-
     incrementMoveCount(piece: IPiece) { piece.incrementMoveCount(); }
-
-    resetHalfmoveClock() { this.halfmoveClock = 0; }
 
     removeSpecialSquare() { delete this.specialMoveSquare; }
 
@@ -537,10 +404,6 @@ class Game {
 
     getSpecialMoveSquare() { return this.specialMoveSquare; }
 
-    getHalfmoveClock() { return this.halfmoveClock; }
-
-    getFullmoveClock() { return this.fullmoveClock; }
-
     setSpecialMoveSquare(move: Square) { this.specialMoveSquare = move; }
 
     setSquareActive(active: boolean) { this.isSquareClicked = active; }
@@ -552,10 +415,6 @@ class Game {
     setPieceIsBeingCaptured(captured: boolean) { this.pieceIsBeingCaptured = captured; }
 
     setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
-
-    setHalfmoveClock(move: number) { this.halfmoveClock = move; }
-
-    setFullmoveClock(move: number) { this.fullmoveClock = move; }
 
 }
 
