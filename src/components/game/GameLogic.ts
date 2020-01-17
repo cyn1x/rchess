@@ -1,5 +1,6 @@
 import { IPiece } from './pieces/types';
 
+import GameData from './GameData';
 import Board from './Board';
 import Square from './Square';
 import Player from './Player';
@@ -8,23 +9,25 @@ import Rook from './pieces/Rook';
 import Pawn from './pieces/Pawn';
 
 class GameLogic {
+    private gameData: GameData;
     private chessboard: Board;
     private player: Player;
-    private attackedSquares!: Array<Square>;
     private bVerifyingRequestedMove: boolean;
     private bVerifyingBoardState: boolean;
 
-    constructor(chessboard: Board, player: Player) {
+    constructor(gameData: GameData, chessboard: Board, player: Player) {
+        this.gameData = gameData;
         this.chessboard = chessboard;
         this.player = player;
-        this.attackedSquares = [];
         this.bVerifyingRequestedMove = false;
         this.bVerifyingBoardState = false;
     }
 
     checkRequestedMove(attackedSquare: Square) {
-        for (let i = 0; i < this.attackedSquares.length; i++) {
-            if (this.attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
+        const attackedSquares = this.gameData.getAttackedSquares();
+
+        for (let i = 0; i < attackedSquares.length; i++) {
+            if (attackedSquares[i].getPosition() === attackedSquare.getPosition()) {
                 this.verifyRequestedMove(attackedSquare);
 
                 return !this.player.bIsInCheck();
@@ -147,7 +150,6 @@ class GameLogic {
     checkAttackableSquares(file: number, rank: number, piece: IPiece) {
         const squaresArray = this.chessboard.getSquaresArray();
         const files = this.chessboard.getFiles();
-
         const attackedSquareIndex = this.calculateArrayIndex(file, rank);
         
         if (attackedSquareIndex < 0 || attackedSquareIndex > squaresArray.length - 1) { return; }
@@ -172,6 +174,7 @@ class GameLogic {
 
     bAttackUnoccupiedSquares(piece: IPiece, attackedSquareIndex: number) {
         const squaresArray = this.chessboard.getSquaresArray();
+        const attackedSquares = this.gameData.getAttackedSquares();
 
         if (this.bIsPawn(piece) && !this.bPawnCanAttack(squaresArray[attackedSquareIndex], piece)) {
             this.setSquareAttack(attackedSquareIndex, piece);
@@ -187,12 +190,13 @@ class GameLogic {
                 if (attackingPieces[i].getColour() !== piece.getColour()) { return; }
             }
         }
-        this.attackedSquares.push(squaresArray[attackedSquareIndex]);
+        attackedSquares.push(squaresArray[attackedSquareIndex]);
         return true;
     }
 
     bAttackOccupiedSquares(piece: IPiece, attackedSquareIndex: number) {
         const squaresArray = this.chessboard.getSquaresArray();
+        const attackedSquares = this.gameData.getAttackedSquares();
 
         if (piece.getColour() === squaresArray[attackedSquareIndex].getPiece().getColour()) {
             this.setSquareAttack(attackedSquareIndex, piece);
@@ -216,7 +220,7 @@ class GameLogic {
                 if (attackingPieces[i].getColour() !== piece.getColour()) { return; }
             }
         }
-        this.attackedSquares.push(squaresArray[attackedSquareIndex]);
+        attackedSquares.push(squaresArray[attackedSquareIndex]);
         return false;
     }
 
@@ -259,7 +263,7 @@ class GameLogic {
         this.chessboard.setActiveSquare(attackedSquare);
         attackedSquare.setPiece(activePiece);
         this.setVerifyingMove(true);
-        this.clearAttackedSquares();
+        this.gameData.clearAttackedSquares();
 
         for (let i = 0; i < squaresArray.length; i++) {
             if (squaresArray[i].bSquareContainsPiece()) {
@@ -267,7 +271,7 @@ class GameLogic {
             }
         }
 
-        this.clearAttackedSquares();
+        this.gameData.clearAttackedSquares();
         attackedSquare.removePiece();
         activeSquare.setPiece(activePiece);
 
@@ -335,6 +339,7 @@ class GameLogic {
         const squaresArray = this.chessboard.getSquaresArray();
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
+        const attackedSquares = this.gameData.getAttackedSquares();
         
         const files = this.chessboard.getFiles();
         
@@ -348,10 +353,10 @@ class GameLogic {
         const northWestSquareIndex = this.calculateArrayIndex(northWestFile, northWestRank);
 
         if (squaresArray[northEastSquareIndex].bIsEnPassantSquare()) {
-            this.attackedSquares.push(squaresArray[northEastSquareIndex]);
+            attackedSquares.push(squaresArray[northEastSquareIndex]);
         }
         else if (squaresArray[northWestSquareIndex].bIsEnPassantSquare()) {
-            this.attackedSquares.push(squaresArray[northWestSquareIndex])
+            attackedSquares.push(squaresArray[northWestSquareIndex])
         }
     }
 
@@ -366,10 +371,12 @@ class GameLogic {
         const capturedPawnFile = files.indexOf(pos[0]);
         const capturedPawnRank = (activePiece.getColour() === "White" ? Number(pos[1]) - 1 : Number(pos[1]) + 1);
         const capturedPawnSquareIndex = this.calculateArrayIndex(capturedPawnFile, capturedPawnRank);
+        const capturedSquare = squaresArray[capturedPawnSquareIndex];
 
-        (squaresArray[capturedPawnSquareIndex]).removePiece();
+        this.gameData.setCapturedPiece(capturedSquare.getPiece());
+        capturedSquare.removePiece();
         
-        return squaresArray[capturedPawnSquareIndex];
+        return capturedSquare;
     }
 
     kingCanCastleDeterminant() {
@@ -425,6 +432,7 @@ class GameLogic {
 
     westCastlingDeterminant(pos: string) {
         const squaresArray = this.chessboard.getSquaresArray();
+        const attackedSquares = this.gameData.getAttackedSquares();
         const files = this.chessboard.getFiles();
         
         let file = files.indexOf(pos[0]);
@@ -442,11 +450,12 @@ class GameLogic {
         const targetSquareIndex = this.calculateArrayIndex(file, rank);
         squaresArray[targetSquareIndex].setCastlingSquare(true);
         this.chessboard.setWestCastlingSquare(squaresArray[targetSquareIndex]);
-        this.attackedSquares.push(squaresArray[targetSquareIndex]);
+        attackedSquares.push(squaresArray[targetSquareIndex]);
     }
 
     eastCastlingDeterminant(pos: string) {
         const squaresArray = this.chessboard.getSquaresArray();
+        const attackedSquares = this.gameData.getAttackedSquares();
         const files = this.chessboard.getFiles();
         
         let file = files.indexOf(pos[0]);
@@ -464,7 +473,7 @@ class GameLogic {
         const targetSquareIndex = this.calculateArrayIndex(file, rank);
         squaresArray[targetSquareIndex].setCastlingSquare(true);
         this.chessboard.setEastCastlingSquare(squaresArray[targetSquareIndex]);
-        this.attackedSquares.push(squaresArray[targetSquareIndex]);
+        attackedSquares.push(squaresArray[targetSquareIndex]);
     }
 
     castleRookQueenSide(square: Square) {
@@ -573,12 +582,6 @@ class GameLogic {
     bIsKing(piece: IPiece) { return piece.getType() === 'K' || piece.getType() === 'k'; }
 
     bPawnCanAttack(square: Square, piece: IPiece) { return square.getPosition()[0] === piece.getPosition()[0]; }
-
-    clearAttackedSquares() { this.attackedSquares = []; }
- 
-    getAttackedSquares() { return this.attackedSquares; }
-
-    setAttackedSquares(attacked: Array<Square>) { this.attackedSquares = attacked; }
 
     setVerifyingMove(verifying: boolean) { this.bVerifyingRequestedMove = verifying; }
 
