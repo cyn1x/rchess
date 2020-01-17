@@ -169,7 +169,9 @@ class GameLogic implements Logic {
         }
         else { this.playerInCheckDeterminant(piece, attackedSquareIndex); }
         
-        return this.bAttackOccupiedSquares(piece, attackedSquareIndex);
+        if (!this.bIsVerifyingRequestedMove()) {
+            return this.bAttackOccupiedSquares(piece, attackedSquareIndex);
+        }
     }
 
     playerInCheckDeterminant(piece: IPiece, attackedSquareIndex: number) {
@@ -295,6 +297,7 @@ class GameLogic implements Logic {
     playerCanCastleDeterminant(piece: IPiece) {
         if (piece instanceof King) {
 
+            if (!this.player.bCanCastleKingSide() || !this.player.bCanCastleQueenSide()) { return; }
             if (!piece.bCanCastle() || piece.bIsInCheck()) { return; }
             if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
 
@@ -332,6 +335,10 @@ class GameLogic implements Logic {
         }
 
         return (piece.getColour() !== attackedPiece.getColour() && this.player.getColour() === attackedPiece.getColour());
+    }
+
+    escapeCheckDeterminant() {
+
     }
 
     bIsPawn(piece: IPiece) { return piece.getType() === 'P' || piece.getType() === 'p'; }
