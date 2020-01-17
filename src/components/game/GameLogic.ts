@@ -11,14 +11,13 @@ import Pawn from './pieces/Pawn';
 class GameLogic {
     private gameData: GameData;
     private chessboard: Board;
-    private player: Player;
+    private player!: Player;
     private bVerifyingRequestedMove: boolean;
     private bVerifyingBoardState: boolean;
 
-    constructor(gameData: GameData, chessboard: Board, player: Player) {
+    constructor(gameData: GameData, chessboard: Board) {
         this.gameData = gameData;
         this.chessboard = chessboard;
-        this.player = player;
         this.bVerifyingRequestedMove = false;
         this.bVerifyingBoardState = false;
     }
@@ -161,7 +160,7 @@ class GameLogic {
 
     checkSquareContainsPiece(piece: IPiece, attackedSquareIndex: number) {
         const squaresArray = this.chessboard.getSquaresArray();
-        
+           
         if (!squaresArray[attackedSquareIndex].bSquareContainsPiece()) {
             return this.bAttackUnoccupiedSquares(piece, attackedSquareIndex);
         }
@@ -183,7 +182,6 @@ class GameLogic {
         else {
             if (!this.bIsPawn(piece)) { this.setSquareAttack(attackedSquareIndex, piece); }
         }
-        
         if (this.bIsKing(piece)) {
             const attackingPieces = squaresArray[attackedSquareIndex].getAttackingPiece();
             for (let i = 0; i < attackingPieces.length; i++) {
@@ -582,6 +580,8 @@ class GameLogic {
     bIsKing(piece: IPiece) { return piece.getType() === 'K' || piece.getType() === 'k'; }
 
     bPawnCanAttack(square: Square, piece: IPiece) { return square.getPosition()[0] === piece.getPosition()[0]; }
+
+    setPlayerForMoveValidation(player: Player) { this.player = player; }
 
     setVerifyingMove(verifying: boolean) { this.bVerifyingRequestedMove = verifying; }
 

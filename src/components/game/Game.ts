@@ -29,7 +29,7 @@ class Game {
         this.gameData = new GameData;
         this.gameState = new GameState();
         this.chessboard = new Board();
-        this.gameLogic = new GameLogic(this.gameData, this.chessboard, this.player);
+        this.gameLogic = new GameLogic(this.gameData, this.chessboard);
         this.isSquareClicked = false;
         this.specialMoveInProgress = false;
         this.pawnisBeingMoved = false;
@@ -362,12 +362,12 @@ class Game {
         this.setSquareActive(false);
     }
 
-    handleOverwriteSquare(activeSquare: Square, activePiece: IPiece) {      
+    handleOverwriteSquare(activeSquare: Square, activePiece: IPiece) {     
         if (activeSquare.getPiece()) {
             this.gameData.setCapturedPiece(activeSquare.getPiece());
-            activeSquare.removePiece();
         }
 
+        this.chessboard.getActiveSquare().removePiece(); 
         this.chessboard.setActiveSquare(activeSquare);
         activeSquare.setPiece(activePiece);
     }
@@ -443,6 +443,11 @@ class Game {
         this.setSpecialMoveInProgress(true);
     }
 
+    checkValidMoves(pos: string, piece: IPiece) {
+        this.gameLogic.setPlayerForMoveValidation(this.player);
+        this.gameLogic.squareContainsAttack(pos, piece);
+    }
+
     checkSpecialMoves(square: Square) {
         const specialMoveSquare = this.gameLogic.checkSpecialMove(square);
         
@@ -498,7 +503,13 @@ class Game {
 
     incrementFullmoveClock() { this.fullmoveClock += 1; }
 
+    incrementMoveCount(piece: IPiece) { piece.incrementMoveCount(); }
+
     resetHalfmoveClock() { this.halfmoveClock = 0; }
+
+    removeSpecialSquare() { delete this.specialMoveSquare; }
+
+    clearAttackedSquares() { this.gameData.clearAttackedSquares(); }
 
     bIsDemonstrationMode() { return this.player.bIsDemonstrationMode(); }
 
@@ -513,14 +524,6 @@ class Game {
     bPawnIsBeingMoved() { return this.pawnisBeingMoved; }
 
     bPieceIsBeingCaptured() { return this.pieceIsBeingCaptured; }
-
-    checkValidMoves(pos: string, piece: IPiece) { this.gameLogic.squareContainsAttack(pos, piece); }
-
-    incrementMoveCount(piece: IPiece) { piece.incrementMoveCount(); }
-
-    clearAttackedSquares() { this.gameData.clearAttackedSquares(); }
-
-    removeSpecialSquare() { delete this.specialMoveSquare; }
 
     getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? "Black" : "White"); }
  
