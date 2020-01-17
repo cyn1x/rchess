@@ -179,7 +179,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     interceptClick(event: any) {
-        if (this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) {
+        if ((this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) && !this.game.bGameIsOver()) {
             this.determineClick(event);
         }
     }
@@ -239,6 +239,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         this.game.setSquareActive(false);
         this.game.preMoveProcessing(attackedSquare);
         this.overwriteSquare(attackedSquare);
+        this.game.postMoveProcessing();
         this.setNextState(prevActiveSquarePos, nextActiveSquarePos);
     }
 

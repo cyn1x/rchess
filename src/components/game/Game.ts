@@ -25,6 +25,7 @@ class Game {
     private specialMoveInProgress: boolean;
     private pawnisBeingMoved: boolean;
     private pieceIsBeingCaptured: boolean;
+    private gameOver: boolean;
 
     constructor(player: string, fen: string, turn: string) {
         this.setPlayer(player, turn);
@@ -37,6 +38,7 @@ class Game {
         this.specialMoveInProgress = false;
         this.pawnisBeingMoved = false;
         this.pieceIsBeingCaptured = false;
+        this.gameOver = false;
 
         this.setGameState(fen, turn);
     }
@@ -255,6 +257,12 @@ class Game {
         this.fullMoveClockProcessing();
     }
 
+    postMoveProcessing() {
+        if (this.gameState.getHalfmoveClock() === 50) {
+            this.setGameOver(true);
+        }
+    }
+
     fiftyMoveRuleDeterminant(attackedSquare: Square, activePiece: IPiece) {
         if (attackedSquare.bSquareContainsPiece()) {
             this.setPieceIsBeingCaptured(true);
@@ -392,6 +400,8 @@ class Game {
 
     bPieceIsBeingCaptured() { return this.pieceIsBeingCaptured; }
 
+    bGameIsOver() { return this.gameOver; }
+
     getNextMove() { return (this.gameState.getCurrentTurn() === "White" ? "Black" : "White"); }
  
     getAttackedSquares() { return this.gameData.getAttackedSquares(); }
@@ -415,6 +425,8 @@ class Game {
     setPieceIsBeingCaptured(captured: boolean) { this.pieceIsBeingCaptured = captured; }
 
     setPlayerCompletedTurn(completed: boolean) { this.player.setTurnComplete(completed); }
+
+    setGameOver(gameOver: boolean) { this.gameOver = gameOver; }
 
 }
 
