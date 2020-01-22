@@ -381,13 +381,17 @@ class GameLogic implements Logic {
                     this.setNewMoveContainsCheck(true);
                 }
             }
-            if (this.isQueen(attackingPiece)) {
+            else if (this.isQueen(attackingPiece)) {
                 if (this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
                     this.setNewMoveContainsCheck(true);
                 }
             }
             else if (kingFile !== attackingPieceFile && kingRank !== attackingPieceRank) {
-                if (this.isBishop(attackingPiece) && 
+                if (this.isPawn(attackingPiece) && 
+                    (files.indexOf(kingFile) - 1 === files.indexOf(attackingPieceFile) || files.indexOf(kingFile) + 1 === files.indexOf(attackingPieceFile))) {
+                    this.setNewMoveContainsCheck(true)
+                }
+                else if ((this.isBishop(attackingPiece)) && 
                     this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
                     this.setNewMoveContainsCheck(true);
                 }
@@ -398,7 +402,7 @@ class GameLogic implements Logic {
                 }
             }
         }
-        return true;
+        return false;
     }
 
     bKingCanEscapeCheck(kingPiece: IPiece, attackedSquare: Square) {
