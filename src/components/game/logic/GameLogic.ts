@@ -233,7 +233,7 @@ class GameLogic implements Logic {
         }
         if (this.isPawn(piece)) {
             if (this.pawnCanAttack(attackedSquare, piece)) {
-                return true;
+                return false;
             }
             else { this.setSquareAttack(attackedSquare, piece); }
         }
@@ -454,7 +454,7 @@ class GameLogic implements Logic {
     playerCanCastleDeterminant(piece: IPiece) {
         if (piece instanceof King) {
             
-            if (!this.player.bCanCastleKingSide() || !this.player.bCanCastleQueenSide()) { return; }
+            if (!this.player.bCanCastleKingSide() && !this.player.bCanCastleQueenSide()) { return; }
             if (!piece.bCanCastle() || piece.bIsInCheck()) { return; }
             if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
 
