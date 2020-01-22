@@ -145,8 +145,8 @@ GNU General Public License v3.0
 * [x] FEN parsing
 * [x] FEN creation
 * [x] Check detection
-* [ ] Checkmate detection
-* [ ] Fifty-move rule
+* [x] Checkmate detection
+* [x] Fifty-move rule
 * [x] Castling ability
 * [x] En Passant capture ability
 * [ ] Pawn upgrade ability
