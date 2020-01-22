@@ -146,6 +146,7 @@ GNU General Public License v3.0
 * [x] FEN creation
 * [x] Check detection
 * [x] Checkmate detection
+* [x] Stalemate detection
 * [x] Fifty-move rule
 * [x] Castling ability
 * [x] En Passant capture ability
