@@ -15,7 +15,9 @@ ___
 I created a demonstration of a PvP Chess Engine using WebSockets in React, HTML5 Canvas, and TypeScript for a unit at my university. The unit focused on full-stack development, using front and backend technologies of our choice. Since the unit finished, I extracted the game specific code from the [UniChess](https://github.com/Cyn1x/unichess) repository to this repository, and added this repository as a dependency in the UniChess repository.
 
 ### What does it do?
-It's a demonstration of a chess engine in React and HTML5 Canvas, using TypeScript under the hood. After cloning the files and building them, a simple UI will appear, allowing basic interaction with the game.
+It's a demonstration of a chess engine in React and HTML5 Canvas, using TypeScript under the hood. The moves are generated for the player in real-time once a piece is active by determining the valid moves for that piece after it is clicked. For example, if the player's king is attacked by the opponent's rook and the player's queen is selected, the correct move will be generated to either capture the piece, or block it, depending on what rank and file the pieces are on. If there are no valid moves for the player and the king is in check, the result is a checkmate. Otherwise, the result is a stalemate. The fifty-move rule is also set to determine whether the result is a draw.
+
+After cloning the files and building them, a simple UI will appear, allowing basic interaction with the board, and setting custom piece positions using Forsyth-Edwards Notation (FEN).
 
 ### Purpose
 The purpose of this was to get to know React and other web technologies. I will continue to get to know React on the UniChess PvP chess web app that uses this repository as a dependency.
@@ -26,7 +28,7 @@ ___
 ### What is in it?
 - Fully working chess demonstration
 - A basic demonstration player which can only move the piece colour corressponding to the current colour's turn
-- Custom piece positioning using Forsyth-Edwards Notation
+- Custom piece positioning using FEN strings
 
 ### What is not in it?
 - Computer controlled opponent
@@ -37,12 +39,12 @@ ___
 
 ### What else will be done?
 - Improved demonstration mode
-- Abstract the core engine logic so AI can be added without muddling through the code
+- Abstract the core engine logic to provide an API so AI can be added without muddling through the code
 - Possible port over to Rust, having the Rust program compute the game logic on the server-side, while the TypeScript code will render only the UI on the client-side
 - Documentation to show how it works
 
 ### What will not be done?
-- AI in TypeScript. I personally would prefer to do all of this in Rust, using TypeScript for the UI only. Though I will make it an option to do so anyway.
+- AI in TypeScript. I personally would prefer to do all of this in a low-level programming language, using TypeScript for the UI only. Though time permitting, I may eventually make it an option to do so in TypeScript anyway.
 
 ___
 
@@ -151,12 +153,13 @@ GNU General Public License v3.0
 * [x] Castling ability
 * [x] En Passant capture ability
 * [ ] Pawn upgrade ability
+* [ ] General game statistics
 * [x] Separate pipeline for actioning multiplayer opponent moves over websockets
 * [ ] In-Game Menu or extra prop allowing customisation of certain features
-* [ ] Documentation to explain how the different stages of gameplay work
+* [ ] Option to disable square highlighting for valid moves
+* [ ] Documentation to explain how the different stages of gameplay work in the code
 * [ ] Advanced interaction for users
 * [ ] Strip debug code when Rollup performs a package
 * [ ] Ability to plug in AI code for PvE gameplay without having to deal with the core engine logic
-* [ ] Port all core logic to Rust to compute on the server-side
-* [ ] Branched 'lite' version to reflect changes on the UI from the Rust program
-* [ ] General game statistics
+* [ ] Port all core logic to a low-level programming language to compute on the server-side
+* [ ] Branched 'lite' version to reflect changes on the UI from the other program
