@@ -7,7 +7,7 @@ import Rook from '../entities/pieces/Rook';
 import Pawn from '../entities/pieces/Pawn';
 import Player from '../entities/Player';
 
-class SpecialMoves implements Logic {
+class SpecialMoveHandler implements Logic {
     private chessboard: Board;
     private gameData: GameData;
 
@@ -274,4 +274,4 @@ class SpecialMoves implements Logic {
 
 }
 
-export default SpecialMoves;
+export default SpecialMoveHandler;

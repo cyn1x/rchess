@@ -9,6 +9,8 @@ class King implements IPiece, IKing {
     position!: string;
     moves!: number;
     moveDirections!: Map<string, number>;
+    generalDefenceDirections!: Map<string, number>;
+    knightDefenceDirections!: Map<string, number>;
     startingSquare!: Square;
     inCheck!: boolean;
     canCastle!: boolean;
@@ -28,6 +30,8 @@ class King implements IPiece, IKing {
         const pieces = new Pieces();
 
         this.setMoveDirections(pieces.kingMoves());
+        this.setGeneralDefenceDirections(pieces.generalDefence());
+        this.setKnightDefenceDirections(pieces.knightDefence());
     }
 
     incrementMoveCount() {
@@ -47,6 +51,10 @@ class King implements IPiece, IKing {
 
     getMoveDirections() { return this.moveDirections; }
 
+    getGeneralDefenceDirections() { return this.generalDefenceDirections; }
+
+    getKnightDefenceDirections() { return this.knightDefenceDirections; }
+
     getPosition() { return this.position; }
 
     getMoveCount() { return this.moves; }
@@ -56,6 +64,10 @@ class King implements IPiece, IKing {
     setImage(image: string) { this.image = image; }
 
     setMoveDirections(directions: Map<string, number>) { this.moveDirections = directions; }
+
+    setGeneralDefenceDirections(directions: Map<string, number>) { this.generalDefenceDirections = directions; }
+
+    setKnightDefenceDirections(directions: Map<string, number>) { this.knightDefenceDirections = directions; }
 
     setPosition(pos: string) { this.position = pos; }
 

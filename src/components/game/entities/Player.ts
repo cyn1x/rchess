@@ -1,9 +1,12 @@
+import { IPiece } from "./pieces/types";
+
 class Player {
     private colour: string;
     private inCheck: boolean;
     private turnComplete: boolean;
     private canCastleQueenSide: boolean;
     private canCastleKingSide: boolean;
+    private king!: IPiece;
     private isDemo!: boolean;
 
     constructor(colour: string) {
@@ -26,6 +29,8 @@ class Player {
 
     getColour() { return this.colour; }
 
+    getKing() { return this.king; }
+
     setDemonstrationMode() { this.isDemo = true; }
 
     setColour(colour: string) { this.colour = colour; }
@@ -37,6 +42,8 @@ class Player {
     setCanCastledQueenSide(canCastle: boolean) { this.canCastleQueenSide = canCastle; }
 
     setCanCastledKingSide(canCastle: boolean) { this.canCastleKingSide = canCastle; }
+
+    setKing(king: IPiece) { this.king = king; }
 
 }
 

@@ -55,7 +55,6 @@ export class Pieces {
 
     knightMoves() {
         const validDirections = new Map();
-
         validDirections.set('NNE', 1).set('ENE', 1).set('ESE', 1).set('SSE', 1).set('SSW', 1).set('WSW', 1).set('WNW', 1).set('NWN', 1);
 
         return validDirections;
@@ -85,6 +84,20 @@ export class Pieces {
     kingMoves() {
         const validDirections = new Map();
         validDirections.set('N', 1).set('NE', 1).set('E', 1).set('SE', 1).set('S', 1).set('SW', 1).set('W', 1).set('NW', 1);
+
+        return validDirections;
+    }
+
+    generalDefence() {
+        const generalDirections = new Map();
+        generalDirections.set('N', 8).set('NE', 8).set('E', 8).set('SE', 8).set('S', 8).set('SW', 8).set('W', 8).set('NW', 8);
+
+        return generalDirections;
+    }
+
+    knightDefence() {
+        const validDirections = new Map();
+        validDirections.set('NNE', 1).set('ENE', 1).set('ESE', 1).set('SSE', 1).set('SSW', 1).set('WSW', 1).set('WNW', 1).set('NWN', 1);
 
         return validDirections;
     }

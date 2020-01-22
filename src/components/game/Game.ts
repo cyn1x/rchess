@@ -46,7 +46,7 @@ class Game {
     setGameState(fen: string, turn: string) {
         const defaultState = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
         const fenString = fen.split(" ").length === 6 ? fen : defaultState;
-
+        
         this.gameState.setFenString(fenString);
         this.gameState.setCurrentTurn(turn);
         this.setPlayerCastlingState(fenString);
@@ -69,6 +69,7 @@ class Game {
         this.player.getColour() === "White" ? this.player.setColour("Black") : this.player.setColour("White");
         this.player.setDemonstrationMode();
         this.player.setCheckStatus(false);
+        this.setKingForDemonstrationMode();
         this.setCastlingStatusforDemoMode();
     }
 
@@ -76,6 +77,17 @@ class Game {
         this.player.setCanCastledKingSide(false);
         this.player.setCanCastledQueenSide(false);
         this.setPlayerCastlingState(this.gameState.getFenString());
+    }
+
+    setKingForDemonstrationMode() {
+        const squaresArray = this.chessboard.getSquaresArray();
+
+        for (let i = 0; i < squaresArray.length; i++) {
+            const piece = squaresArray[i].getPiece();
+            if (piece && (piece instanceof King && piece.getColour() === this.player.getColour())) {
+                this.player.setKing(squaresArray[i].getPiece());
+            }
+        }
     }
     
     initialise(cw: number, ch: number) {
@@ -89,6 +101,8 @@ class Game {
         }
         this.chessboard.setSquaresArray(squaresArray);
         this.setPiecePositions();
+        this.gameLogic.setPlayerForMoveValidation(this.player);
+        this.gameLogic.determineAttackedSquares();
     }
 
     updateGameState(gameProps: IGameState) {
@@ -151,6 +165,10 @@ class Game {
                     const newPiece = (piecesFactory.typeOfPiece(pieceToPlace));
                     newPiece.setStartingSquare(squaresArray[index]);
                     squaresArray[index].setPiece(newPiece);
+                    
+                    if (newPiece instanceof King && newPiece.getColour() === this.player.getColour()) {
+                        this.player.setKing(newPiece);
+                    }
                 }
             })
         })
@@ -324,9 +342,9 @@ class Game {
         this.setSpecialMoveInProgress(true);
     }
 
-    checkValidMoves(pos: string, piece: IPiece) {
+    checkValidMoves(pos: string, activePiece: IPiece) {
         this.gameLogic.setPlayerForMoveValidation(this.player);
-        this.gameLogic.squareContainsAttack(pos, piece);
+        this.gameLogic.squareContainsAttack(activePiece);
     }
 
     checkSpecialMoves(square: Square) {
@@ -376,8 +394,30 @@ class Game {
 
         this.gameLogic.determineEnPassantSquare(enPassantSquare);
         this.gameLogic.determineAttackedSquares();
-        this.gameData.clearAttackedSquares();
         this.setPlayerCompletedTurn(false);
+
+        this.determineGameConditions();
+    }
+
+    determineGameConditions() {
+        const validMoves = this.gameData.getNumberOfValidMoves();
+        
+        if (validMoves === 0) {
+            if (this.player.bIsInCheck()) {
+                console.log('checkmate')
+                // checkmate
+            }
+            else {
+                console.log('stalemate')
+                // stalemate
+            }
+            this.setGameOver(true);
+        }
+        else if (this.gameState.getHalfmoveClock() === 50) {
+            console.log('draw')
+            // draw
+            this.setGameOver(true);
+        }
     }
 
     incrementMoveCount(piece: IPiece) { piece.incrementMoveCount(); }
