@@ -228,7 +228,6 @@ class GameLogic implements Logic {
 
     bAttackOccupiedSquares(piece: IPiece, attackedSquare: Square) {
         if (piece.getColour() === attackedSquare.getPiece().getColour()) {
-            this.setSquareAttack(attackedSquare, piece);
             return false;
         }
         if (this.isPawn(piece)) {
