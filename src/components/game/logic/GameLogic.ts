@@ -351,7 +351,7 @@ class GameLogic implements Logic {
         let openSquareRank = kingPieceRank + rankDirection;
 
         while (currentMove <= maximumMoves) {
-            if (this.checkAttackableSquares(openSquareFile, openSquareRank, king)) { return; }
+            if (!this.checkAttackableSquares(openSquareFile, openSquareRank, king)) { return; }
 
             openSquareFile = openSquareFile + fileDirection;
             openSquareRank = openSquareRank + rankDirection;
@@ -359,50 +359,82 @@ class GameLogic implements Logic {
         }
     }
 
-    bKingBeingOpenedForAttack(kingPiece: IPiece, undefendedSquare: Square) {
-        const attackingPiece = undefendedSquare.getPiece();
+    bKingBeingOpenedForAttack(kingPiece: IPiece, attackedSquare: Square) {
         const files = this.chessboard.getFiles();
+        const attackingPiece = attackedSquare.getPiece();
         
         if (attackingPiece) {
             const kingFile = kingPiece.getPosition()[0];
             const kingRank = kingPiece.getPosition()[1];
             const attackingPieceFile = attackingPiece.getPosition()[0];
             const attackingPieceRank = attackingPiece.getPosition()[1];
-            const moveFile = undefendedSquare.getPosition()[0];
-            const moveRank = undefendedSquare.getPosition()[1];
-
+            const moveFile = attackedSquare.getPosition()[0];
+            const moveRank = attackedSquare.getPosition()[1];
+            
             if (attackingPiece.getColour() === this.player.getColour()) { return false; }
-
+            
             if (this.isRook(attackingPiece)) {
                 if ((kingFile === attackingPieceFile) && (moveFile === kingFile)) {
                     this.setNewMoveContainsCheck(true);
+                    return true;
                 }
                 else if (kingRank === attackingPieceRank && moveRank === kingRank) {
                     this.setNewMoveContainsCheck(true);
+                    return true;
                 }
             }
             else if (this.isQueen(attackingPiece)) {
                 if (this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
                     this.setNewMoveContainsCheck(true);
+                    return true;
                 }
             }
             else if (kingFile !== attackingPieceFile && kingRank !== attackingPieceRank) {
-                if (this.isPawn(attackingPiece) && 
-                    (files.indexOf(kingFile) - 1 === files.indexOf(attackingPieceFile) || files.indexOf(kingFile) + 1 === files.indexOf(attackingPieceFile))) {
-                    this.setNewMoveContainsCheck(true)
+                if (this.isPawn(attackingPiece)) {
+                    this.pawnIsAttackingKing(kingPiece, attackedSquare);
+                    return true;
                 }
                 else if ((this.isBishop(attackingPiece)) && 
                     this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
                     this.setNewMoveContainsCheck(true);
+                    return true;
                 }
                 else if (this.isKnight(attackingPiece)) {
                     if (!this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
                         this.setNewMoveContainsCheck(true);
+                        return true;
                     }
                 }
             }
         }
         return false;
+    }
+
+    pawnIsAttackingKing(kingPiece: IPiece, attackedSquare: Square) {
+        const files = this.chessboard.getFiles();
+        const attackingPiece = attackedSquare.getPiece();
+
+        const kingFile = kingPiece.getPosition()[0];
+        const kingRank = kingPiece.getPosition()[1];
+        const attackingPieceFile = attackingPiece.getPosition()[0];
+        const attackingPieceRank = attackingPiece.getPosition()[1];
+        
+        if (this.player.getColour() === "White") {
+            if (files.indexOf(attackingPieceFile) - 1 === files.indexOf(kingFile) && Number(attackingPieceRank) - 1 === Number(kingRank)) {
+            this.setNewMoveContainsCheck(true);
+            }
+            else if (files.indexOf(attackingPieceFile) + 1 === files.indexOf(kingFile) && Number(attackingPieceRank) - 1 === Number(kingRank)) {
+                this.setNewMoveContainsCheck(true);
+            }
+        }
+        else if (this.player.getColour() === "Black") {
+            if (files.indexOf(attackingPieceFile) - 1 === files.indexOf(kingFile) && Number(attackingPieceRank) + 1 === Number(kingRank)) {
+                this.setNewMoveContainsCheck(true);
+            }
+            else if (files.indexOf(attackingPieceFile) + 1 === files.indexOf(kingFile) && Number(attackingPieceRank) + 1 === Number(kingRank)) {
+                this.setNewMoveContainsCheck(true);
+            }
+        }
     }
 
     bKingCanEscapeCheck(kingPiece: IPiece, attackedSquare: Square) {
