@@ -317,50 +317,107 @@ class GameLogic implements Logic {
     kingBeingOpenedForAttack(kingPiece: IPiece, attackedSquare: Square) {
         const files = this.chessboard.getFiles();
         const attackingPiece = attackedSquare.getPiece();
-        const kingFile = kingPiece.getPosition()[0];
-        const kingRank = kingPiece.getPosition()[1];
-        const moveFile = attackedSquare.getPosition()[0];
-        const moveRank = attackedSquare.getPosition()[1];
         
         if (attackingPiece) {
-            const attackingPieceFile = attackingPiece.getPosition()[0];
-            const attackingPieceRank = attackingPiece.getPosition()[1];
-            
+    
+            const kingFile = files.indexOf(kingPiece.getPosition()[0]);
+            const kingRank = Number(kingPiece.getPosition()[1]);
+            const attackingPieceFile = files.indexOf(attackingPiece.getPosition()[0]);
+            const attackingPieceRank = Number(attackingPiece.getPosition()[1]);
+
             if (attackingPiece.getColour() === this.player.getColour()) { return; }
             
             if (this.isRook(attackingPiece)) {
-                if ((kingFile === attackingPieceFile) && (moveFile === kingFile)) {
-                    this.setNewMoveContainsCheck(true);
-                    return true;
-                }
-                else if (kingRank === attackingPieceRank && moveRank === kingRank) {
-                    this.setNewMoveContainsCheck(true);
-                    return true;
-                }
+                return this.rookIsAttackingKing(kingPiece, attackedSquare);
             }
             else if (this.isQueen(attackingPiece)) {
-                if (this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
-                    this.setNewMoveContainsCheck(true);
-                    return true;
+                return this.queenIsAttackingKing(kingPiece, attackedSquare);
+            }
+            else {
+                if (kingFile !== attackingPieceFile && kingRank !== attackingPieceRank) {
+                    return this.determineDiagonalAttackingPiece(kingPiece, attackedSquare);
                 }
             }
-            else if (kingFile !== attackingPieceFile && kingRank !== attackingPieceRank) {
-                if (this.isPawn(attackingPiece)) {
-                    this.pawnIsAttackingKing(kingPiece, attackedSquare);
-                    return;
-                }
-                else if ((this.isBishop(attackingPiece)) && 
-                    this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
-                    this.setNewMoveContainsCheck(true);
-                    return true;
-                }
-                else if (this.isKnight(attackingPiece)) {
-                    if (!this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
-                        this.setNewMoveContainsCheck(true);
-                        return true;
-                    }
-                }
-            }
+            
+        }
+
+    }
+
+    determineDiagonalAttackingPiece(kingPiece: IPiece, attackedSquare: Square) {
+        const attackingPiece = attackedSquare.getPiece();
+        
+        switch(true) {
+            case this.isPawn(attackingPiece):
+                return this.pawnIsAttackingKing(kingPiece, attackedSquare);
+            case this.isBishop(attackingPiece):
+                return this.bishopIsAttackingKing(kingPiece, attackedSquare);
+            case this.isKnight(attackingPiece):
+                return this.knightIsAttackingKing(kingPiece, attackedSquare);
+        }
+
+    }
+
+    rookIsAttackingKing(kingPiece: IPiece, attackedSquare: Square) {
+        const files = this.chessboard.getFiles();
+        const attackingPiece = attackedSquare.getPiece();
+
+        const kingFile = files.indexOf(kingPiece.getPosition()[0]);
+        const kingRank = Number(kingPiece.getPosition()[1]);
+        const attackingPieceFile = files.indexOf(attackingPiece.getPosition()[0]);
+        const attackingPieceRank = Number(attackingPiece.getPosition()[1]);
+
+        if ((kingFile === attackingPieceFile)) {
+            this.setNewMoveContainsCheck(true);
+            return true;
+        }
+        else if (kingRank === attackingPieceRank) {
+            this.setNewMoveContainsCheck(true);
+            return true;
+        }
+    }
+
+    queenIsAttackingKing(kingPiece: IPiece, attackedSquare: Square) {
+        const files = this.chessboard.getFiles();
+        const attackingPiece = attackedSquare.getPiece();
+
+        const kingFile = files.indexOf(kingPiece.getPosition()[0]);
+        const kingRank = Number(kingPiece.getPosition()[1]);
+        const attackingPieceFile = files.indexOf(attackingPiece.getPosition()[0]);
+        const attackingPieceRank = Number(attackingPiece.getPosition()[1]);
+
+        if (this.bSquaresLineUp(kingFile, kingRank, attackingPieceFile, attackingPieceRank)) {
+            this.setNewMoveContainsCheck(true);
+            return true;
+        }
+    }
+
+    bishopIsAttackingKing(kingPiece: IPiece, attackedSquare: Square) {
+        const files = this.chessboard.getFiles();
+        const attackingPiece = attackedSquare.getPiece();
+
+        const kingFile = files.indexOf(kingPiece.getPosition()[0]);
+        const kingRank = Number(kingPiece.getPosition()[1]);
+        const attackingPieceFile = files.indexOf(attackingPiece.getPosition()[0]);
+        const attackingPieceRank = Number(attackingPiece.getPosition()[1]);
+
+        if (this.bSquaresLineUp(kingFile, kingRank, attackingPieceFile, attackingPieceRank)) {
+            this.setNewMoveContainsCheck(true);
+            return true;
+        }
+    }
+
+    knightIsAttackingKing(kingPiece: IPiece, attackedSquare: Square) {
+        const files = this.chessboard.getFiles();
+        const attackingPiece = attackedSquare.getPiece();
+
+        const kingFile = files.indexOf(kingPiece.getPosition()[0]);
+        const kingRank = Number(kingPiece.getPosition()[1]);
+        const attackingPieceFile = files.indexOf(attackingPiece.getPosition()[0]);
+        const attackingPieceRank = Number(attackingPiece.getPosition()[1]);
+
+        if (!this.bSquaresLineUp(kingFile, kingRank, attackingPieceFile, attackingPieceRank)) {
+            this.setNewMoveContainsCheck(true);
+            return true;
         }
     }
 
@@ -368,24 +425,24 @@ class GameLogic implements Logic {
         const files = this.chessboard.getFiles();
         const attackingPiece = attackedSquare.getPiece();
 
-        const kingFile = kingPiece.getPosition()[0];
-        const kingRank = kingPiece.getPosition()[1];
-        const attackingPieceFile = attackingPiece.getPosition()[0];
-        const attackingPieceRank = attackingPiece.getPosition()[1];
+        const kingFile = files.indexOf(kingPiece.getPosition()[0]);
+        const kingRank = Number(kingPiece.getPosition()[1]);
+        const attackingPieceFile = files.indexOf(attackingPiece.getPosition()[0]);
+        const attackingPieceRank = Number(attackingPiece.getPosition()[1]);
         
         if (this.player.getColour() === "White") {
-            if (files.indexOf(attackingPieceFile) - 1 === files.indexOf(kingFile) && Number(attackingPieceRank) - 1 === Number(kingRank)) {
-            this.setNewMoveContainsCheck(true);
+            if (attackingPieceFile - 1 === kingFile && attackingPieceRank - 1 === kingRank) {
+                this.setNewMoveContainsCheck(true);
             }
-            else if (files.indexOf(attackingPieceFile) + 1 === files.indexOf(kingFile) && Number(attackingPieceRank) - 1 === Number(kingRank)) {
+            else if (attackingPieceFile + 1 === kingFile && attackingPieceRank - 1 === kingRank) {
                 this.setNewMoveContainsCheck(true);
             }
         }
         else if (this.player.getColour() === "Black") {
-            if (files.indexOf(attackingPieceFile) - 1 === files.indexOf(kingFile) && Number(attackingPieceRank) + 1 === Number(kingRank)) {
+            if (attackingPieceFile - 1 === kingFile && attackingPieceRank + 1 === kingRank) {
                 this.setNewMoveContainsCheck(true);
             }
-            else if (files.indexOf(attackingPieceFile) + 1 === files.indexOf(kingFile) && Number(attackingPieceRank) + 1 === Number(kingRank)) {
+            else if (attackingPieceFile + 1 === kingFile && attackingPieceRank + 1 === kingRank) {
                 this.setNewMoveContainsCheck(true);
             }
         }
