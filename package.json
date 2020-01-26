@@ -1,6 +1,6 @@
 {
   "name": "unichess-chess-engine",
-  "version": "1.11.7",
+  "version": "1.11.8",
   "description": "",
   "main": "build/index.js",
   "module": "build/index.es.js",

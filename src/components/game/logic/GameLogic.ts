@@ -167,7 +167,7 @@ class GameLogic implements Logic {
                 return !this.bKingCanEscapeCheck(piece, attackedSquare);
             }
             if (this.isVerifyingNewMoveState()) {
-                return !this.bKingBeingOpenedForAttack(piece, attackedSquare);
+                return !this.kingBeingOpenedForAttack(piece, attackedSquare);
             }
 
             return this.bSquareContainsPiece(piece, attackedSquare);
@@ -223,11 +223,13 @@ class GameLogic implements Logic {
                 }
             }
         }
+
         return true;
     }
 
     bAttackOccupiedSquares(piece: IPiece, attackedSquare: Square) {
         if (piece.getColour() === attackedSquare.getPiece().getColour()) {
+            this.setSquareAttack(attackedSquare, piece);
             return false;
         }
         if (this.isPawn(piece)) {
@@ -266,6 +268,7 @@ class GameLogic implements Logic {
                 }
             }
         }
+
         return false;
     }
 
@@ -275,8 +278,6 @@ class GameLogic implements Logic {
     }
 
     checkKingDefences(attackedSquare: Square) {
-        const files = this.chessboard.getFiles();
-
         this.setVerifyingNewMoveState(true);
         this.setNewMoveContainsCheck(false);
         
@@ -285,27 +286,11 @@ class GameLogic implements Logic {
         const defendingPiece = attackedSquare.getPiece();
         const kingPiece = this.player.getKing();
 
-        const undefendedSquarePos = activePiece.getPosition();
-        const undefendedSquareFile = files.indexOf(undefendedSquarePos[0]);
-        const undefendedSquareRank = Number(undefendedSquarePos[1]);
-
         activeSquare.removePiece();
         this.chessboard.setActiveSquare(attackedSquare);
         attackedSquare.setPiece(activePiece);
 
-        const kingPiecePos = kingPiece.getPosition();
-        const kingPieceFile = files.indexOf(kingPiecePos[0]);
-        const kingPieceRank = Number(kingPiecePos[1]);
-
-        if (this.player.bIsInCheck()) {
-            this.moveNegatesCheck(kingPiece);
-        }
-        else if (this.bSquaresLineUp(kingPieceFile, kingPieceRank, undefendedSquareFile, undefendedSquareRank)) {
-            const fileDeterminant = (undefendedSquareFile - kingPieceFile);
-            const rankDeterminant = (undefendedSquareRank - kingPieceRank);
-
-            this.moveContainsCheckDeterminant(fileDeterminant, rankDeterminant);
-        }
+        this.moveContainsCheckDeterminant(kingPiece);
         
         attackedSquare.removePiece();
         activeSquare.setPiece(activePiece);
@@ -318,7 +303,7 @@ class GameLogic implements Logic {
         this.setVerifyingNewMoveState(false);
     }
 
-    moveNegatesCheck(piece: IPiece) {
+    moveContainsCheckDeterminant(piece: IPiece) {
         const king = piece as King;
         const generalDefence = king.getGeneralDefenceDirections();
         const knightDefence = king.getKnightDefenceDirections();
@@ -329,48 +314,19 @@ class GameLogic implements Logic {
         this.setVerifyingKingCheckState(false);
     }
 
-    moveContainsCheckDeterminant(file: number, rank: number) {
-        const squaresArray = this.chessboard.getSquaresArray();
-        const files = this.chessboard.getFiles();
-        const king = this.player.getKing();
-
-        const kingPiecePos = king.getPosition();
-        const kingPieceFile = files.indexOf(kingPiecePos[0]);
-        const kingPieceRank = Number(kingPiecePos[1]);
-
-        const fileSign = file > 0 ? 1 : (-1);
-        const rankSign = rank > 0 ? 1 : (-1);
-
-        const fileDirection = file !== 0 ? 1 * fileSign : file;
-        const rankDirection = rank !== 0 ? 1 * rankSign : rank;
-        const maximumMoves = squaresArray.length / 8;
-        
-        let currentMove = 1;
-        let openSquareFile = kingPieceFile + fileDirection;
-        let openSquareRank = kingPieceRank + rankDirection;
-
-        while (currentMove <= maximumMoves) {
-            if (!this.checkAttackableSquares(openSquareFile, openSquareRank, king)) { return; }
-
-            openSquareFile = openSquareFile + fileDirection;
-            openSquareRank = openSquareRank + rankDirection;
-            currentMove++;
-        }
-    }
-
-    bKingBeingOpenedForAttack(kingPiece: IPiece, attackedSquare: Square) {
+    kingBeingOpenedForAttack(kingPiece: IPiece, attackedSquare: Square) {
         const files = this.chessboard.getFiles();
         const attackingPiece = attackedSquare.getPiece();
+        const kingFile = kingPiece.getPosition()[0];
+        const kingRank = kingPiece.getPosition()[1];
+        const moveFile = attackedSquare.getPosition()[0];
+        const moveRank = attackedSquare.getPosition()[1];
         
         if (attackingPiece) {
-            const kingFile = kingPiece.getPosition()[0];
-            const kingRank = kingPiece.getPosition()[1];
             const attackingPieceFile = attackingPiece.getPosition()[0];
             const attackingPieceRank = attackingPiece.getPosition()[1];
-            const moveFile = attackedSquare.getPosition()[0];
-            const moveRank = attackedSquare.getPosition()[1];
             
-            if (attackingPiece.getColour() === this.player.getColour()) { return false; }
+            if (attackingPiece.getColour() === this.player.getColour()) { return; }
             
             if (this.isRook(attackingPiece)) {
                 if ((kingFile === attackingPieceFile) && (moveFile === kingFile)) {
@@ -391,7 +347,7 @@ class GameLogic implements Logic {
             else if (kingFile !== attackingPieceFile && kingRank !== attackingPieceRank) {
                 if (this.isPawn(attackingPiece)) {
                     this.pawnIsAttackingKing(kingPiece, attackedSquare);
-                    return true;
+                    return;
                 }
                 else if ((this.isBishop(attackingPiece)) && 
                     this.bSquaresLineUp(files.indexOf(kingFile), Number(kingRank), files.indexOf(attackingPieceFile), Number(attackingPieceRank))) {
@@ -406,7 +362,6 @@ class GameLogic implements Logic {
                 }
             }
         }
-        return false;
     }
 
     pawnIsAttackingKing(kingPiece: IPiece, attackedSquare: Square) {
@@ -440,7 +395,7 @@ class GameLogic implements Logic {
         const attackingPiece = attackedSquare.getPiece();
 
         if (attackingPiece) {
-            return !this.bKingBeingOpenedForAttack(kingPiece, attackedSquare)
+            return !this.kingBeingOpenedForAttack(kingPiece, attackedSquare)
         }
         
         return false;
