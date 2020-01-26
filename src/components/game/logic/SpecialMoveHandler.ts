@@ -75,10 +75,10 @@ class SpecialMoveHandler implements Logic {
         const northWestRank = (activePiece.getColour() === "White" ? Number(pos[1]) + 1 : Number(pos[1]) - 1);
         const northWestSquareIndex = this.calculateArrayIndex(northWestFile, northWestRank);
 
-        if (squaresArray[northEastSquareIndex].bIsEnPassantSquare()) {
+        if (squaresArray[northEastSquareIndex].isEnPassantSquare()) {
             attackedSquares.push(squaresArray[northEastSquareIndex]);
         }
-        else if (squaresArray[northWestSquareIndex].bIsEnPassantSquare()) {
+        else if (squaresArray[northWestSquareIndex].isEnPassantSquare()) {
             attackedSquares.push(squaresArray[northWestSquareIndex])
         }
     }
@@ -154,8 +154,8 @@ class SpecialMoveHandler implements Logic {
         while (file != firstSquareInRow) {
             file = file - 1;
             const targetSquareIndex = this.calculateArrayIndex(file, rank);
-            if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
-            if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
+            if (this.kingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
+            if (!this.kingCanCastle(targetSquareIndex, file)) { return false; }
         }
         
         file = files.indexOf(pos[0]) - 2;
@@ -177,8 +177,8 @@ class SpecialMoveHandler implements Logic {
         while (file != lastSquareInRow) {
             file = file + 1;
             const targetSquareIndex = this.calculateArrayIndex(file, rank);
-            if (this.bKingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
-            if (!this.bKingCanCastle(targetSquareIndex, file)) { return false; }
+            if (this.kingPassesThroughAttackedSquare(targetSquareIndex, file)) { return false }
+            if (!this.kingCanCastle(targetSquareIndex, file)) { return false; }
         }
 
         file = files.indexOf(pos[0]) + 2;
@@ -228,7 +228,7 @@ class SpecialMoveHandler implements Logic {
         return kingSideRookSquareIndex;
     }
 
-    bKingPassesThroughAttackedSquare(targetSquareIndex: number, file: number) {
+    kingPassesThroughAttackedSquare(targetSquareIndex: number, file: number) {
         const squaresArray = this.chessboard.getSquaresArray();
 
         if (file === 3 || file === 2 || file === 5 || file === 6) {
@@ -241,27 +241,27 @@ class SpecialMoveHandler implements Logic {
         }
     }
 
-    bKingCanCastle(targetSquareIndex: number, file: number) {
+    kingCanCastle(targetSquareIndex: number, file: number) {
         const squaresArray = this.chessboard.getSquaresArray();
         const firstSquareInRow = 0;
         const lastSquareInRow = 7;
 
         if ((file === firstSquareInRow || file === lastSquareInRow)) {
-            return (squaresArray[targetSquareIndex].bSquareContainsPiece() && this.bRookCanCastle(squaresArray, targetSquareIndex));
+            return (squaresArray[targetSquareIndex].squareContainsPiece() && this.rookCanCastle(squaresArray, targetSquareIndex));
         }
         else {
-            return (!this.bCastlingMoveIsObstructed(squaresArray, targetSquareIndex));
+            return (!this.castlingMoveIsObstructed(squaresArray, targetSquareIndex));
         }
     }
 
-    bCastlingMoveIsObstructed(squaresArray: Array<Square>, targetSquareIndex: number) {
-        return squaresArray[targetSquareIndex].bSquareContainsPiece();
+    castlingMoveIsObstructed(squaresArray: Array<Square>, targetSquareIndex: number) {
+        return squaresArray[targetSquareIndex].squareContainsPiece();
     }
 
-    bRookCanCastle(squaresArray: Array<Square>, targetSquareIndex: number) {
+    rookCanCastle(squaresArray: Array<Square>, targetSquareIndex: number) {
         const piece = squaresArray[targetSquareIndex].getPiece();
         if (piece instanceof Rook) {
-            return (piece.bCanCastle());
+            return (piece.canCastle());
         }
     }
 

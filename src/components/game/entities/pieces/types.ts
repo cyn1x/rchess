@@ -25,25 +25,25 @@ export interface IPiece {
 
 export interface IKing {
     inCheck: boolean;
-    canCastle: boolean;
+    castled: boolean;
 
-    bIsInCheck(): boolean;
-    bCanCastle(): boolean;
+    isInCheck(): boolean;
+    canCastle(): boolean;
     setCheckStatus(arg0: boolean): void;
     setCastledStatus(arg0: boolean): void;
 }
 
 export interface IRook {
-    canCastle: boolean;
+    castled: boolean;
 
-    bCanCastle(): boolean;
+    canCastle(): boolean;
     setCastledStatus(arg0: boolean): void;
 }
 
 export interface IPawn {
     firstMove: boolean;
-    hasUpgraded: boolean;
+    upgraded: boolean;
 
-    bHasUpgraded(): boolean;
+    hasUpgraded(): boolean;
     setHasUpgraded(upgraded: boolean): void;
 }

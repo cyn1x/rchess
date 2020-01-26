@@ -10,8 +10,8 @@ class Square {
     private hasPiece!: boolean;
     private isAttacked!: boolean;
     private colour!: string;
-    private isEnPassantSquare!: boolean;
-    private isCastlingSquare!: boolean;
+    private castlingSquare!: boolean;
+    private enPassantSquare!: boolean;
     private attackingPieces!: IPiece[];
 
     constructor(pos: string, x: number, y: number, w: number, h: number) {
@@ -22,8 +22,8 @@ class Square {
         this.h = h;
 
         this.attackingPieces = [];
-        this.isCastlingSquare = false;
-        this.isEnPassantSquare = false;
+        this.castlingSquare = false;
+        this.enPassantSquare = false;
     }
 
     removePiece() { 
@@ -32,13 +32,13 @@ class Square {
         this.isAttacked = false;
     }
 
-    bSquareContainsPiece() { return this.hasPiece; }
+    squareContainsPiece() { return this.hasPiece; }
 
-    bSquareIsAttacked() { return this.isAttacked; }
+    squareIsAttacked() { return this.isAttacked; }
 
-    bIsCastlingSquare() { return this.isCastlingSquare; }
+    isCastlingSquare() { return this.castlingSquare; }
 
-    bIsEnPassantSquare() { return this.isEnPassantSquare; }
+    isEnPassantSquare() { return this.enPassantSquare; }
 
     clearAttackingPieces() { this.attackingPieces = []; }
 
@@ -78,9 +78,9 @@ class Square {
 
     setColour(colour: string) { this.colour = colour; }
 
-    setCastlingSquare(isCastlingSquare: boolean) { this.isCastlingSquare = isCastlingSquare; }
+    setCastlingSquare(isCastlingSquare: boolean) { this.castlingSquare = isCastlingSquare; }
 
-    setEnPassantSquare(isEnPassantSquare: boolean) { this.isEnPassantSquare = isEnPassantSquare; }
+    setEnPassantSquare(isEnPassantSquare: boolean) { this.enPassantSquare = isEnPassantSquare; }
 
 }
 

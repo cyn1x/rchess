@@ -10,7 +10,7 @@ class Rook implements IPiece, IRook {
     moves!: number;
     moveDirections!: Map<string, number>;
     startingSquare!: Square;
-    canCastle!: boolean;
+    castled!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -23,7 +23,7 @@ class Rook implements IPiece, IRook {
     initialise() {
         this.moves = 0;
         const pieces = new Pieces();
-        this.canCastle = true;
+        this.castled = true;
 
         this.setMoveDirections(pieces.rookMoves());
     }
@@ -33,7 +33,7 @@ class Rook implements IPiece, IRook {
         this.setCastledStatus(false);
     }
 
-    bCanCastle() { return this.canCastle; }
+    canCastle() { return this.castled; }
 
     getType() { return this.type; }
 
@@ -57,7 +57,7 @@ class Rook implements IPiece, IRook {
 
     setStartingSquare(square: Square) { this.startingSquare = square; }
 
-    setCastledStatus(castled: boolean) { this.canCastle = castled; }
+    setCastledStatus(castled: boolean) { this.castled = castled; }
 
 }
 

@@ -13,7 +13,7 @@ class King implements IPiece, IKing {
     knightDefenceDirections!: Map<string, number>;
     startingSquare!: Square;
     inCheck!: boolean;
-    canCastle!: boolean;
+    castled!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -26,7 +26,7 @@ class King implements IPiece, IKing {
     initialise() {
         this.moves = 0;
         this.inCheck = false;
-        this.canCastle = true;
+        this.castled = true;
         const pieces = new Pieces();
 
         this.setMoveDirections(pieces.kingMoves());
@@ -39,9 +39,9 @@ class King implements IPiece, IKing {
         this.setCastledStatus(false);
     }
 
-    bIsInCheck() { return this.inCheck; }
+    isInCheck() { return this.inCheck; }
 
-    bCanCastle() { return this.canCastle; }
+    canCastle() { return this.castled; }
 
     getType() { return this.type; }
 
@@ -75,7 +75,7 @@ class King implements IPiece, IKing {
 
     setCheckStatus(check: boolean) { this.inCheck = check; }
 
-    setCastledStatus(castled: boolean) { this.canCastle = castled; }
+    setCastledStatus(castled: boolean) { this.castled = castled; }
 
 }
 

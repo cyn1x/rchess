@@ -65,7 +65,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
             return;
         }
-        if (this.game.bIsMultiplayerGame(this.props.game.nextPlayerTurn)) {
+        if (this.game.isMultiplayerGame(this.props.game.nextPlayerTurn)) {
             this.updateOpponentMove();
         }
 
@@ -179,7 +179,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     interceptClick(event: any) {
-        if ((this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) && !this.game.bGameIsOver()) {
+        if ((this.game.getGameState().getCurrentTurn() === this.game.getCurrentPlayer().getColour()) && !this.game.gameIsOver()) {
             this.determineClick(event);
         }
     }
@@ -202,7 +202,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     handleClick(clickedSquare: Square) {
-        if (this.game.bSquareIsActive()) {
+        if (this.game.squareIsActive()) {
             if (this.game.getChessboard().getActiveSquare() === clickedSquare) {
                 this.selectSquare(clickedSquare, ClickSquare.deselect);
             }
@@ -211,7 +211,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             }
             return;
         }
-        if (clickedSquare.bSquareContainsPiece()) {
+        if (clickedSquare.squareContainsPiece()) {
             if (clickedSquare.getPiece().getColour() === this.game.getCurrentPlayer().getColour()) {
                 this.selectSquare(clickedSquare, ClickSquare.select);
             }
@@ -219,13 +219,13 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     handlePlayerMove(attackedSquare: Square) {
-        if (!this.game.bRequestedMoveIsValid(attackedSquare)) {
+        if (!this.game.requestedMoveIsValid(attackedSquare)) {
             return;
         }
 
         this.game.determinePlayerSpecialMoveCase(attackedSquare);
         
-        if (this.game.bSpecialMoveInProgress()) {
+        if (this.game.specialMoveInProgress()) {
             this.handleSpecialSquare(attackedSquare);
         }
         
@@ -250,7 +250,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         this.game.checkValidMoves(activeSquarePos, activePiece);
         this.game.determinePlayerSpecialMoveCase(updatedSquare);
 
-        if (this.game.bSpecialMoveInProgress()) {
+        if (this.game.specialMoveInProgress()) {
             this.handleSpecialSquare(updatedSquare);
         }
 
@@ -295,7 +295,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
     }
 
     manageValidSquares() {
-        if (this.game.bSquareIsActive()) {
+        if (this.game.squareIsActive()) {
             const activeSquarePos = this.game.getChessboard().getActiveSquare().getPosition();
             const activePiece = this.game.getChessboard().getActiveSquare().getPiece();
 
@@ -323,7 +323,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
 
         this.selectCell(validSquare);
 
-        if (validSquare.bSquareContainsPiece()) {
+        if (validSquare.squareContainsPiece()) {
             const img = this.drawPiece(validSquare.getPiece());
             this.drawImg(img, ranks.indexOf(Number(validSquare.getPosition()[1])), files.indexOf(validSquare.getPosition()[0]));
         }
@@ -352,7 +352,7 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
         const sw = square.getWidth();
         const sh = square.getHeight();
 
-        if (this.game.bSquareIsActive() && !this.game.bSpecialMoveInProgress()) {
+        if (this.game.squareIsActive() && !this.game.specialMoveInProgress()) {
             ctx.fillStyle = '#6F9EFF';
         }
         else {

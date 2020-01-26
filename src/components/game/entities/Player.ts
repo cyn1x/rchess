@@ -4,8 +4,8 @@ class Player {
     private colour: string;
     private inCheck: boolean;
     private turnComplete: boolean;
-    private canCastleQueenSide: boolean;
-    private canCastleKingSide: boolean;
+    private castleQueenSide: boolean;
+    private castleKingSide: boolean;
     private king!: IPiece;
     private isDemo!: boolean;
 
@@ -13,19 +13,19 @@ class Player {
         this.colour = colour;
         this.inCheck = false;
         this.turnComplete = false;
-        this.canCastleQueenSide = false;
-        this.canCastleKingSide = false;
+        this.castleQueenSide = false;
+        this.castleKingSide = false;
     }
 
-    bIsInCheck() { return this.inCheck; }
+    isInCheck() { return this.inCheck; }
 
-    bIsDemonstrationMode() { return this.isDemo; }
+    isDemonstrationMode() { return this.isDemo; }
 
-    bHasCompletedTurn() { return this.turnComplete; }
+    hasCompletedTurn() { return this.turnComplete; }
 
-    bCanCastleKingSide() { return this.canCastleKingSide; }
+    canCastleQueenSide() { return this.castleQueenSide; }
 
-    bCanCastleQueenSide() { return this.canCastleQueenSide; }
+    canCastleKingSide() { return this.castleKingSide; }
 
     getColour() { return this.colour; }
 
@@ -39,9 +39,9 @@ class Player {
 
     setTurnComplete(completed: boolean) { this.turnComplete = completed; }
 
-    setCanCastledQueenSide(canCastle: boolean) { this.canCastleQueenSide = canCastle; }
+    setCanCastledQueenSide(canCastle: boolean) { this.castleQueenSide = canCastle; }
 
-    setCanCastledKingSide(canCastle: boolean) { this.canCastleKingSide = canCastle; }
+    setCanCastledKingSide(canCastle: boolean) { this.castleKingSide = canCastle; }
 
     setKing(king: IPiece) { this.king = king; }
 

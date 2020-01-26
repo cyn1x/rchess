@@ -11,7 +11,7 @@ class Pawn implements IPiece, IPawn {
     moveDirections!: Map<string, number>;
     startingSquare!: Square;
     firstMove!: boolean;
-    hasUpgraded!: boolean;
+    upgraded!: boolean;
 
     constructor(type: string, colour: string, image: string) {
         this.type = type;
@@ -22,7 +22,7 @@ class Pawn implements IPiece, IPawn {
     }
     
     initialise() {
-        this.hasUpgraded = false;
+        this.upgraded = false;
         this.moves = 0;
         const pieces = new Pieces();
 
@@ -46,7 +46,7 @@ class Pawn implements IPiece, IPawn {
         this.update();
     }
 
-    bHasUpgraded() { return this.hasUpgraded; }
+    hasUpgraded() { return this.upgraded; }
 
     getType() { return this.type; }
 
@@ -70,7 +70,7 @@ class Pawn implements IPiece, IPawn {
 
     setStartingSquare(square: Square) { this.startingSquare = square; }
 
-    setHasUpgraded(upgraded: boolean) { this.hasUpgraded = upgraded; }
+    setHasUpgraded(upgraded: boolean) { this.upgraded = upgraded; }
 
 }
 

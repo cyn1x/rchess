@@ -24,7 +24,7 @@ class FenBuilder {
                 emptySquares = 0;
             }
             
-            if (board[i].bSquareContainsPiece()) {
+            if (board[i].squareContainsPiece()) {
                 newFenString += board[i].getPiece().getType();
                 emptySquares = 0;
             }
@@ -34,7 +34,7 @@ class FenBuilder {
                     if ((i + 1) % 8 === 0) {
                         newFenString += emptySquares;
                     }
-                    else if (board[i + 1].bSquareContainsPiece()) {
+                    else if (board[i + 1].squareContainsPiece()) {
                         newFenString += emptySquares;
                     }
                 }
@@ -55,10 +55,10 @@ class FenBuilder {
         let fenCastlingState = "";
 
         if (this.player.getColour() === "White") {
-            if (this.player.bCanCastleKingSide()) {
+            if (this.player.canCastleKingSide()) {
                 fenCastlingState += "K";
             }
-            if (this.player.bCanCastleQueenSide()) {
+            if (this.player.canCastleQueenSide()) {
                 fenCastlingState += "Q";
             }
 
@@ -67,10 +67,10 @@ class FenBuilder {
         else if (this.player.getColour() === "Black") {
             fenCastlingState = this.appendFenCastlingWhiteStatus();
 
-            if (this.player.bCanCastleKingSide()) {
+            if (this.player.canCastleKingSide()) {
                 fenCastlingState += "k";
             }
-            if (this.player.bCanCastleQueenSide()) {
+            if (this.player.canCastleQueenSide()) {
                 fenCastlingState += "q";
             }
         }
