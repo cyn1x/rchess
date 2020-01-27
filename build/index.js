@@ -311,13 +311,13 @@ class SpecialMoveHandler {
     kingCanCastleDeterminant(player) {
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
-        if (activePiece.getColour() === "White") {
+        if (activePiece.getColour() === "White" && activePiece.getColour() === player.getColour()) {
             if (activeSquare.getPosition() === "E1") {
                 player.setCanCastledKingSide(false);
                 player.setCanCastledQueenSide(false);
             }
         }
-        else if (activePiece.getColour() === "Black") {
+        else if (activePiece.getColour() === "Black" && activePiece.getColour() === player.getColour()) {
             if (activePiece.getPosition() === "E8") {
                 player.setCanCastledKingSide(false);
                 player.setCanCastledQueenSide(false);
@@ -327,7 +327,7 @@ class SpecialMoveHandler {
     rookCanCastleDeterminant(player) {
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
-        if (activePiece.getColour() === "White") {
+        if (activePiece.getColour() === "White" && activePiece.getColour() === player.getColour()) {
             if (activeSquare.getPosition() === "A1") {
                 player.setCanCastledQueenSide(false);
             }
@@ -335,7 +335,7 @@ class SpecialMoveHandler {
                 player.setCanCastledKingSide(false);
             }
         }
-        else if (activePiece.getColour() === "Black") {
+        else if (activePiece.getColour() === "Black" && activePiece.getColour() === player.getColour()) {
             if (activeSquare.getPosition() === "A8") {
                 player.setCanCastledQueenSide(false);
             }
@@ -912,9 +912,7 @@ class GameLogic {
     }
     playerCanCastleDeterminant(piece) {
         if (piece instanceof King) {
-            if (!this.player.canCastleKingSide() && !this.player.canCastleQueenSide()) {
-                return;
-            }
+            // if (!this.player.canCastleKingSide() && !this.player.canCastleQueenSide()) { return; }
             if (!piece.canCastle() || piece.isInCheck()) {
                 return;
             }
@@ -1626,11 +1624,11 @@ class Game {
         const activePiece = this.chessboard.getActiveSquare().getPiece();
         if (activePiece instanceof King) {
             if (square === this.chessboard.getWestCastlingSquare()) {
-                this.initiateCastling();
+                this.initiateCastling(activePiece);
                 return;
             }
             if (square === this.chessboard.getEastCastlingSquare()) {
-                this.initiateCastling();
+                this.initiateCastling(activePiece);
                 return;
             }
         }
@@ -1642,9 +1640,11 @@ class Game {
         }
         this.setSpecialMoveInProgress(false);
     }
-    initiateCastling() {
-        this.player.setCanCastledKingSide(false);
-        this.player.setCanCastledQueenSide(false);
+    initiateCastling(activePiece) {
+        if (activePiece.getColour() === this.player.getColour()) {
+            this.player.setCanCastledKingSide(false);
+            this.player.setCanCastledQueenSide(false);
+        }
         this.setSpecialMoveInProgress(true);
     }
     initiateEnPassantCapture() {
@@ -1940,7 +1940,9 @@ class GameCanvas extends React__default.Component {
         if (this.game.specialMoveInProgress()) {
             this.handleSpecialSquare(updatedSquare);
         }
+        this.game.preMoveProcessing(updatedSquare);
         this.overwriteSquare(updatedSquare);
+        this.game.postMoveProcessing();
     }
     handleSpecialSquare(attackedSquare) {
         this.game.checkSpecialMoves(attackedSquare);

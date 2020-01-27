@@ -39,7 +39,7 @@ declare class Game {
     fiftyMoveRuleProcessing(): void;
     fullMoveClockProcessing(): void;
     determinePlayerSpecialMoveCase(square: Square): void;
-    initiateCastling(): void;
+    initiateCastling(activePiece: IPiece): void;
     initiateEnPassantCapture(): void;
     checkValidMoves(pos: string, activePiece: IPiece): void;
     checkSpecialMoves(square: Square): void;
