@@ -1,0 +1,31 @@
+import { IPiece, IPawn } from './types';
+import Square from '../Square';
+declare class Pawn implements IPiece, IPawn {
+    type: string;
+    colour: string;
+    image: string;
+    position: string;
+    moves: number;
+    moveDirections: Map<string, number>;
+    startingSquare: Square;
+    firstMove: boolean;
+    upgraded: boolean;
+    constructor(type: string, colour: string, image: string);
+    initialise(): void;
+    update(): void;
+    incrementMoveCount(): void;
+    hasUpgraded(): boolean;
+    getType(): string;
+    getColour(): string;
+    getImage(): string;
+    getMoveDirections(): Map<string, number>;
+    getPosition(): string;
+    getMoveCount(): number;
+    getStartingSquare(): Square;
+    setImage(image: string): void;
+    setMoveDirections(directions: Map<string, number>): void;
+    setPosition(pos: string): void;
+    setStartingSquare(square: Square): void;
+    setHasUpgraded(upgraded: boolean): void;
+}
+export default Pawn;

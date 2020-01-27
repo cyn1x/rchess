@@ -1,0 +1,32 @@
+import Square from './Square';
+import { IPiece } from './pieces/types';
+declare class Board {
+    private squares;
+    private piecePositionsArray;
+    private piecesArray;
+    private activeSquare;
+    private westCastlingSquare;
+    private eastCastlingSquare;
+    private enPassantSquare;
+    constructor();
+    initialise(): void;
+    clearSpecialSquares(): void;
+    getFiles(): string[];
+    getRanks(): number[];
+    getStartingPieces(): string;
+    getSquaresArray(): Square[];
+    getPiecePositionsArray(): string[];
+    getPieceObjectArray(): IPiece[];
+    getActiveSquare(): Square;
+    getWestCastlingSquare(): Square;
+    getEastCastlingSquare(): Square;
+    getEnPassantSquare(): Square;
+    setSquaresArray(squares: Array<Square>): void;
+    setPiecePositionsArray(pieces: Array<string>): void;
+    setPieceObjectArray(piece: IPiece): void;
+    setActiveSquare(square: Square): void;
+    setWestCastlingSquare(square: Square): void;
+    setEastCastlingSquare(square: Square): void;
+    setEnPassantSquare(square: Square): void;
+}
+export default Board;
