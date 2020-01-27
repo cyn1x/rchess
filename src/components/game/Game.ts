@@ -315,11 +315,11 @@ class Game {
         const activePiece = this.chessboard.getActiveSquare().getPiece();
         if (activePiece instanceof King) {
             if (square === this.chessboard.getWestCastlingSquare()) {
-                this.initiateCastling();
+                this.initiateCastling(activePiece);
                 return;
             }
             if (square === this.chessboard.getEastCastlingSquare()) {
-                this.initiateCastling();
+                this.initiateCastling(activePiece);
                 return;
             }
         }
@@ -332,9 +332,11 @@ class Game {
         this.setSpecialMoveInProgress(false);
     }
 
-    initiateCastling() {
-        this.player.setCanCastledKingSide(false);
-        this.player.setCanCastledQueenSide(false);
+    initiateCastling(activePiece: IPiece) {
+        if (activePiece.getColour() === this.player.getColour()) {
+            this.player.setCanCastledKingSide(false);
+            this.player.setCanCastledQueenSide(false);
+        }
         this.setSpecialMoveInProgress(true);
     }
 

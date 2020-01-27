@@ -106,13 +106,13 @@ class SpecialMoveHandler implements Logic {
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
         
-        if (activePiece.getColour() === "White") {
+        if (activePiece.getColour() === "White" && activePiece.getColour() === player.getColour()) {
             if (activeSquare.getPosition() === "E1") {
                 player.setCanCastledKingSide(false);
                 player.setCanCastledQueenSide(false);
             }
         }
-        else if (activePiece.getColour() === "Black") {
+        else if (activePiece.getColour() === "Black" && activePiece.getColour() === player.getColour()) {
             if (activePiece.getPosition() === "E8") {
                 player.setCanCastledKingSide(false);
                 player.setCanCastledQueenSide(false);
@@ -124,7 +124,7 @@ class SpecialMoveHandler implements Logic {
         const activeSquare = this.chessboard.getActiveSquare();
         const activePiece = activeSquare.getPiece();
 
-        if (activePiece.getColour() === "White") {
+        if (activePiece.getColour() === "White" && activePiece.getColour() === player.getColour()) {
             if (activeSquare.getPosition() === "A1") {
                 player.setCanCastledQueenSide(false);
             }
@@ -132,7 +132,7 @@ class SpecialMoveHandler implements Logic {
                 player.setCanCastledKingSide(false);
             }
         }
-        else if (activePiece.getColour() === "Black") {
+        else if (activePiece.getColour() === "Black" && activePiece.getColour() === player.getColour()) {
             if (activeSquare.getPosition() === "A8") {
                 player.setCanCastledQueenSide(false);
             }

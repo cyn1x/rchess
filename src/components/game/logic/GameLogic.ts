@@ -501,7 +501,7 @@ class GameLogic implements Logic {
     playerCanCastleDeterminant(piece: IPiece) {
         if (piece instanceof King) {
             
-            if (!this.player.canCastleKingSide() && !this.player.canCastleQueenSide()) { return; }
+            // if (!this.player.canCastleKingSide() && !this.player.canCastleQueenSide()) { return; }
             if (!piece.canCastle() || piece.isInCheck()) { return; }
             if (piece.getStartingSquare().getPosition() !== piece.getPosition()) { return; }
 

@@ -254,7 +254,9 @@ class GameCanvas extends React.Component<IGameCanvas, IState> {
             this.handleSpecialSquare(updatedSquare);
         }
 
+        this.game.preMoveProcessing(updatedSquare);
         this.overwriteSquare(updatedSquare);
+        this.game.postMoveProcessing();
     }
 
     handleSpecialSquare(attackedSquare: Square) {
