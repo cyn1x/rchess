@@ -39,8 +39,9 @@ ___
 
 ### What else will be done?
 - Improved demonstration mode
+- Remove conditionals scattered throughout the code which are used to keep sync with multiplayer games over Websockets, and have a separate module dealing with this rather than the core engine code.
 - Abstract the core engine logic to provide an API so AI can be added without muddling through the code
-- Possible port over to Rust, having the Rust program compute the game logic on the server-side, while the TypeScript code will render only the UI on the client-side
+- Possible port over to a low-level programming language, having the program compute the game logic on the server-side, while the TypeScript code will render only the UI on the client-side
 - Documentation to show how it works
 
 ### What will not be done?
@@ -154,7 +155,7 @@ GNU General Public License v3.0
 * [x] En Passant capture ability
 * [ ] Pawn upgrade ability
 * [ ] General game statistics
-* [x] Separate pipeline for actioning multiplayer opponent moves over websockets
+* [ ] Separate pipeline for actioning multiplayer opponent moves over Websockets
 * [ ] In-Game Menu or extra prop allowing customisation of certain features
 * [ ] Option to disable square highlighting for valid moves
 * [ ] Documentation to explain how the different stages of gameplay work in the code
