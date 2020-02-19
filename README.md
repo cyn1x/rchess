@@ -1,4 +1,3 @@
-<!-- Headings -->
 # UniChess Chess Engine
 
 ## Table of Contents
@@ -8,6 +7,7 @@
 4. [Usage](#Usage)
 5. [Misc](#Misc)
 ___
+![UniChess Chess Engine Image](https://zacvukovic.com/img/portfolio/unichess-chess-engine.jpg "Logo Title Text 1")
 
 ## Introduction
 
