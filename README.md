@@ -12,7 +12,7 @@ ___
 ## Introduction
 
 ### What is it?
-I created a demonstration of a PvP Chess Engine using WebSockets in React, HTML5 Canvas, and TypeScript for a unit at my university. The unit focused on full-stack development, using front and backend technologies of our choice. Since the unit finished, I extracted the game specific code from the [UniChess](https://github.com/Cyn1x/unichess) repository to this repository, and added this repository as a dependency in the UniChess repository.
+I created a demonstration of a PvP Chess Engine using WebSockets in React, HTML5 Canvas, and TypeScript for a unit at my university. The unit focused on full-stack development, using front and backend technologies of our choice. Since the unit finished, I extracted the game specific code from the [UniChess](https://github.com/Cyn1x/unichess) repository to this repository so I could continue to work on the core game logic, and added this repository as a dependency in the UniChess repository.
 
 ### What does it do?
 It's a demonstration of a chess engine in React and HTML5 Canvas, using TypeScript under the hood. The moves are generated for the player in real-time once a piece is active by determining the valid moves for that piece after it is clicked. For example, if the player's king is attacked by the opponent's rook and the player's queen is selected, the correct move will be generated to either capture the piece, or block it, depending on what rank and file the pieces are on. If there are no valid moves for the player and the king is in check, the result is a checkmate. Otherwise, the result is a stalemate. The fifty-move rule is also set to determine whether the result is a draw.
