@@ -103,7 +103,7 @@ class GameController extends React.Component<IGameController> {
 ```
 
 ### Why external usage?
-The external usage is the way I use it for my separate PvP chess web app, and I don't expect anyone to want to use it that way. This is just here for information. I wanted to play with Rollup and creating my own dependencies. Additionally, I use Redux for local store management.
+The external usage is the way I use it for my separate PvP chess web app, and I don't expect anyone to want to use it that way. This is just here for information. I wanted to play with Rollup and creating my own dependencies. Additionally, I use Redux for local store management in the [UniChess](https://github.com/Cyn1x/unichess) web app where I retrieve the board state from a callback function after every move.
 
 ### Interaction
 This applies to both external usage and using the provided fields on the UI.
