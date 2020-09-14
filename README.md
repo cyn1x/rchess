@@ -164,3 +164,4 @@ GNU General Public License v3.0
 * [ ] Ability to plug in AI code for PvE gameplay without having to deal with the core engine logic
 * [ ] Port all core logic to a low-level programming language to compute on the server-side
 * [ ] Branched 'lite' version to reflect changes on the UI from the other program
+* [ ] Replace PNG piece images with SVGs
