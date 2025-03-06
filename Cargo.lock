@@ -3,5 +3,27 @@
 version = 4
 
 [[package]]
+name = "base-rs"
+version = "0.1.0"
+source = "git+https://github.com/cyn1x/base-rs#44e2db6f0c7032327126cea8acaa35f536dfb3ff"
+
+[[package]]
 name = "rchess"
 version = "0.1.0"
+dependencies = [
+ "websocket-rs",
+]
+
+[[package]]
+name = "sha-rs"
+version = "0.1.0"
+source = "git+https://github.com/cyn1x/sha-rs#9923008df707a914a00e870119a5c51f5795231c"
+
+[[package]]
+name = "websocket-rs"
+version = "0.1.0"
+source = "git+https://github.com/cyn1x/websocket-rs#0672548616ae54720d2a6e6d3958cb873ee70633"
+dependencies = [
+ "base-rs",
+ "sha-rs",
+]
