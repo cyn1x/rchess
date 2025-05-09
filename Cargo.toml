@@ -3,5 +3,13 @@ name = "rchess"
 version = "0.1.0"
 edition = "2024"
 
+[[bin]]
+name = "rchess"
+path = "src/main.rs"
+
+[lib]
+name = "rchess"
+path = "src/lib.rs"
+
 [dependencies]
 websocket-rs = { git = "https://github.com/cyn1x/websocket-rs" }
