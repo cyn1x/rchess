@@ -29,9 +29,9 @@ pub enum RayDirections {
 
 #[rustfmt::skip]
 pub enum KnightDirections {
-    NorthNorthEast = 0, NorthEastEast  = 1, SouthEastEast = 2,
-    SouthSouthEast = 3, SouthSouthWest = 4, SouthWestWest = 5,
-    NorthWestWest =  6, NorthNorthWest = 7,
+    NorthNorthEast, NorthEastEast,  SouthEastEast,
+    SouthSouthEast, SouthSouthWest, SouthWestWest,
+    NorthWestWest,  NorthNorthWest,
 }
 
 pub fn shift(b: u64, direction: RayDirections) -> u64 { SHIFT[direction as usize](b) }
@@ -64,7 +64,7 @@ pub fn quiet_move(board: u64, from: Square, to: Square) -> u64 {
     board ^ (from_mask ^ to_mask)
 }
 
-pub fn capture_move(_b: u64) -> u64 { unimplemented!() }
+pub fn capture_move(_b: u64) -> u64 { todo!() }
 
 #[cfg(test)]
 mod tests {

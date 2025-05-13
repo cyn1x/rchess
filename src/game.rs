@@ -3,11 +3,13 @@
 use crate::game::board::Bitboard;
 
 pub mod board;
+pub mod fen;
 pub mod movement;
+pub mod piece;
 
 pub fn init() {
-    // TODO: Move to tests
-    let board = Bitboard::new();
+    let mut board = Bitboard::default();
+    board.populate();
 
     board.pretty_print();
 }

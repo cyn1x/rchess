@@ -1,5 +1,8 @@
 //! Chessboard structure and generation
 
+use super::fen;
+use super::piece;
+
 #[macro_export]
 macro_rules! get_bit {
     ($bitboard:expr, $square:expr) => {
@@ -38,35 +41,58 @@ impl Square {
     pub fn to_bit_index(self) -> u8 { self as u8 }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Bitboard {
-    pub bitboard: u64,
+    pub piece_bitboards: [u64; 6],
+    pub color_bitboards: [u64; 2],
+    pub empty: u64,
+    scratch: u64,
 }
 
 impl Bitboard {
-    pub fn new() -> Self { Self { bitboard: 0u64 } }
+    pub fn populate(&mut self) {
+        let board_layout = fen::from_fen();
 
-    pub fn set_square(&mut self, square: Square) {
-        set_bit!(self.bitboard, square);
+        for (square, piece) in board_layout {
+            if let Some(piece_type) = piece::piece_code(piece) {
+                let color_code = piece::color_code(piece);
+
+                set_bit!(self.piece_bitboards[piece_type as usize], square);
+                set_bit!(self.color_bitboards[color_code as usize], square);
+            }
+        }
     }
 
-    pub fn pretty_print(&self) {
+    pub fn pretty_print(&mut self) {
+        self.compose();
+
         println!();
         for rank in (0..8).rev() {
             print!("{}  ", rank + 1);
 
             for file in 0..8 {
                 let square = rank * 8 + file;
-                let bit = if get_bit!(self.bitboard, square) != 0 {
+                let bit = if get_bit!(self.scratch, square) != 0 {
                     1
                 } else {
                     0
                 };
+
                 print!(" {:b}", bit);
             }
             println!();
         }
         println!("\n    a b c d e f g h");
+    }
+
+    pub fn set_square(bb: &mut u64, square: Square) {
+        set_bit!(*bb, square);
+    }
+
+    fn compose(&mut self) {
+        for bb in self.piece_bitboards {
+            self.scratch |= bb;
+        }
     }
 }
 
