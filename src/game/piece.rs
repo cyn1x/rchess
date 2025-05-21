@@ -26,11 +26,11 @@ pub enum Color {
     White, Black
 }
 
-pub fn color_code(p: char) -> u8 {
+pub fn color_code(p: char) -> Color {
     if p.is_ascii_uppercase() {
-        return Color::White as u8;
+        return Color::White;
     }
-    Color::Black as u8
+    Color::Black
 }
 
 pub fn piece_code(c: char) -> Option<PieceType> {
