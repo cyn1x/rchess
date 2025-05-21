@@ -2,6 +2,8 @@
 
 use super::piece;
 
+/* Macros for manipulating single bits on the bitboard */
+
 #[macro_export]
 macro_rules! get_bit {
     ($bitboard:expr, $square:expr) => {
@@ -23,6 +25,8 @@ macro_rules! pop_bit {
     };
 }
 
+/* Square is part of the board, so it is encapsulated in `board.rs` */
+
 #[rustfmt::skip]
 #[repr(u8)]
 pub enum Square {
@@ -39,6 +43,8 @@ pub enum Square {
 impl Square {
     pub fn to_bit_index(self) -> u8 { self as u8 }
 }
+
+/* Chessboard representation with bitboards */
 
 #[derive(Debug, Default)]
 pub struct Bitboard {
@@ -92,6 +98,8 @@ impl Bitboard {
         }
     }
 }
+
+/* Unit tests */
 
 #[cfg(test)]
 mod tests {

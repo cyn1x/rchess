@@ -1,6 +1,7 @@
 //! Handles board bit shifts and individual bit movement
 
 use super::board::Square;
+/* Mask values for handling wrapping */
 
 const NOT_A_FILE: u64 = 0xfefefefefefefefe;
 const NOT_H_FILE: u64 = 0x7f7f7f7f7f7f7f7f;
@@ -45,6 +46,7 @@ const fn shift_southwest(b: u64) -> u64 { (b >> 9) & NOT_H_FILE }
 const fn shift_south(b: u64) -> u64 { b >> 8 }
 const fn shift_southeast(b: u64) -> u64 { (b >> 7) & NOT_A_FILE }
 
+/* Knight move directions */
 pub fn knight_shift(b: u64, direction: KnightDirections) -> u64 {
     KNIGHT_SHIFTS[direction as usize](b)
 }
@@ -58,6 +60,7 @@ fn shift_south_west_west(b: u64) -> u64 { (b >> 10) & NOT_GH_FILE }
 fn shift_north_west_west(b: u64) -> u64 { (b << 6) & NOT_GH_FILE }
 fn shift_north_north_west(b: u64) -> u64 { (b << 15) & NOT_H_FILE }
 
+/* Move utility functions */
 pub fn quiet_move(board: u64, from: Square, to: Square) -> u64 {
     let from_mask = 1u64 << from as u8;
     let to_mask = 1u64 << to as u8;
@@ -66,6 +69,7 @@ pub fn quiet_move(board: u64, from: Square, to: Square) -> u64 {
 
 pub fn capture_move(_b: u64) -> u64 { todo!() }
 
+/* Unit tests */
 #[cfg(test)]
 mod tests {
     use super::*;

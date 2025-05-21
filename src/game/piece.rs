@@ -1,4 +1,4 @@
-//! Piece
+//! Piece type definitions
 
 #[allow(dead_code)]
 pub const UNICODE: [[char; 2]; 6] = [
@@ -9,6 +9,8 @@ pub const UNICODE: [[char; 2]; 6] = [
     ['♕', '♛'],
     ['♔', '♚'],
 ];
+
+/* Chess piece representation */
 
 #[derive(Copy, Clone)]
 #[rustfmt::skip]
