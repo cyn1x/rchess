@@ -1,12 +1,50 @@
 //! Handles board bit shifts and individual bit movement
 
-use super::board::Square;
+use super::board::{Bitboard, Square};
+
 /* Mask values for handling wrapping */
 
 const NOT_A_FILE: u64 = 0xfefefefefefefefe;
 const NOT_H_FILE: u64 = 0x7f7f7f7f7f7f7f7f;
 const NOT_AB_FILE: u64 = 0xfcfcfcfcfcfcfcfc;
 const NOT_GH_FILE: u64 = 0x3f3f3f3f3f3f3f3f;
+
+/* Structures to record move information */
+
+#[derive(Debug, Default)]
+pub struct EncodedMove {
+    /*
+     * `repr` move encoding scheme
+     *
+     *  [Flags]      [to]       [from]
+     *   0000       000000      000000
+     */
+    repr: u16,
+}
+
+impl EncodedMove {
+    pub fn new(from: u8, to: u8, flags: u16) -> Self {
+        EncodedMove {
+            repr: ((flags & 0xf) << 12) | ((from as u16 & 0x3f) << 6) | (to as u16 & 0x3f),
+        }
+    }
+
+    pub fn get_to(self) -> u16 { self.repr & 0x3f }
+    pub fn get_from(self) -> u16 { (self.repr >> 6) & 0x3f }
+    pub fn get_flags(self) -> u16 { (self.repr >> 12) & 0x0f }
+
+    pub fn set_to(&mut self, to: u8) {
+        self.repr &= !0x3f;
+        self.repr |= to as u16 & 0x3f;
+    }
+
+    pub fn set_from(&mut self, from: u8) {
+        self.repr &= !0xfc0;
+        self.repr |= (from as u16 & 0x3f) << 6;
+    }
+}
+
+/* Move directions for all pieces except knights */
 
 #[rustfmt::skip]
 const SHIFT: [fn(u64) -> u64; 8] = [
@@ -15,24 +53,9 @@ const SHIFT: [fn(u64) -> u64; 8] = [
 ];
 
 #[rustfmt::skip]
-const KNIGHT_SHIFTS: [fn(u64) -> u64; 8] = [
-    shift_north_north_east, shift_north_east_east,
-    shift_south_east_east,  shift_south_south_east,
-    shift_south_south_west, shift_south_west_west,
-    shift_north_west_west,  shift_north_north_west
-];
-
-#[rustfmt::skip]
 pub enum RayDirections {
     North, NorthEast, East, SouthEast,  
     South, SouthWest, West, NorthWest,
-}
-
-#[rustfmt::skip]
-pub enum KnightDirections {
-    NorthNorthEast, NorthEastEast,  SouthEastEast,
-    SouthSouthEast, SouthSouthWest, SouthWestWest,
-    NorthWestWest,  NorthNorthWest,
 }
 
 pub fn shift(b: u64, direction: RayDirections) -> u64 { SHIFT[direction as usize](b) }
@@ -47,6 +70,22 @@ const fn shift_south(b: u64) -> u64 { b >> 8 }
 const fn shift_southeast(b: u64) -> u64 { (b >> 7) & NOT_A_FILE }
 
 /* Knight move directions */
+
+#[rustfmt::skip]
+pub enum KnightDirections {
+    NorthNorthEast, NorthEastEast,  SouthEastEast,
+    SouthSouthEast, SouthSouthWest, SouthWestWest,
+    NorthWestWest,  NorthNorthWest,
+}
+
+#[rustfmt::skip]
+const KNIGHT_SHIFTS: [fn(u64) -> u64; 8] = [
+    shift_north_north_east, shift_north_east_east,
+    shift_south_east_east,  shift_south_south_east,
+    shift_south_south_west, shift_south_west_west,
+    shift_north_west_west,  shift_north_north_west
+];
+
 pub fn knight_shift(b: u64, direction: KnightDirections) -> u64 {
     KNIGHT_SHIFTS[direction as usize](b)
 }
@@ -61,6 +100,7 @@ fn shift_north_west_west(b: u64) -> u64 { (b << 6) & NOT_GH_FILE }
 fn shift_north_north_west(b: u64) -> u64 { (b << 15) & NOT_H_FILE }
 
 /* Move utility functions */
+
 pub fn quiet_move(board: u64, from: Square, to: Square) -> u64 {
     let from_mask = 1u64 << from as u8;
     let to_mask = 1u64 << to as u8;
@@ -69,7 +109,12 @@ pub fn quiet_move(board: u64, from: Square, to: Square) -> u64 {
 
 pub fn capture_move(_b: u64) -> u64 { todo!() }
 
+pub fn generate_moves(_move_list: &mut [EncodedMove; 256], _bitboard: &mut Bitboard) -> u32 {
+    todo!()
+}
+
 /* Unit tests */
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -82,6 +127,25 @@ mod tests {
         // Test move north by one square
         let result = quiet_move(d2, Square::D2, Square::D3);
         assert_eq!(result, 1u64 << Square::D3.to_bit_index());
+    }
+
+    #[test]
+    fn test_capture_move() {}
+
+    #[test]
+    fn test_generate_moves() {
+        // Test double pawn push encoding
+        let to = Square::D4 as u8;
+        let from = Square::D2 as u8;
+        let flags = 1u16;
+
+        let encoded = EncodedMove::new(from, to, flags);
+        let result = encoded.repr;
+        assert_eq!(
+            result, 0b0001_0010_1101_1011,
+            "Expected bits: {:016b}, got: {:016b}",
+            0b0001_0010_1101_1011, result
+        );
     }
 
     #[test]

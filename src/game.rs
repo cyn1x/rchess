@@ -1,6 +1,7 @@
 //! Initializes chess game mechanics
 
 use crate::game::board::Bitboard;
+use crate::util::debug;
 
 pub mod board;
 pub mod fen;

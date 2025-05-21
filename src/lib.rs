@@ -5,6 +5,7 @@
 // use websocket_rs::{self as websocket};
 
 pub mod game;
+pub mod util;
 
 pub fn run() {
     // let event = websocket::init();
