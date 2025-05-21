@@ -2,8 +2,14 @@
 
 const DEFAULT_FEN: &str = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-pub fn from_fen() -> Vec<(u8, char)> {
-    let (positions, _state): (&str, &str) = match DEFAULT_FEN.split_once(' ') {
+pub fn from_fen(fen_str: Option<String>) -> Vec<(u8, char)> {
+    let fen_repr: String = if fen_str.clone().take() != None {
+        fen_str.unwrap()
+    } else {
+        DEFAULT_FEN.to_string()
+    };
+
+    let (positions, _state): (&str, &str) = match fen_repr.split_once(' ') {
         Some(pair) => pair,
         None => {
             eprintln!("Invalid FEN string");
@@ -21,10 +27,8 @@ pub fn from_fen() -> Vec<(u8, char)> {
 
     for c in merged_ranks.chars() {
         if c.is_ascii_digit() {
+            // Advance the target square by the amount of unoccupied squares in the FEN string
             target_square += c.to_digit(10).unwrap();
-            for _ in 0..target_square {
-                squares.push((target_square as u8, c));
-            }
         } else if c.is_ascii() {
             squares.push((target_square as u8, c));
             target_square += 1;

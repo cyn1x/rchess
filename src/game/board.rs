@@ -1,6 +1,5 @@
 //! Chessboard structure and generation
 
-use super::fen;
 use super::piece;
 
 #[macro_export]
@@ -50,9 +49,7 @@ pub struct Bitboard {
 }
 
 impl Bitboard {
-    pub fn populate(&mut self) {
-        let board_layout = fen::from_fen();
-
+    pub fn populate(&mut self, board_layout: Vec<(u8, char)>) {
         for (square, piece) in board_layout {
             if let Some(piece_type) = piece::piece_code(piece) {
                 let color_code = piece::color_code(piece);
